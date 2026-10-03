@@ -19,10 +19,16 @@ http://127.0.0.1:8000/docs
 - `GET /health`
 - `POST /telemetry/readings`
 - `GET /telemetry/readings`
+- `POST /ml/predictions`
+- `POST /ml/predictions/load-sample`
+- `GET /anomalies`
+- `GET /anomalies/{anomaly_id}`
 - `GET /dashboard/summary`
 - `GET /consumers`
 - `GET /consumers/{consumer_id}`
 - `GET /consumers/{consumer_id}/history`
+- `GET /consumers/{consumer_id}/analysis`
+- `GET /investigations`
 - `GET /transformers`
 - `GET /transformers/{transformer_id}`
 - `GET /simulation/status`
@@ -57,7 +63,7 @@ Invoke-RestMethod `
   -ContentType "application/json"
 ```
 
-Get anomaly evidence placeholder:
+Get anomaly evidence:
 
 ```powershell
 Invoke-RestMethod `
@@ -67,7 +73,27 @@ Invoke-RestMethod `
   -ContentType "application/json"
 ```
 
-Until ML and investigation workflow are integrated, unavailable evidence returns `data_available=false` and preserves `UNCERTAIN` instead of inventing facts.
+Before ML predictions are loaded, unavailable evidence returns `data_available=false` and preserves `UNCERTAIN` instead of inventing facts. After loading predictions, this endpoint returns structured ML evidence.
+
+## ML Prediction Testing
+
+Load the generated prediction sample from `ml/evaluation/predictions_sample.json`:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/ml/predictions/load-sample `
+  -Method POST
+```
+
+Then inspect:
+
+- `GET /dashboard/summary`
+- `GET /anomalies`
+- `GET /investigations`
+- `GET /consumers/{consumer_id}/analysis`
+- `POST /voice/tools/anomaly-evidence`
+
+Only `HIGH` and `CRITICAL` risk predictions create investigation cases automatically.
 
 ## Current Storage
 
@@ -91,7 +117,7 @@ Tables are created on startup for the prototype. A migration tool should be adde
 ## Not Implemented Yet
 
 - authentication
-- ML anomaly scoring
-- investigation workflow
+- live ML model inference from telemetry
+- full investigation workflow updates/resolution
 - WebSockets
 - ElevenLabs, OpenAI, MQTT, or ThingsBoard integrations

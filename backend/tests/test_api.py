@@ -97,6 +97,85 @@ class BackendApiTest(unittest.TestCase):
         self.assertFalse(response.json()["data_available"])
         self.assertEqual(response.json()["payload"]["predicted_cause"], "UNCERTAIN")
 
+    def test_ingest_ml_prediction_creates_anomaly_and_case(self):
+        payload = {
+            "model_version": "xgboost_ranker_v1",
+            "production_model": "XGBoost",
+            "predictions": [
+                {
+                    "consumer_id": "C031",
+                    "risk_score": 91.0,
+                    "risk_level": "CRITICAL",
+                    "predicted_cause": "THEFT_TAMPERING",
+                    "confidence": 0.91,
+                    "anomaly_score": 0.91,
+                    "model_version": "xgboost_ranker_v1",
+                    "evidence": [
+                        {
+                            "feature": "recent_vs_hist_drop_pct",
+                            "value": 60.0,
+                            "direction": "supports_anomaly",
+                        }
+                    ],
+                }
+            ],
+        }
+
+        ingest = self.client.post("/ml/predictions", json=payload)
+        self.assertEqual(ingest.status_code, 200)
+        self.assertEqual(ingest.json()["accepted"], 1)
+        self.assertEqual(ingest.json()["cases_created"], 1)
+
+        anomalies = self.client.get("/anomalies")
+        self.assertEqual(anomalies.status_code, 200)
+        self.assertEqual(len(anomalies.json()), 1)
+        self.assertEqual(anomalies.json()[0]["consumer_id"], "C031")
+
+        cases = self.client.get("/investigations")
+        self.assertEqual(cases.status_code, 200)
+        self.assertEqual(len(cases.json()), 1)
+        self.assertEqual(cases.json()[0]["status"], "AI_FLAGGED")
+
+    def test_consumer_analysis_and_voice_use_ml_prediction(self):
+        self.client.post(
+            "/ml/predictions",
+            json={
+                "model_version": "xgboost_ranker_v1",
+                "production_model": "XGBoost",
+                "predictions": [
+                    {
+                        "consumer_id": "C044",
+                        "risk_score": 72.0,
+                        "risk_level": "HIGH",
+                        "predicted_cause": "THEFT_TAMPERING",
+                        "confidence": 0.72,
+                        "anomaly_score": 0.72,
+                        "model_version": "xgboost_ranker_v1",
+                        "evidence": [],
+                    }
+                ],
+            },
+        )
+
+        analysis = self.client.get("/consumers/C044/analysis")
+        self.assertEqual(analysis.status_code, 200)
+        self.assertTrue(analysis.json()["data_available"])
+        self.assertEqual(analysis.json()["latest_anomaly"]["risk_level"], "HIGH")
+
+        voice = self.client.post("/voice/tools/anomaly-evidence", json={"consumer_id": "C044"})
+        self.assertEqual(voice.status_code, 200)
+        self.assertTrue(voice.json()["data_available"])
+        self.assertEqual(voice.json()["payload"]["latest_anomaly"]["predicted_cause"], "THEFT_TAMPERING")
+
+    def test_load_ml_prediction_sample_from_evaluation_file(self):
+        response = self.client.post("/ml/predictions/load-sample")
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(response.json()["accepted"], 0)
+
+        summary = self.client.get("/dashboard/summary")
+        self.assertEqual(summary.status_code, 200)
+        self.assertGreater(summary.json()["active_anomalies"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()
