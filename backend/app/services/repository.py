@@ -19,10 +19,13 @@ from backend.app.models import (
 )
 from backend.app.schemas.anomaly import (
     AnomalyOut,
+    AnomalyQueueOut,
     CaseResolutionIn,
     CaseResolutionOut,
     ChecklistItemOut,
     ChecklistUpdateIn,
+    CopilotAnswerOut,
+    CopilotAskIn,
     ConsumerAnalysisOut,
     FieldObservationIn,
     FieldObservationOut,
@@ -207,6 +210,11 @@ class TelemetryRepository:
         ).all()
         return [self._to_anomaly_out(row) for row in rows]
 
+    def anomaly_queue(self, limit: int = 100) -> AnomalyQueueOut:
+        total = self.db.scalar(select(func.count(AnomalyPrediction.id))) or 0
+        items = self.list_anomalies(limit)
+        return AnomalyQueueOut(total=total, limit=limit, returned=len(items), items=items)
+
     def get_anomaly(self, anomaly_id: str) -> AnomalyOut | None:
         anomaly = self.db.scalar(select(AnomalyPrediction).where(AnomalyPrediction.id == anomaly_id))
         if anomaly is None:
@@ -374,6 +382,136 @@ class TelemetryRepository:
             recommended_action=self._recommended_action(anomaly.risk_level),
         )
 
+    def answer_question(self, payload: CopilotAskIn) -> CopilotAnswerOut:
+        question = payload.question.lower()
+        if payload.transformer_id is not None or "transformer" in question:
+            if payload.transformer_id is None:
+                return self._no_data("transformer_summary", "A transformer_id is required.")
+            transformer = self.get_transformer(payload.transformer_id)
+            if transformer is None:
+                return self._no_data("transformer_summary", "Transformer was not found.")
+            return CopilotAnswerOut(
+                data_available=True,
+                intent="transformer_summary",
+                answer=(
+                    f"Transformer {transformer.transformer_id} is on feeder {transformer.feeder_id} "
+                    f"with {transformer.consumer_count} known consumers and latest consumer energy "
+                    f"{transformer.latest_consumer_energy}."
+                ),
+                payload=transformer.model_dump(),
+                suggested_next_questions=["Show me risky consumers", "What is the grid status?"],
+            )
+
+        if any(term in question for term in ["dashboard", "grid status", "current status", "summary"]):
+            status = self.status()
+            return CopilotAnswerOut(
+                data_available=True,
+                intent="dashboard_summary",
+                answer=(
+                    f"Electron currently has {status['consumers']} consumers, "
+                    f"{status['active_anomalies']} anomaly records, "
+                    f"{status['high_risk_cases']} high-risk cases, and "
+                    f"{status['active_investigations']} active investigations."
+                ),
+                payload=status,
+                suggested_next_questions=[
+                    "Show me the top risky consumers",
+                    "Which cases need inspection?",
+                ],
+            )
+
+        if any(term in question for term in ["top", "risky", "highest risk", "anomaly queue", "anomalies"]):
+            queue = self.anomaly_queue(payload.limit)
+            if queue.returned == 0:
+                return self._no_data("top_risky_consumers", "No anomaly records are available.")
+            top = queue.items[0]
+            return CopilotAnswerOut(
+                data_available=True,
+                intent="top_risky_consumers",
+                answer=(
+                    f"Found {queue.total} anomaly records. The highest-risk consumer is "
+                    f"{top.consumer_id} with risk score {top.risk_score:.1f}, "
+                    f"risk level {top.risk_level}, and probable cause {top.predicted_cause}."
+                ),
+                payload=queue.model_dump(),
+                suggested_next_questions=[
+                    "Why was this consumer flagged?",
+                    "Which cases need field inspection?",
+                ],
+            )
+
+        if payload.consumer_id is not None or any(term in question for term in ["consumer", "flagged", "why"]):
+            if payload.consumer_id is None:
+                return self._no_data("consumer_analysis", "A consumer_id is required to explain a consumer.")
+            analysis = self.consumer_analysis(payload.consumer_id)
+            if not analysis.data_available or analysis.latest_anomaly is None:
+                return self._no_data("consumer_analysis", "No ML prediction exists for this consumer.")
+            anomaly = analysis.latest_anomaly
+            return CopilotAnswerOut(
+                data_available=True,
+                intent="consumer_analysis",
+                answer=(
+                    f"Consumer {payload.consumer_id} was flagged as {anomaly.risk_level} risk "
+                    f"with score {anomaly.risk_score:.1f}. The probable cause is "
+                    f"{anomaly.predicted_cause}. Recommended action: {analysis.recommended_action}"
+                ),
+                payload=analysis.model_dump(),
+                suggested_next_questions=[
+                    "What evidence supports this?",
+                    "What is the investigation status?",
+                ],
+            )
+
+        if payload.case_id is not None or any(term in question for term in ["case", "investigation", "checklist", "observation", "resolution", "outcome"]):
+            if payload.case_id is None:
+                return self._no_data("investigation_case", "A case_id is required to answer case questions.")
+            detail = self.get_investigation_case(payload.case_id)
+            if detail is None:
+                return self._no_data("investigation_case", "Investigation case was not found.")
+            if "checklist" in question or "inspect" in question:
+                pending = [item.label for item in detail.checklist if item.status != "DONE"]
+                answer = (
+                    "Remaining checklist items: " + ", ".join(pending)
+                    if pending
+                    else "All checklist items are marked done."
+                )
+                intent = "case_checklist"
+            elif "observation" in question or "field" in question:
+                answer = f"This case has {len(detail.observations)} field observation(s)."
+                intent = "case_observations"
+            elif "resolution" in question or "outcome" in question:
+                if detail.resolution is None:
+                    answer = "This case has not been resolved yet."
+                else:
+                    answer = (
+                        f"The predicted cause was {detail.resolution.predicted_cause}; "
+                        f"the actual field outcome was {detail.resolution.actual_outcome}."
+                    )
+                intent = "case_resolution"
+            else:
+                answer = (
+                    f"Case {payload.case_id} is {detail.case.status}. It is linked to consumer "
+                    f"{detail.case.consumer_id}, risk score {detail.case.risk_score:.1f}, "
+                    f"and probable cause {detail.case.predicted_cause}."
+                )
+                intent = "case_status"
+            return CopilotAnswerOut(
+                data_available=True,
+                intent=intent,
+                answer=answer,
+                payload=detail.model_dump(),
+                suggested_next_questions=[
+                    "What should the field team inspect?",
+                    "What observations are stored?",
+                    "What is the resolution?",
+                ],
+            )
+
+        return self._no_data(
+            "unsupported",
+            "I can answer questions about dashboard status, risky consumers, consumers, cases, checklist, observations, resolutions, and transformers.",
+        )
+
     def reset(self) -> None:
         self.db.execute(delete(CaseResolution))
         self.db.execute(delete(ChecklistItem))
@@ -471,6 +609,18 @@ class TelemetryRepository:
         if risk_level == "LOW":
             return "No immediate field action."
         return "Evidence is insufficient; keep case under review."
+
+    def _no_data(self, intent: str, answer: str) -> CopilotAnswerOut:
+        return CopilotAnswerOut(
+            data_available=False,
+            intent=intent,
+            answer=answer,
+            payload={},
+            suggested_next_questions=[
+                "Show me the current grid status",
+                "Show me the top risky consumers",
+            ],
+        )
 
     def _transformer_summary(self, transformer: Transformer) -> TransformerSummary:
         consumers = self.db.scalars(

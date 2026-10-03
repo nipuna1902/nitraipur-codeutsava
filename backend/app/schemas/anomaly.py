@@ -41,6 +41,30 @@ class AnomalyOut(BaseModel):
     created_at: datetime
 
 
+class AnomalyQueueOut(BaseModel):
+    total: int
+    limit: int
+    returned: int
+    items: list[AnomalyOut]
+
+
+class CopilotAskIn(BaseModel):
+    question: str = Field(min_length=1)
+    consumer_id: str | None = None
+    case_id: str | None = None
+    anomaly_id: str | None = None
+    transformer_id: str | None = None
+    limit: int = Field(default=5, ge=1, le=100)
+
+
+class CopilotAnswerOut(BaseModel):
+    data_available: bool
+    answer: str
+    intent: str
+    payload: dict
+    suggested_next_questions: list[str] = Field(default_factory=list)
+
+
 class InvestigationCaseOut(BaseModel):
     id: str
     case_id: str

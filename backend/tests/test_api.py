@@ -176,6 +176,69 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(summary.status_code, 200)
         self.assertGreater(summary.json()["active_anomalies"], 0)
 
+    def test_anomaly_queue_includes_total_and_returned_counts(self):
+        self._create_prediction("C090", risk_level="CRITICAL", risk_score=95.0)
+        self._create_prediction("C091", risk_level="HIGH", risk_score=75.0)
+
+        queue = self.client.get("/anomalies/queue?limit=1")
+        self.assertEqual(queue.status_code, 200)
+        self.assertEqual(queue.json()["total"], 2)
+        self.assertEqual(queue.json()["limit"], 1)
+        self.assertEqual(queue.json()["returned"], 1)
+        self.assertEqual(len(queue.json()["items"]), 1)
+
+    def test_copilot_answers_dashboard_and_top_risk_questions(self):
+        self._create_prediction("C101", risk_level="CRITICAL", risk_score=94.0)
+        self._create_prediction("C102", risk_level="HIGH", risk_score=74.0)
+
+        dashboard = self.client.post("/copilot/ask", json={"question": "What is the current grid status?"})
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertTrue(dashboard.json()["data_available"])
+        self.assertEqual(dashboard.json()["intent"], "dashboard_summary")
+
+        top = self.client.post("/copilot/ask", json={"question": "Show me the top risky consumers", "limit": 1})
+        self.assertEqual(top.status_code, 200)
+        self.assertTrue(top.json()["data_available"])
+        self.assertEqual(top.json()["intent"], "top_risky_consumers")
+        self.assertEqual(top.json()["payload"]["returned"], 1)
+
+    def test_copilot_answers_consumer_case_and_transformer_questions(self):
+        self._create_prediction("C111", risk_level="CRITICAL", risk_score=93.0)
+        case_id = self.client.get("/investigations").json()[0]["case_id"]
+
+        consumer = self.client.post(
+            "/copilot/ask",
+            json={"question": "Why was this consumer flagged?", "consumer_id": "C111"},
+        )
+        self.assertEqual(consumer.status_code, 200)
+        self.assertTrue(consumer.json()["data_available"])
+        self.assertEqual(consumer.json()["intent"], "consumer_analysis")
+
+        checklist = self.client.post(
+            "/copilot/ask",
+            json={"question": "What should the field team inspect?", "case_id": case_id},
+        )
+        self.assertEqual(checklist.status_code, 200)
+        self.assertTrue(checklist.json()["data_available"])
+        self.assertEqual(checklist.json()["intent"], "case_checklist")
+
+        transformer = self.client.post(
+            "/copilot/ask",
+            json={"question": "Give transformer summary", "transformer_id": "T01"},
+        )
+        self.assertEqual(transformer.status_code, 200)
+        self.assertTrue(transformer.json()["data_available"])
+        self.assertEqual(transformer.json()["intent"], "transformer_summary")
+
+    def test_copilot_returns_no_data_for_missing_identifiers(self):
+        response = self.client.post(
+            "/copilot/ask",
+            json={"question": "Why was this consumer flagged?", "consumer_id": "MISSING"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["data_available"])
+        self.assertEqual(response.json()["intent"], "consumer_analysis")
+
     def test_investigation_lifecycle_persists_updates(self):
         self._create_prediction("C077", risk_level="CRITICAL", risk_score=93.0)
         cases = self.client.get("/investigations").json()
