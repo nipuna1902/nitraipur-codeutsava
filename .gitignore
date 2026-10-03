@@ -21,3 +21,6 @@ simulator/fixtures/*.json
 tests/__init__.py
 tests/scenarios/__init__.py
 tests/scenarios/test_simulator.py
+electron_backend.db
+*.sqlite
+*.sqlite3
