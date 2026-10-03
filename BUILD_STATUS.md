@@ -37,14 +37,14 @@ Enhanced time-series features extracted (25 baseline & temporal features), valid
 - [ ] Risk scoring
 - [ ] FastAPI
 - [ ] WebSocket
-- [ ] Dashboard
-- [ ] Digital Twin UI
-- [ ] Investigation workflow
-- [ ] ElevenLabs
-- [ ] LLM reports
-- [ ] Multilingual
+- [x] Dashboard (Command center, KPIs, alerts, loss audit, trends, risk distribution)
+- [x] Digital Twin UI (Substation & feeder & transformer topology with energy balance equation)
+- [x] Investigation workflow (Master-detail audit center, root cause triage, evidence dossiers)
+- [x] Stress testing (Attack scenario injection, benchmark latency metrics, telemetry rate slider)
+- [ ] ElevenLabs voice alerts & audio briefs
+- [ ] LLM inspection report generation
+- [ ] Multilingual support (Hindi, Chhattisgarhi, English)
 - [ ] Voice field observations
-- [ ] Stress testing
 - [ ] ThingsBoard
 - [ ] Deployment
 
