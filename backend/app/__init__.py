@@ -1,0 +1,2 @@
+"""Electron backend application package."""
+

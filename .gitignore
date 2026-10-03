@@ -15,3 +15,9 @@ data/synthetic/*
 ml/artifacts/*
 !**/.gitkeep
 pictures/
+simulator/*.py
+simulator/hardware_demo.html
+simulator/fixtures/*.json
+tests/__init__.py
+tests/scenarios/__init__.py
+tests/scenarios/test_simulator.py
