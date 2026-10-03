@@ -16,7 +16,7 @@ The dashboard is still a prototype. It shows live backend data where backend end
 
 Purpose:
 
-- main demo dashboard
+- main live-backend dashboard
 - show backend summary
 - show anomaly risk curve
 - show investigation queue
@@ -28,7 +28,7 @@ Added controls:
 
 - `Check API`
 - `Load ML Sample`
-- `Check Queue`
+- `Sync Queue`
 - `Ask Copilot`
 - `Refresh`
 
@@ -75,7 +75,7 @@ How to test:
    }
    ```
 
-6. Click `Check Queue`.
+6. Click `Sync Queue`.
 
    Expected:
 
@@ -96,7 +96,7 @@ How to test:
 
 Important:
 
-If backend is off, the dashboard falls back to demo data. That is useful for presentation, but for real testing backend must be running.
+If backend is off, the dashboard renders an empty offline state. Real frontend testing requires the backend to be running.
 
 ## Simulator Page
 
@@ -399,8 +399,8 @@ The UI should show two things side by side:
 Known Truth                    Electron Prediction
 -----------                    -------------------
 Injected scenario: Theft        Predicted: Theft
-Consumer: C-1172                Risk: Critical
-Transformer: TR-18              Confidence: 0.91
+Consumer: <consumer_id>          Risk: Critical
+Transformer: <transformer_id>    Confidence: 0.91
 Duration: 24 ticks              Evidence: sudden drop, zero streak
 ```
 
@@ -588,7 +588,7 @@ Suggested links:
 
 - dashboard anomaly row -> `/consumers/[id]`
 - case queue item -> `/investigations/[case_id]`
-- transformer card -> `/grid?transformer=TR-18`
+- transformer card -> `/grid?transformer=[transformer_id]`
 - simulation scenario result -> `/stress-test`
 - bad-data payload -> backend injection result page
 
@@ -605,8 +605,8 @@ Example request:
 ```json
 {
   "injection_type": "SUDDEN_DROP",
-  "consumer_id": "C-1172",
-  "transformer_id": "TR-18",
+  "consumer_id": "<consumer_id>",
+  "transformer_id": "<transformer_id>",
   "duration_ticks": 24,
   "severity": 0.75
 }
@@ -620,7 +620,7 @@ Expected response:
   "accepted": true,
   "readings_created": 24,
   "ground_truth": {
-    "consumer_id": "C-1172",
+    "consumer_id": "<consumer_id>",
     "actual_scenario": "THEFT_TAMPERING"
   }
 }
@@ -876,7 +876,7 @@ Backend request shape:
 ```json
 {
   "question": "Why was this consumer flagged?",
-  "consumer_id": "C-1172",
+  "consumer_id": "<consumer_id>",
   "case_id": null,
   "anomaly_id": null,
   "transformer_id": null,

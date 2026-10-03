@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Activity, Copy, Gauge, RadioTower, ShieldAlert, WifiOff, ZapOff } from "lucide-react";
+import type { Consumer, Transformer } from "@/types/dashboard";
 
 const injections = [
   {
@@ -42,13 +43,48 @@ const injections = [
   }
 ];
 
-export function BadDataLab() {
+type BadDataLabProps = {
+  consumers: Consumer[];
+  transformers: Transformer[];
+};
+
+export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
   const [selected, setSelected] = useState(injections[1]);
-  const [consumerId, setConsumerId] = useState("C-1172");
-  const [transformerId, setTransformerId] = useState("TR-18");
+  const [consumerId, setConsumerId] = useState(consumers[0]?.consumer_id ?? "");
+  const [transformerId, setTransformerId] = useState(transformers[0]?.transformer_id ?? "");
   const [severity, setSeverity] = useState(75);
   const [durationTicks, setDurationTicks] = useState(24);
   const [copied, setCopied] = useState(false);
+
+  const selectedTransformer = useMemo(
+    () => transformers.find((transformer) => transformer.transformer_id === transformerId),
+    [transformerId, transformers]
+  );
+  const filteredConsumers = useMemo(
+    () =>
+      transformerId
+        ? consumers.filter((consumer) => consumer.transformer_id === transformerId)
+        : consumers,
+    [consumers, transformerId]
+  );
+
+  useEffect(() => {
+    if (!filteredConsumers.length) {
+      setConsumerId("");
+      return;
+    }
+    if (!filteredConsumers.some((consumer) => consumer.consumer_id === consumerId)) {
+      setConsumerId(filteredConsumers[0].consumer_id);
+    }
+  }, [consumerId, filteredConsumers]);
+
+  function updateTransformer(nextTransformerId: string) {
+    setTransformerId(nextTransformerId);
+    const nextConsumer = consumers.find((consumer) =>
+      nextTransformerId ? consumer.transformer_id === nextTransformerId : true
+    );
+    setConsumerId(nextConsumer?.consumer_id ?? "");
+  }
 
   const payload = useMemo(
     () => ({
@@ -57,7 +93,7 @@ export function BadDataLab() {
       transformer_id: transformerId,
       severity: severity / 100,
       duration_ticks: durationTicks,
-      timestamp: "demo-generated",
+      timestamp: "preview-generated",
       voltage: selected.id === "MISSING_PACKETS" ? null : 229.4,
       current: selected.id === "ZERO_READING" ? 0 : 3.2,
       power: selected.id === "ZERO_READING" ? 0 : selected.id === "SUDDEN_DROP" ? 120 : 734,
@@ -104,7 +140,7 @@ export function BadDataLab() {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
         {injections.map((injection) => {
           const Icon = injection.icon;
           const active = selected.id === injection.id;
@@ -113,10 +149,11 @@ export function BadDataLab() {
               key={injection.id}
               type="button"
               onClick={() => setSelected(injection)}
-              className={`min-h-28 rounded-lg border p-4 text-left transition ${
+              aria-pressed={active}
+              className={`min-h-28 cursor-pointer rounded-lg border p-4 text-left transition ${
                 active
-                  ? "border-slate-500 bg-slate-100 text-slate-950"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-teal-500 bg-teal-50 text-slate-950 ring-2 ring-teal-100"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
               }`}
             >
               <Icon size={20} />
@@ -132,20 +169,43 @@ export function BadDataLab() {
           <div className="mt-4 grid gap-3">
             <label className="grid gap-1 text-sm">
               <span className="text-slate-600">Consumer</span>
-              <select value={consumerId} onChange={(event) => setConsumerId(event.target.value)} className="min-h-10 rounded-lg border border-slate-200 bg-white px-3">
-                {["C-1172", "C-1888", "C-2781", "C-0904", "C-1326"].map((item) => (
-                  <option key={item}>{item}</option>
+              <select
+                value={consumerId}
+                onChange={(event) => setConsumerId(event.target.value)}
+                className="min-h-10 rounded-lg border border-slate-200 bg-white px-3"
+              >
+                <option value="">Select consumer</option>
+                {filteredConsumers.slice(0, 80).map((consumer) => (
+                  <option key={consumer.consumer_id} value={consumer.consumer_id}>
+                    {consumer.consumer_id} / {consumer.transformer_id}
+                  </option>
                 ))}
               </select>
             </label>
             <label className="grid gap-1 text-sm">
               <span className="text-slate-600">Transformer</span>
-              <select value={transformerId} onChange={(event) => setTransformerId(event.target.value)} className="min-h-10 rounded-lg border border-slate-200 bg-white px-3">
-                {["TR-18", "TR-22", "TR-11", "TR-09", "TR-06"].map((item) => (
-                  <option key={item}>{item}</option>
+              <select
+                value={transformerId}
+                onChange={(event) => updateTransformer(event.target.value)}
+                className="min-h-10 rounded-lg border border-slate-200 bg-white px-3"
+              >
+                <option value="">Select transformer</option>
+                {transformers.map((transformer) => (
+                  <option key={transformer.transformer_id} value={transformer.transformer_id}>
+                    {transformer.transformer_id} / {transformer.feeder_id}
+                  </option>
                 ))}
               </select>
             </label>
+            <p className="text-xs leading-5 text-slate-500">
+              Use live backend IDs from `/consumers` and `/transformers`; changing a fault card updates the payload preview immediately.
+            </p>
+            <div className="rounded-lg border border-teal-100 bg-white p-3 text-xs leading-5 text-slate-600">
+              <p className="font-semibold text-slate-900">Live selection</p>
+              <p>Transformer: {transformerId || "None selected"}{selectedTransformer ? ` / ${selectedTransformer.feeder_id}` : ""}</p>
+              <p>Available consumers on this transformer: {filteredConsumers.length}</p>
+              <p>Selected consumer: {consumerId || "None selected"}</p>
+            </div>
             <label className="grid gap-2 text-sm">
               <span className="text-slate-600">Severity: {severity}%</span>
               <input type="range" min="10" max="100" value={severity} onChange={(event) => setSeverity(Number(event.target.value))} />

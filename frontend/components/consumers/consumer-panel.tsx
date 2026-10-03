@@ -32,7 +32,7 @@ export function ConsumerPanel({ consumers, anomalies }: ConsumerPanelProps) {
             <div key={consumer.consumer_id} className="grid grid-cols-[1fr_0.8fr_0.7fr] border-t border-slate-200 px-4 py-4 text-sm">
               <div>
                 <p className="font-semibold text-slate-950">{consumer.consumer_id}</p>
-                <p className="text-slate-500">{consumer.category} · {consumer.sanctioned_load} kW</p>
+                <p className="text-slate-500">{consumer.category} / {consumer.sanctioned_load} kW</p>
               </div>
               <div className="text-slate-700">
                 <p>{consumer.transformer_id}</p>

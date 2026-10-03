@@ -1,12 +1,11 @@
-import { redirect } from "next/navigation";
-export default function Home() { redirect("/simulator"); }
 import Link from "next/link";
 import { Activity, BrainCircuit, RadioTower, Route, ShieldAlert, Zap } from "lucide-react";
 import { AppNavigation } from "@/components/dashboard/app-navigation";
 import { AnomalyChart } from "@/components/dashboard/anomaly-chart";
+import { BackendActions } from "@/components/dashboard/backend-actions";
+import { AnomalyReviewBoard } from "@/components/investigation/anomaly-review-board";
 import { CaseQueue } from "@/components/investigation/case-queue";
 import { ConsumerPanel } from "@/components/consumers/consumer-panel";
-import { DemoActions } from "@/components/dashboard/demo-actions";
 import { GridForensics } from "@/components/grid/grid-forensics";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { VoiceCopilot } from "@/components/voice/voice-copilot";
@@ -56,12 +55,16 @@ export default async function DashboardPage() {
           <StatCard icon={Route} label="Active investigations" value={data.summary.active_investigations} tone="emerald" />
         </section>
 
-        <DemoActions />
+        <BackendActions
+          initialAnomalies={data.anomalies}
+          initialCases={data.investigations}
+          initialTransformers={data.transformers}
+        />
 
         <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Demo Flow</p>
-            <h2 className="mt-1 text-xl font-semibold text-slate-950">Suggested judging path</h2>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Validation Flow</p>
+            <h2 className="mt-1 text-xl font-semibold text-slate-950">Live system check path</h2>
             <div className="mt-5 grid gap-2 text-sm">
               {[
                 "Load ML sample",
@@ -114,6 +117,8 @@ export default async function DashboardPage() {
           <AnomalyChart anomalies={data.anomalies} />
           <CaseQueue cases={data.investigations} anomalies={data.anomalies} />
         </section>
+
+        <AnomalyReviewBoard anomalies={data.anomalies} cases={data.investigations} />
 
         <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
           <ConsumerPanel consumers={data.consumers} anomalies={data.anomalies} />

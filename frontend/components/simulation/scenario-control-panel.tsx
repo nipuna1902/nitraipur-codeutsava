@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, CloudOff, Gauge, RadioTower, ShieldAlert, Zap } from "lucide-react";
+import type { Consumer, Transformer } from "@/types/dashboard";
 
 const scenarios = [
   {
@@ -42,19 +43,59 @@ const scenarios = [
   }
 ];
 
-export function ScenarioControlPanel() {
+type ScenarioControlPanelProps = {
+  consumers: Consumer[];
+  transformers: Transformer[];
+};
+
+export function ScenarioControlPanel({ consumers, transformers }: ScenarioControlPanelProps) {
   const [selected, setSelected] = useState(scenarios[1]);
+  const [transformerId, setTransformerId] = useState(transformers[0]?.transformer_id ?? "");
+  const [targetConsumers, setTargetConsumers] = useState(consumers[0]?.consumer_id ?? "");
+
+  const selectedTransformer = useMemo(
+    () => transformers.find((transformer) => transformer.transformer_id === transformerId),
+    [transformerId, transformers]
+  );
+  const filteredConsumers = useMemo(
+    () =>
+      transformerId
+        ? consumers.filter((consumer) => consumer.transformer_id === transformerId)
+        : consumers,
+    [consumers, transformerId]
+  );
+
+  useEffect(() => {
+    if (!filteredConsumers.length) {
+      setTargetConsumers("");
+      return;
+    }
+    if (!filteredConsumers.some((consumer) => consumer.consumer_id === targetConsumers)) {
+      setTargetConsumers(filteredConsumers[0].consumer_id);
+    }
+  }, [filteredConsumers, targetConsumers]);
+
+  function updateTransformer(nextTransformerId: string) {
+    setTransformerId(nextTransformerId);
+    const nextConsumer = consumers.find((consumer) =>
+      nextTransformerId ? consumer.transformer_id === nextTransformerId : true
+    );
+    setTargetConsumers(nextConsumer?.consumer_id ?? "");
+  }
 
   const payload = useMemo(
     () => ({
       scenario: selected.id,
-      transformer_id: selected.id === "COORDINATED_THEFT" ? "TR-18" : "TR-06",
-      target_consumers: selected.id === "COORDINATED_THEFT" ? ["C-1172", "C-1888", "C-2781"] : ["C-1172"],
+      transformer_id: transformerId,
+      target_consumers: targetConsumers
+        .split(",")
+        .map((consumer) => consumer.trim())
+        .filter(Boolean),
       ticks: 96,
       stream_to_backend: false,
       note: "UI control is ready. Backend simulator run endpoint is the next integration step."
     }),
-    [selected]
+    [selected, targetConsumers, transformerId]
   );
 
   return (
@@ -69,7 +110,7 @@ export function ScenarioControlPanel() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid gap-2 md:grid-cols-3 xl:grid-cols-6">
         {scenarios.map((scenario) => {
           const Icon = scenario.icon;
           const active = selected.id === scenario.id;
@@ -78,15 +119,16 @@ export function ScenarioControlPanel() {
               key={scenario.id}
               type="button"
               onClick={() => setSelected(scenario)}
-              className={`min-h-32 rounded-lg border p-4 text-left transition ${
+              aria-pressed={active}
+              className={`min-h-28 cursor-pointer rounded-lg border p-4 text-left transition ${
                 active
-                  ? "border-slate-500 bg-slate-100 text-slate-950"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "border-teal-500 bg-teal-50 text-slate-950 ring-2 ring-teal-100"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
               }`}
             >
               <Icon size={20} />
               <p className="mt-3 font-semibold">{scenario.label}</p>
-              <p className="mt-1 text-sm leading-5 text-slate-500">{scenario.description}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">{scenario.description}</p>
             </button>
           );
         })}
@@ -97,6 +139,47 @@ export function ScenarioControlPanel() {
           <p className="text-sm font-semibold text-slate-950">Selected scenario</p>
           <p className="mt-2 text-3xl font-semibold text-slate-950">{selected.label}</p>
           <p className="mt-3 text-sm leading-6 text-slate-600">{selected.description}</p>
+          <div className="mt-5 grid gap-3">
+            <label className="grid gap-1 text-sm">
+              <span className="text-slate-600">Transformer</span>
+              <select
+                value={transformerId}
+                onChange={(event) => updateTransformer(event.target.value)}
+                className="min-h-10 rounded-lg border border-slate-200 bg-white px-3"
+              >
+                <option value="">Select transformer</option>
+                {transformers.map((transformer) => (
+                  <option key={transformer.transformer_id} value={transformer.transformer_id}>
+                    {transformer.transformer_id} / {transformer.feeder_id}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="text-slate-600">Target consumers</span>
+              <select
+                value={targetConsumers}
+                onChange={(event) => setTargetConsumers(event.target.value)}
+                className="min-h-10 rounded-lg border border-slate-200 bg-white px-3"
+              >
+                <option value="">Select consumer</option>
+                {filteredConsumers.slice(0, 80).map((consumer) => (
+                  <option key={consumer.consumer_id} value={consumer.consumer_id}>
+                    {consumer.consumer_id} / {consumer.transformer_id}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="rounded-lg border border-teal-100 bg-white p-3 text-xs leading-5 text-slate-600">
+              <p className="font-semibold text-slate-900">Live selection</p>
+              <p>Transformer: {transformerId || "None selected"}{selectedTransformer ? ` / ${selectedTransformer.feeder_id}` : ""}</p>
+              <p>Available consumers on this transformer: {filteredConsumers.length}</p>
+              <p>Selected consumer: {targetConsumers || "None selected"}</p>
+            </div>
+            <p className="text-xs leading-5 text-slate-500">
+              Transformer IDs come from the live backend `/transformers` route. Consumers come from `/consumers`.
+            </p>
+          </div>
         </div>
         <pre className="max-h-72 overflow-auto rounded-lg border border-slate-200 bg-slate-950 p-5 text-xs leading-5 text-slate-100">
           {JSON.stringify(payload, null, 2)}

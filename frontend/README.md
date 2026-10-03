@@ -57,7 +57,7 @@ Next.js dashboard prototype for Electron.
 - voice copilot placeholder card
 - digital twin readiness panel
 
-The frontend reads live backend data when the FastAPI server is available. If the backend is unavailable or empty, it falls back to demo data so the dashboard still opens during presentation.
+The frontend reads live backend data from FastAPI. If the backend is unavailable, it renders an empty offline state instead of bundled mock records.
 
 ## Backend Integration
 
@@ -89,7 +89,7 @@ Start backend from the repository root:
 uvicorn backend.app.main:app --reload
 ```
 
-Load ML demo predictions if needed:
+Load ML predictions if needed:
 
 ```powershell
 Invoke-RestMethod -Uri http://127.0.0.1:8000/ml/predictions/load-sample -Method POST
@@ -110,6 +110,12 @@ http://localhost:3000
 ```
 
 ## Verify
+
+Full live backend/frontend testing is documented in:
+
+```text
+../docs/18-end-to-end-testing-guide.md
+```
 
 Backend:
 

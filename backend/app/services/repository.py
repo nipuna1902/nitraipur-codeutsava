@@ -153,29 +153,37 @@ class TelemetryRepository:
 
     def list_consumers(self) -> list[ConsumerSummary]:
         consumers = self.db.scalars(select(Consumer).order_by(Consumer.consumer_id)).all()
-        return [summary for consumer in consumers if (summary := self.get_consumer(consumer.consumer_id)) is not None]
+        return [self._consumer_summary(consumer) for consumer in consumers]
 
     def get_consumer(self, consumer_id: str) -> ConsumerSummary | None:
-        readings_count = self.db.scalar(
-            select(func.count(TelemetryReading.id)).where(TelemetryReading.consumer_id == consumer_id)
-        ) or 0
-        if readings_count == 0:
+        consumer = self.db.scalar(select(Consumer).where(Consumer.consumer_id == consumer_id))
+        if consumer is None:
             return None
+        return self._consumer_summary(consumer)
+
+    def _consumer_summary(self, consumer: Consumer) -> ConsumerSummary:
+        readings_count = self.db.scalar(
+            select(func.count(TelemetryReading.id)).where(TelemetryReading.consumer_id == consumer.consumer_id)
+        ) or 0
         latest = self.db.scalar(
             select(TelemetryReading)
-            .where(TelemetryReading.consumer_id == consumer_id)
+            .where(TelemetryReading.consumer_id == consumer.consumer_id)
             .order_by(TelemetryReading.timestamp.desc())
             .limit(1)
         )
-        if latest is None:
-            return None
         return ConsumerSummary(
-            consumer_id=consumer_id,
-            latest_energy=latest.energy,
-            latest_power=latest.power,
-            latest_voltage=latest.voltage,
-            meter_status=latest.meter_status,
-            communication_status=latest.communication_status,
+            consumer_id=consumer.consumer_id,
+            category=consumer.category,
+            sanctioned_load=consumer.sanctioned_load,
+            tariff=consumer.tariff,
+            transformer_id=consumer.transformer_id,
+            feeder_id=consumer.feeder_id,
+            area=consumer.area,
+            latest_energy=latest.energy if latest is not None else None,
+            latest_power=latest.power if latest is not None else None,
+            latest_voltage=latest.voltage if latest is not None else None,
+            meter_status=latest.meter_status if latest is not None else None,
+            communication_status=latest.communication_status if latest is not None else None,
             readings_count=readings_count,
         )
 
@@ -456,6 +464,43 @@ class TelemetryRepository:
                 suggested_next_questions=[
                     "Why was this consumer flagged?",
                     "Which cases need field inspection?",
+                ],
+            )
+
+        if any(
+            term in question
+            for term in [
+                "investigation queue",
+                "inspection queue",
+                "case queue",
+                "cases need",
+                "active investigations",
+                "investigation backlog",
+                "queue so long",
+            ]
+        ):
+            cases = self.list_investigation_cases(limit=payload.limit)
+            status = self.status()
+            aggregate_count = sum(1 for case in cases if case.case_type == "AGGREGATE_REVIEW")
+            answer = (
+                f"Electron has {status['active_investigations']} active investigations. "
+                f"The queue is ordered by adjusted investigation priority, so high-risk and aggregate-review "
+                f"items stay visible until field review or resolution. Showing {len(cases)} case(s) in this answer; "
+                f"{aggregate_count} of them are aggregate-review cases that need attribution checks before any "
+                f"building-level conclusion."
+            )
+            return CopilotAnswerOut(
+                data_available=True,
+                intent="investigation_queue_summary",
+                answer=answer,
+                payload={
+                    "summary": status,
+                    "cases": [case.model_dump() for case in cases],
+                },
+                suggested_next_questions=[
+                    "Which cases need field inspection?",
+                    "Show me the top risky consumers",
+                    "What is the current grid status?",
                 ],
             )
 
@@ -843,17 +888,13 @@ class TelemetryRepository:
         )
 
     def _infer_transformer(self, consumer_id: str) -> str:
+        transformer_ids = sorted(DEFAULT_TRANSFORMERS)
         try:
             number = int(consumer_id.removeprefix("C"))
         except ValueError:
-            return "T01"
-        if number <= 12:
-            return "T01"
-        if number <= 24:
-            return "T02"
-        if number <= 36:
-            return "T03"
-        return "T04"
+            checksum = sum(ord(char) for char in consumer_id)
+            return transformer_ids[checksum % len(transformer_ids)]
+        return transformer_ids[(number - 1) % len(transformer_ids)]
 
     def _to_telemetry_out(self, reading: TelemetryReading) -> TelemetryReadingOut:
         return TelemetryReadingOut(

@@ -182,6 +182,16 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(summary.status_code, 200)
         self.assertGreater(summary.json()["active_anomalies"], 0)
 
+        consumers = self.client.get("/consumers")
+        self.assertEqual(consumers.status_code, 200)
+        self.assertGreater(len(consumers.json()), 0)
+        self.assertIn("transformer_id", consumers.json()[0])
+
+        transformers = self.client.get("/transformers")
+        self.assertEqual(transformers.status_code, 200)
+        counts = {item["transformer_id"]: item["consumer_count"] for item in transformers.json()}
+        self.assertTrue(all(count > 0 for count in counts.values()))
+
     def test_anomaly_queue_includes_total_and_returned_counts(self):
         self._create_prediction("C090", risk_level="CRITICAL", risk_score=95.0)
         self._create_prediction("C091", risk_level="HIGH", risk_score=75.0)
@@ -274,6 +284,21 @@ class BackendApiTest(unittest.TestCase):
         self.assertTrue(top.json()["data_available"])
         self.assertEqual(top.json()["intent"], "top_risky_consumers")
         self.assertEqual(top.json()["payload"]["returned"], 1)
+
+    def test_copilot_answers_investigation_queue_without_selected_consumer(self):
+        self._create_prediction("C105", risk_level="CRITICAL", risk_score=96.0)
+        self._create_prediction("C106", risk_level="HIGH", risk_score=79.0)
+
+        response = self.client.post(
+            "/copilot/ask",
+            json={"question": "Why is the investigation queue so long?", "limit": 5},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["data_available"])
+        self.assertEqual(response.json()["intent"], "investigation_queue_summary")
+        self.assertIn("active investigations", response.json()["answer"])
+        self.assertEqual(len(response.json()["payload"]["cases"]), 2)
 
     def test_copilot_answers_consumer_case_and_transformer_questions(self):
         self._create_prediction("C111", risk_level="CRITICAL", risk_score=93.0)
