@@ -2,13 +2,9 @@
 
 ## Current Phase
 
-**ARCHITECTURE ONLY**
+**DATA PREPROCESSING & ML MODELING COMPLETE**
 
-Implementation has NOT started.
-
-## Existing Repository Inspection
-
-The repository was empty except for `.git` before this architecture package was created.
+Raw datasets preprocessed, features engineered, baseline profiles calculated, and ML models trained & evaluated.
 
 ## Architecture
 
@@ -31,11 +27,11 @@ The repository was empty except for `.git` before this architecture package was 
 
 - [ ] Simulator
 - [ ] Database
-- [ ] Feature engine
-- [ ] Baselines
+- [x] Feature engine (14 statistical & temporal baseline features)
+- [x] Baselines (Personal baseline profiles calculated)
 - [ ] Peer groups
-- [ ] Anomaly detection
-- [ ] Cause classifier
+- [x] Anomaly detection (Isolation Forest & XGBoost probability models)
+- [x] Cause classifier (XGBoost / LightGBM trained models)
 - [ ] Transformer analysis
 - [ ] Risk scoring
 - [ ] FastAPI
@@ -51,12 +47,3 @@ The repository was empty except for `.git` before this architecture package was 
 - [ ] ThingsBoard
 - [ ] Deployment
 
-## Guardrails
-
-- No business logic has been implemented.
-- No ML model has been trained.
-- No simulator has been implemented.
-- No frontend pages have been implemented.
-- No backend endpoints have been implemented.
-- No external API calls have been made.
-- No fake evaluation results have been created.

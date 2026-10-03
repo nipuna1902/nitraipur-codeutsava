@@ -1,0 +1,150 @@
+{
+  "CrossGrid_Transferability": {
+    "XGBoost": {
+      "roc_auc": 0.7724,
+      "pr_auc": 0.4197,
+      "precision": 0.3943,
+      "recall": 0.4534,
+      "f1_score": 0.4218,
+      "confusion_matrix": [
+        [
+          7591,
+          971
+        ],
+        [
+          762,
+          632
+        ]
+      ],
+      "threshold": 0.5
+    },
+    "LightGBM": {
+      "roc_auc": 0.7832,
+      "pr_auc": 0.4427,
+      "precision": 0.384,
+      "recall": 0.4878,
+      "f1_score": 0.4297,
+      "confusion_matrix": [
+        [
+          7471,
+          1091
+        ],
+        [
+          714,
+          680
+        ]
+      ],
+      "threshold": 0.5
+    },
+    "RandomForest": {
+      "roc_auc": 0.7844,
+      "pr_auc": 0.4206,
+      "precision": 0.3957,
+      "recall": 0.4326,
+      "f1_score": 0.4133,
+      "confusion_matrix": [
+        [
+          7641,
+          921
+        ],
+        [
+          791,
+          603
+        ]
+      ],
+      "threshold": 0.5
+    },
+    "IsolationForest": {
+      "roc_auc": 0.6246,
+      "pr_auc": 0.314,
+      "precision": 0.7531,
+      "recall": 0.0875,
+      "f1_score": 0.1568,
+      "confusion_matrix": [
+        [
+          8522,
+          40
+        ],
+        [
+          1272,
+          122
+        ]
+      ],
+      "threshold": 0.5
+    }
+  },
+  "MergedDataset_Holdout": {
+    "XGBoost": {
+      "roc_auc": 0.7701,
+      "pr_auc": 0.3446,
+      "precision": 0.2235,
+      "recall": 0.6138,
+      "f1_score": 0.3277,
+      "confusion_matrix": [
+        [
+          7327,
+          2137
+        ],
+        [
+          387,
+          615
+        ]
+      ],
+      "threshold": 0.5
+    },
+    "LightGBM": {
+      "roc_auc": 0.7757,
+      "pr_auc": 0.3452,
+      "precision": 0.217,
+      "recall": 0.6248,
+      "f1_score": 0.3221,
+      "confusion_matrix": [
+        [
+          7205,
+          2259
+        ],
+        [
+          376,
+          626
+        ]
+      ],
+      "threshold": 0.5
+    },
+    "RandomForest": {
+      "roc_auc": 0.7646,
+      "pr_auc": 0.3159,
+      "precision": 0.217,
+      "recall": 0.6078,
+      "f1_score": 0.3199,
+      "confusion_matrix": [
+        [
+          7267,
+          2197
+        ],
+        [
+          393,
+          609
+        ]
+      ],
+      "threshold": 0.5
+    },
+    "IsolationForest": {
+      "roc_auc": 0.5861,
+      "pr_auc": 0.1475,
+      "precision": 0.2584,
+      "recall": 0.0848,
+      "f1_score": 0.1277,
+      "confusion_matrix": [
+        [
+          9220,
+          244
+        ],
+        [
+          917,
+          85
+        ]
+      ],
+      "threshold": 0.5
+    }
+  }
+}
