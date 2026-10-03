@@ -15,7 +15,7 @@ export function VoiceCopilot() {
       <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5">
         <div className="flex items-center gap-3">
           <Mic2 className="text-slate-600" />
-          <p className="font-semibold text-slate-950">Ask: “Why is C-1172 high priority?”</p>
+          <p className="font-semibold text-slate-950">Ask: "Why is C-1172 high priority?"</p>
         </div>
         <p className="mt-3 text-sm leading-6 text-slate-600">
           The copilot is designed to call narrow backend tools for consumer summaries, anomaly evidence, transformer

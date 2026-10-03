@@ -1,7 +1,9 @@
 import { Activity, BrainCircuit, RadioTower, Route, ShieldAlert, Zap } from "lucide-react";
+import { AppNavigation } from "@/components/dashboard/app-navigation";
 import { AnomalyChart } from "@/components/dashboard/anomaly-chart";
 import { CaseQueue } from "@/components/investigation/case-queue";
 import { ConsumerPanel } from "@/components/consumers/consumer-panel";
+import { DemoActions } from "@/components/dashboard/demo-actions";
 import { GridForensics } from "@/components/grid/grid-forensics";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { VoiceCopilot } from "@/components/voice/voice-copilot";
@@ -13,6 +15,7 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-5 py-6 sm:px-8 lg:px-10">
+        <AppNavigation />
         <header className="grid gap-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-[1.4fr_0.6fr]">
           <div>
             <div className="mb-4 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
@@ -49,6 +52,8 @@ export default async function DashboardPage() {
           <StatCard icon={RadioTower} label="Consumers covered" value={data.summary.total_consumers} tone="amber" />
           <StatCard icon={Route} label="Active investigations" value={data.summary.active_investigations} tone="emerald" />
         </section>
+
+        <DemoActions />
 
         <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <AnomalyChart anomalies={data.anomalies} />
