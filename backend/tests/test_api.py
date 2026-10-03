@@ -62,6 +62,41 @@ class BackendApiTest(unittest.TestCase):
         transformer_ids = {item["transformer_id"] for item in response.json()}
         self.assertEqual(transformer_ids, {"T01", "T02", "T03", "T04"})
 
+    def test_voice_session_placeholder_does_not_call_external_provider(self):
+        response = self.client.post("/voice/session", json={"consumer_id": "C001", "language": "HI"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["provider"], "ELEVENLABS_FUTURE")
+        self.assertEqual(response.json()["language"], "HI")
+
+    def test_voice_consumer_summary_uses_structured_backend_data(self):
+        payload = {
+            "readings": [
+                {
+                    "consumer_id": "C001",
+                    "timestamp": datetime(2026, 10, 3, tzinfo=timezone.utc).isoformat(),
+                    "voltage": 230.0,
+                    "current": 4.5,
+                    "power": 1.1,
+                    "energy": 0.275,
+                    "meter_status": "NORMAL",
+                    "communication_status": "CONNECTED",
+                    "source": "SIMULATOR",
+                }
+            ]
+        }
+        self.client.post("/telemetry/readings", json=payload)
+
+        response = self.client.post("/voice/tools/consumer-summary", json={"consumer_id": "C001"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["data_available"])
+        self.assertEqual(response.json()["payload"]["consumer_id"], "C001")
+
+    def test_voice_anomaly_evidence_preserves_uncertainty_before_ml_integration(self):
+        response = self.client.post("/voice/tools/anomaly-evidence", json={"consumer_id": "C001"})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["data_available"])
+        self.assertEqual(response.json()["payload"]["predicted_cause"], "UNCERTAIN")
+
 
 if __name__ == "__main__":
     unittest.main()
