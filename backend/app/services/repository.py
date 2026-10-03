@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -47,16 +48,34 @@ DEFAULT_TRANSFORMERS = {
 }
 
 CASE_CREATING_RISK_LEVELS = {"HIGH", "CRITICAL"}
+DIRECT_ATTRIBUTION_STATUSES = {"SINGLE_BUILDING", "DIRECT_METER"}
+CONFIDENT_ALLOCATIONS = {"HIGH", "MEDIUM"}
 
 DEFAULT_CHECKLIST = {
+    "attribution_scope_verified": "Attribution scope verified",
     "meter_inspected": "Meter physically inspected",
     "seal_inspected": "Seal inspected",
     "connected_load_verified": "Connected load verified",
     "meter_reading_verified": "Meter reading verified",
+    "communication_path_checked": "Communication path checked",
+    "meter_fault_ruled_out": "Meter fault ruled out",
     "bypass_checked": "Bypass checked",
     "physical_anomaly_observed": "Physical anomaly observed",
     "additional_notes": "Additional notes captured",
 }
+
+
+@dataclass(frozen=True)
+class GuardrailContext:
+    case_type: str
+    raw_risk_score: float
+    adjusted_risk_score: float
+    adjusted_priority: str
+    outlier_flags: list[str]
+    allocation_confidence: str
+    attribution_status: str
+    recommendation: str
+    risk_adjustment_reason: str
 
 
 class TelemetryRepository:
@@ -379,7 +398,7 @@ class TelemetryRepository:
             data_available=True,
             latest_anomaly=anomaly,
             investigation_case=case,
-            recommended_action=self._recommended_action(anomaly.risk_level),
+            recommended_action=anomaly.recommendation,
         )
 
     def answer_question(self, payload: CopilotAskIn) -> CopilotAnswerOut:
@@ -430,8 +449,8 @@ class TelemetryRepository:
                 intent="top_risky_consumers",
                 answer=(
                     f"Found {queue.total} anomaly records. The highest-risk consumer is "
-                    f"{top.consumer_id} with risk score {top.risk_score:.1f}, "
-                    f"risk level {top.risk_level}, and probable cause {top.predicted_cause}."
+                    f"{top.consumer_id} with raw risk score {top.raw_risk_score:.1f}, "
+                    f"adjusted score {top.adjusted_risk_score:.1f}, and case type {top.case_type}."
                 ),
                 payload=queue.model_dump(),
                 suggested_next_questions=[
@@ -452,7 +471,8 @@ class TelemetryRepository:
                 intent="consumer_analysis",
                 answer=(
                     f"Consumer {payload.consumer_id} was flagged as {anomaly.risk_level} risk "
-                    f"with score {anomaly.risk_score:.1f}. The probable cause is "
+                    f"with raw score {anomaly.raw_risk_score:.1f} and adjusted score "
+                    f"{anomaly.adjusted_risk_score:.1f}. The probable cause is "
                     f"{anomaly.predicted_cause}. Recommended action: {analysis.recommended_action}"
                 ),
                 payload=analysis.model_dump(),
@@ -491,8 +511,9 @@ class TelemetryRepository:
             else:
                 answer = (
                     f"Case {payload.case_id} is {detail.case.status}. It is linked to consumer "
-                    f"{detail.case.consumer_id}, risk score {detail.case.risk_score:.1f}, "
-                    f"and probable cause {detail.case.predicted_cause}."
+                    f"{detail.case.consumer_id}, raw risk score {detail.case.raw_risk_score:.1f}, "
+                    f"adjusted score {detail.case.adjusted_risk_score:.1f}, and case type "
+                    f"{detail.case.case_type}."
                 )
                 intent = "case_status"
             return CopilotAnswerOut(
@@ -584,6 +605,7 @@ class TelemetryRepository:
         )
         if existing is not None:
             return existing
+        guardrail = self._guardrail_for_prediction(prediction)
         case = InvestigationCase(
             id=str(uuid4()),
             case_id=f"CASE-{prediction.consumer_id}-{prediction.id[:8]}",
@@ -591,7 +613,7 @@ class TelemetryRepository:
             anomaly_id=prediction.id,
             risk_score=prediction.risk_score,
             predicted_cause=prediction.predicted_cause,
-            priority=prediction.risk_level,
+            priority=guardrail.adjusted_priority,
             status="AI_FLAGGED",
         )
         self.db.add(case)
@@ -609,6 +631,182 @@ class TelemetryRepository:
         if risk_level == "LOW":
             return "No immediate field action."
         return "Evidence is insufficient; keep case under review."
+
+    def _guardrail_for_prediction(self, prediction: AnomalyPrediction) -> GuardrailContext:
+        return self._guardrail_context(
+            risk_score=prediction.risk_score,
+            risk_level=prediction.risk_level,
+            predicted_cause=prediction.predicted_cause,
+            confidence=prediction.confidence,
+            evidence=prediction.evidence or [],
+        )
+
+    def _guardrail_context(
+        self,
+        risk_score: float,
+        risk_level: str,
+        predicted_cause: str,
+        confidence: float,
+        evidence: list[dict],
+    ) -> GuardrailContext:
+        allocation_confidence = self._normalized_evidence_value(
+            evidence,
+            {"allocation_confidence", "building_allocation_confidence"},
+            "UNKNOWN",
+        )
+        attribution_status = self._normalized_evidence_value(
+            evidence,
+            {"attribution_status", "building_attribution_status"},
+            "AGGREGATE_ONLY",
+        )
+        outlier_flags = set(self._declared_outlier_flags(evidence))
+
+        direct_attribution = (
+            attribution_status in DIRECT_ATTRIBUTION_STATUSES
+            and allocation_confidence in CONFIDENT_ALLOCATIONS
+        )
+        if not direct_attribution:
+            outlier_flags.add("AGGREGATE_ATTRIBUTION")
+        if self._is_communication_heavy(predicted_cause, evidence):
+            outlier_flags.add("COMMUNICATION_HEAVY")
+        if self._is_meter_fault_like(predicted_cause, evidence):
+            outlier_flags.add("METER_FAULT_LIKE")
+        if self._is_large_load_outlier(risk_score, evidence):
+            outlier_flags.add("LARGE_LOAD_OUTLIER")
+
+        corroborating_evidence = [
+            item for item in evidence
+            if str(item.get("feature", "")).lower()
+            not in {"allocation_confidence", "building_allocation_confidence", "attribution_status", "building_attribution_status", "outlier_flags"}
+        ]
+        if confidence < 0.65 or not corroborating_evidence:
+            outlier_flags.add("WEAK_CORROBORATION")
+
+        high_or_critical = risk_level in CASE_CREATING_RISK_LEVELS
+        case_type = "AGGREGATE_REVIEW" if high_or_critical and not direct_attribution else "STANDARD"
+
+        penalties: list[tuple[str, float]] = []
+        if case_type == "AGGREGATE_REVIEW":
+            penalties.append(("multi-building or unknown attribution", 15.0))
+        if "COMMUNICATION_HEAVY" in outlier_flags:
+            penalties.append(("communication issue may dominate the anomaly", 20.0))
+        if "METER_FAULT_LIKE" in outlier_flags:
+            penalties.append(("meter fault signal may dominate the anomaly", 20.0))
+        if "WEAK_CORROBORATION" in outlier_flags:
+            penalties.append(("weak corroborating evidence", 10.0))
+        if "LARGE_LOAD_OUTLIER" in outlier_flags and case_type == "AGGREGATE_REVIEW":
+            penalties.append(("large-load aggregate row increases false-positive risk", 5.0))
+
+        adjusted_risk_score = round(max(0.0, risk_score - sum(penalty for _, penalty in penalties)), 1)
+        adjusted_priority = self._risk_level_from_score(adjusted_risk_score)
+
+        if case_type == "AGGREGATE_REVIEW":
+            recommendation = (
+                "High-risk aggregate anomaly. Field verification needed before attributing this anomaly "
+                "to a specific building."
+            )
+        elif "COMMUNICATION_HEAVY" in outlier_flags:
+            recommendation = "Review communication health before theft/tampering escalation."
+        elif "METER_FAULT_LIKE" in outlier_flags:
+            recommendation = "Treat as meter-fault review before theft/tampering escalation."
+        elif "WEAK_CORROBORATION" in outlier_flags:
+            recommendation = "Review evidence and monitor before dispatch."
+        else:
+            recommendation = self._recommended_action(risk_level)
+
+        reason = (
+            "; ".join(reason for reason, _ in penalties)
+            if penalties
+            else "No aggregate or outlier adjustment applied."
+        )
+
+        return GuardrailContext(
+            case_type=case_type,
+            raw_risk_score=risk_score,
+            adjusted_risk_score=adjusted_risk_score,
+            adjusted_priority=adjusted_priority,
+            outlier_flags=sorted(outlier_flags),
+            allocation_confidence=allocation_confidence,
+            attribution_status=attribution_status,
+            recommendation=recommendation,
+            risk_adjustment_reason=reason,
+        )
+
+    def _normalized_evidence_value(self, evidence: list[dict], feature_names: set[str], default: str) -> str:
+        for item in evidence:
+            feature = str(item.get("feature", "")).lower()
+            if feature in feature_names:
+                value = item.get("value")
+                if value is not None:
+                    return str(value).upper().replace(" ", "_")
+        return default
+
+    def _declared_outlier_flags(self, evidence: list[dict]) -> list[str]:
+        flags: list[str] = []
+        for item in evidence:
+            if str(item.get("feature", "")).lower() != "outlier_flags":
+                continue
+            value = item.get("value")
+            if isinstance(value, list):
+                flags.extend(str(flag) for flag in value)
+            elif value is not None:
+                flags.extend(str(value).replace(";", ",").split(","))
+        return [flag.strip().upper().replace(" ", "_") for flag in flags if flag.strip()]
+
+    def _is_communication_heavy(self, predicted_cause: str, evidence: list[dict]) -> bool:
+        if predicted_cause == "COMMUNICATION_FAILURE":
+            return True
+        for item in evidence:
+            feature = str(item.get("feature", "")).lower()
+            value = item.get("value")
+            value_text = str(value).lower()
+            if "communication" not in feature and "comm" not in feature:
+                continue
+            if any(term in feature for term in ["gap", "missing", "failure", "disconnect"]):
+                return True
+            if any(term in value_text for term in ["degraded", "disconnected", "missing", "failed", "low"]):
+                return True
+            if isinstance(value, (int, float)) and ("health" in feature or "score" in feature) and value <= 0.4:
+                return True
+        return False
+
+    def _is_meter_fault_like(self, predicted_cause: str, evidence: list[dict]) -> bool:
+        if predicted_cause == "METER_MALFUNCTION":
+            return True
+        for item in evidence:
+            feature = str(item.get("feature", "")).lower()
+            value = item.get("value")
+            value_text = str(value).lower()
+            if "meter" not in feature:
+                continue
+            if any(term in feature for term in ["fault", "malfunction", "stuck", "diagnostic"]):
+                return True
+            if any(term in value_text for term in ["fault", "suspected_fault", "malfunction", "stuck", "failed"]):
+                return True
+            if isinstance(value, (int, float)) and ("health" in feature or "score" in feature) and value <= 0.4:
+                return True
+        return False
+
+    def _is_large_load_outlier(self, risk_score: float, evidence: list[dict]) -> bool:
+        if risk_score < 75:
+            return False
+        for item in evidence:
+            feature = str(item.get("feature", "")).lower()
+            value = item.get("value")
+            if not isinstance(value, (int, float)):
+                continue
+            if any(term in feature for term in ["load", "energy", "demand"]) and abs(value) >= 50:
+                return True
+        return False
+
+    def _risk_level_from_score(self, score: float) -> str:
+        if score >= 85:
+            return "CRITICAL"
+        if score >= 65:
+            return "HIGH"
+        if score >= 45:
+            return "MEDIUM"
+        return "LOW"
 
     def _no_data(self, intent: str, answer: str) -> CopilotAnswerOut:
         return CopilotAnswerOut(
@@ -672,6 +870,7 @@ class TelemetryRepository:
         )
 
     def _to_anomaly_out(self, anomaly: AnomalyPrediction) -> AnomalyOut:
+        guardrail = self._guardrail_for_prediction(anomaly)
         return AnomalyOut(
             id=anomaly.id,
             consumer_id=anomaly.consumer_id,
@@ -683,9 +882,28 @@ class TelemetryRepository:
             evidence=anomaly.evidence or [],
             model_version=anomaly.model_version,
             created_at=anomaly.created_at,
+            case_type=guardrail.case_type,
+            raw_risk_score=guardrail.raw_risk_score,
+            adjusted_risk_score=guardrail.adjusted_risk_score,
+            outlier_flags=guardrail.outlier_flags,
+            allocation_confidence=guardrail.allocation_confidence,
+            attribution_status=guardrail.attribution_status,
+            recommendation=guardrail.recommendation,
+            risk_adjustment_reason=guardrail.risk_adjustment_reason,
         )
 
     def _to_case_out(self, case: InvestigationCase) -> InvestigationCaseOut:
+        anomaly = self.db.scalar(select(AnomalyPrediction).where(AnomalyPrediction.id == case.anomaly_id))
+        if anomaly is not None:
+            guardrail = self._guardrail_for_prediction(anomaly)
+        else:
+            guardrail = self._guardrail_context(
+                risk_score=case.risk_score,
+                risk_level=case.priority,
+                predicted_cause=case.predicted_cause,
+                confidence=1.0,
+                evidence=[],
+            )
         return InvestigationCaseOut(
             id=case.id,
             case_id=case.case_id,
@@ -697,6 +915,14 @@ class TelemetryRepository:
             status=case.status,
             created_at=case.created_at,
             updated_at=case.updated_at,
+            case_type=guardrail.case_type,
+            raw_risk_score=guardrail.raw_risk_score,
+            adjusted_risk_score=guardrail.adjusted_risk_score,
+            outlier_flags=guardrail.outlier_flags,
+            allocation_confidence=guardrail.allocation_confidence,
+            attribution_status=guardrail.attribution_status,
+            recommendation=guardrail.recommendation,
+            risk_adjustment_reason=guardrail.risk_adjustment_reason,
         )
 
     def _to_observation_out(self, observation: FieldObservation) -> FieldObservationOut:

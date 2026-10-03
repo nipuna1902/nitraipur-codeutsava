@@ -39,6 +39,14 @@ class AnomalyOut(BaseModel):
     evidence: list[dict]
     model_version: str
     created_at: datetime
+    case_type: str
+    raw_risk_score: float
+    adjusted_risk_score: float
+    outlier_flags: list[str] = Field(default_factory=list)
+    allocation_confidence: str
+    attribution_status: str
+    recommendation: str
+    risk_adjustment_reason: str
 
 
 class AnomalyQueueOut(BaseModel):
@@ -76,6 +84,14 @@ class InvestigationCaseOut(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+    case_type: str
+    raw_risk_score: float
+    adjusted_risk_score: float
+    outlier_flags: list[str] = Field(default_factory=list)
+    allocation_confidence: str
+    attribution_status: str
+    recommendation: str
+    risk_adjustment_reason: str
 
 
 class InvestigationCaseUpdateIn(BaseModel):

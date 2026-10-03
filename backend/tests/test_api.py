@@ -130,11 +130,17 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(anomalies.status_code, 200)
         self.assertEqual(len(anomalies.json()), 1)
         self.assertEqual(anomalies.json()[0]["consumer_id"], "C031")
+        self.assertEqual(anomalies.json()[0]["raw_risk_score"], 91.0)
+        self.assertLess(anomalies.json()[0]["adjusted_risk_score"], anomalies.json()[0]["raw_risk_score"])
+        self.assertEqual(anomalies.json()[0]["case_type"], "AGGREGATE_REVIEW")
 
         cases = self.client.get("/investigations")
         self.assertEqual(cases.status_code, 200)
         self.assertEqual(len(cases.json()), 1)
         self.assertEqual(cases.json()[0]["status"], "AI_FLAGGED")
+        self.assertEqual(cases.json()[0]["allocation_confidence"], "UNKNOWN")
+        self.assertEqual(cases.json()[0]["attribution_status"], "AGGREGATE_ONLY")
+        self.assertIn("AGGREGATE_ATTRIBUTION", cases.json()[0]["outlier_flags"])
 
     def test_consumer_analysis_and_voice_use_ml_prediction(self):
         self.client.post(
@@ -186,6 +192,73 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(queue.json()["limit"], 1)
         self.assertEqual(queue.json()["returned"], 1)
         self.assertEqual(len(queue.json()["items"]), 1)
+
+    def test_high_risk_unknown_aggregate_row_creates_aggregate_review_case(self):
+        self._create_prediction("C092", risk_level="CRITICAL", risk_score=96.0)
+
+        case = self.client.get("/investigations").json()[0]
+        self.assertEqual(case["case_type"], "AGGREGATE_REVIEW")
+        self.assertEqual(case["raw_risk_score"], 96.0)
+        self.assertLess(case["adjusted_risk_score"], 96.0)
+        self.assertEqual(case["allocation_confidence"], "UNKNOWN")
+        self.assertEqual(case["attribution_status"], "AGGREGATE_ONLY")
+        self.assertIn("Field verification needed", case["recommendation"])
+
+    def test_high_confidence_single_building_case_remains_standard(self):
+        self._create_prediction(
+            "C093",
+            risk_level="HIGH",
+            risk_score=76.0,
+            evidence=[
+                {"feature": "allocation_confidence", "value": "HIGH", "direction": "context"},
+                {"feature": "attribution_status", "value": "SINGLE_BUILDING", "direction": "context"},
+                {"feature": "recent_vs_hist_drop_pct", "value": 42, "direction": "supports_anomaly"},
+            ],
+        )
+
+        case = self.client.get("/investigations").json()[0]
+        self.assertEqual(case["case_type"], "STANDARD")
+        self.assertEqual(case["raw_risk_score"], 76.0)
+        self.assertEqual(case["adjusted_risk_score"], 76.0)
+        self.assertEqual(case["allocation_confidence"], "HIGH")
+        self.assertEqual(case["attribution_status"], "SINGLE_BUILDING")
+
+    def test_communication_heavy_anomaly_avoids_direct_theft_wording(self):
+        self._create_prediction(
+            "C094",
+            risk_level="HIGH",
+            risk_score=82.0,
+            predicted_cause="THEFT_TAMPERING",
+            evidence=[
+                {"feature": "allocation_confidence", "value": "HIGH", "direction": "context"},
+                {"feature": "attribution_status", "value": "SINGLE_BUILDING", "direction": "context"},
+                {"feature": "communication_health_score", "value": 0.2, "direction": "supports_anomaly"},
+            ],
+        )
+
+        anomaly = self.client.get("/anomalies").json()[0]
+        self.assertEqual(anomaly["predicted_cause"], "THEFT_TAMPERING")
+        self.assertIn("COMMUNICATION_HEAVY", anomaly["outlier_flags"])
+        self.assertIn("communication health", anomaly["recommendation"])
+        self.assertNotIn("Theft detected", anomaly["recommendation"])
+
+    def test_meter_fault_like_anomaly_is_separated_from_theft_escalation(self):
+        self._create_prediction(
+            "C095",
+            risk_level="HIGH",
+            risk_score=80.0,
+            predicted_cause="THEFT_TAMPERING",
+            evidence=[
+                {"feature": "allocation_confidence", "value": "HIGH", "direction": "context"},
+                {"feature": "attribution_status", "value": "SINGLE_BUILDING", "direction": "context"},
+                {"feature": "meter_health_score", "value": 0.25, "direction": "supports_anomaly"},
+            ],
+        )
+
+        anomaly = self.client.get("/anomalies").json()[0]
+        self.assertIn("METER_FAULT_LIKE", anomaly["outlier_flags"])
+        self.assertIn("meter-fault review", anomaly["recommendation"])
+        self.assertLess(anomaly["adjusted_risk_score"], anomaly["raw_risk_score"])
 
     def test_copilot_answers_dashboard_and_top_risk_questions(self):
         self._create_prediction("C101", risk_level="CRITICAL", risk_score=94.0)
@@ -326,7 +399,14 @@ class BackendApiTest(unittest.TestCase):
         bypass = [item for item in detail["checklist"] if item["item_id"] == "bypass_checked"][0]
         self.assertEqual(bypass["status"], "DONE")
 
-    def _create_prediction(self, consumer_id: str, risk_level: str = "CRITICAL", risk_score: float = 91.0):
+    def _create_prediction(
+        self,
+        consumer_id: str,
+        risk_level: str = "CRITICAL",
+        risk_score: float = 91.0,
+        predicted_cause: str = "THEFT_TAMPERING",
+        evidence: list[dict] | None = None,
+    ):
         return self.client.post(
             "/ml/predictions",
             json={
@@ -337,11 +417,11 @@ class BackendApiTest(unittest.TestCase):
                         "consumer_id": consumer_id,
                         "risk_score": risk_score,
                         "risk_level": risk_level,
-                        "predicted_cause": "THEFT_TAMPERING",
+                        "predicted_cause": predicted_cause,
                         "confidence": risk_score / 100.0,
                         "anomaly_score": risk_score / 100.0,
                         "model_version": "xgboost_ranker_v1",
-                        "evidence": [
+                        "evidence": evidence if evidence is not None else [
                             {
                                 "feature": "recent_vs_hist_drop_pct",
                                 "value": 60,

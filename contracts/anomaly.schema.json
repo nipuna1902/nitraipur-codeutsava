@@ -3,15 +3,44 @@
   "$id": "https://electron.local/contracts/anomaly.schema.json",
   "title": "Anomaly",
   "type": "object",
-  "required": ["consumer_id", "timestamp", "anomaly_score", "risk_score", "predicted_cause"],
+  "required": [
+    "id",
+    "consumer_id",
+    "anomaly_score",
+    "risk_score",
+    "risk_level",
+    "predicted_cause",
+    "confidence",
+    "evidence",
+    "model_version",
+    "created_at",
+    "case_type",
+    "raw_risk_score",
+    "adjusted_risk_score",
+    "outlier_flags",
+    "allocation_confidence",
+    "attribution_status",
+    "recommendation",
+    "risk_adjustment_reason"
+  ],
   "properties": {
     "id": { "type": "string" },
     "consumer_id": { "type": "string" },
     "timestamp": { "type": "string", "format": "date-time" },
+    "created_at": { "type": "string", "format": "date-time" },
     "anomaly_score": { "type": "number" },
     "risk_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "risk_level": { "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL", "UNCERTAIN"] },
     "predicted_cause": { "enum": ["NORMAL", "THEFT_TAMPERING", "METER_MALFUNCTION", "COMMUNICATION_FAILURE", "LEGITIMATE_ABNORMAL_CONSUMPTION", "UNCERTAIN"] },
     "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "case_type": { "enum": ["STANDARD", "AGGREGATE_REVIEW"] },
+    "raw_risk_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "adjusted_risk_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "outlier_flags": { "type": "array", "items": { "type": "string" } },
+    "allocation_confidence": { "enum": ["UNKNOWN", "LOW", "MEDIUM", "HIGH"] },
+    "attribution_status": { "enum": ["AGGREGATE_ONLY", "SINGLE_BUILDING", "DIRECT_METER", "UNKNOWN"] },
+    "recommendation": { "type": "string" },
+    "risk_adjustment_reason": { "type": "string" },
     "personal_deviation": { "type": "number" },
     "peer_deviation": { "type": "number" },
     "persistence_score": { "type": "number" },
@@ -19,7 +48,19 @@
     "communication_health_score": { "type": "number" },
     "transformer_loss_score": { "type": "number" },
     "cluster_score": { "type": "number" },
-    "evidence": { "type": "array", "items": { "type": "string" } },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["feature", "direction"],
+        "properties": {
+          "feature": { "type": "string" },
+          "value": {},
+          "direction": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
     "model_version": { "type": "string" }
   },
   "additionalProperties": false
