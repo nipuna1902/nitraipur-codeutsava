@@ -2,33 +2,33 @@
   "name": "electron-frontend",
   "version": "0.1.0",
   "private": true,
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start", "typecheck": "tsc --noEmit", "test": "tsx --test lib/grid.test.ts" },
-  "dependencies": { "@react-three/drei": "^10.0.0", "@react-three/fiber": "^9.0.0", "next": "^15.5.0", "react": "^19.1.0", "react-dom": "^19.1.0", "three": "^0.180.0", "lucide-react": "^0.468.0" },
-  "devDependencies": { "@tailwindcss/postcss": "^4.1.0", "tailwindcss": "^4.1.0", "@types/node": "^22.0.0", "@types/react": "^19.0.0", "@types/react-dom": "^19.0.0", "@types/three": "^0.180.0", "typescript": "^5.8.0", "tsx": "^4.20.0", "@playwright/test": "^1.55.0" }
-  "name": "electron-dashboard",
-  "version": "0.1.0",
-  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test lib/grid.test.ts"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
-    "lucide-react": "1.51.0",
-    "next": "16.3.8",
-    "postcss": "^8.5.23",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
+    "@react-three/drei": "^10.0.0",
+    "@react-three/fiber": "^9.0.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "recharts": "^3.10.1",
-    "tailwindcss": "^4.1.17"
+    "three": "^0.180.0"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "typescript": "^6.0.3"
+    "@playwright/test": "^1.55.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.180.0",
+    "postcss": "^8.5.0",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
   }
 }

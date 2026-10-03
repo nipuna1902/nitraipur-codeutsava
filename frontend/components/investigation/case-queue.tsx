@@ -3,7 +3,7 @@ import type { Anomaly, InvestigationCase } from "@/types/dashboard";
 
 type CaseQueueProps = {
   cases: InvestigationCase[];
-  anomalies?: unknown[];
+  anomalies?: Anomaly[];
 };
 
 const priorityClass: Record<string, string> = {
@@ -20,7 +20,7 @@ function priorityFromScore(score: number) {
   return "LOW";
 }
 
-export function CaseQueue({ cases, anomalies }: CaseQueueProps) {
+export function CaseQueue({ cases, anomalies = [] }: CaseQueueProps) {
   const anomalyById = new Map(anomalies.map((anomaly) => [anomaly.id, anomaly]));
   const anomalyByConsumer = new Map(anomalies.map((anomaly) => [anomaly.consumer_id, anomaly]));
   const fallbackCases = cases.length
