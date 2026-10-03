@@ -12,6 +12,7 @@ build/
 .venv/
 venv/
 *.log
+*.tsbuildinfo
 data/raw/*
 data/processed/*
 data/synthetic/*

@@ -1,12 +1,34 @@
 from __future__ import annotations
 
 import asyncio
+import json
+from pathlib import Path
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
+from backend.app.schemas.anomaly import (
+    AnomalyOut,
+    AnomalyQueueOut,
+    CaseResolutionIn,
+    CaseResolutionOut,
+    ChecklistItemOut,
+    ChecklistUpdateIn,
+    ConsumerAnalysisOut,
+    CopilotAnswerOut,
+    CopilotAskIn,
+    FieldObservationIn,
+    FieldObservationOut,
+    InvestigationCaseDetailOut,
+    InvestigationCaseOut,
+    InvestigationCaseUpdateIn,
+    MlPredictionBatchIn,
+    MlPredictionIngestResponse,
+)
 from backend.app.schemas.grid import ConsumerSummary, TransformerSummary
 from backend.app.schemas.telemetry import TelemetryBatchIn, TelemetryIngestResponse, TelemetryReadingOut
 from backend.app.schemas.voice import (
@@ -22,6 +44,9 @@ from backend.app.services.repository import TelemetryRepository
 from backend.app.websocket.manager import ws_manager
 
 router = APIRouter()
+
+BASE_DIR = Path(__file__).resolve().parents[3]
+PREDICTIONS_SAMPLE_PATH = BASE_DIR / "ml" / "evaluation" / "predictions_sample.json"
 
 
 @router.get("/health")
@@ -58,9 +83,9 @@ def dashboard_summary(repository: TelemetryRepository = Depends(get_repository))
     return {
         "total_consumers": status["consumers"],
         "telemetry_readings": status["telemetry_readings"],
-        "active_anomalies": 0,
-        "high_risk_cases": 0,
-        "active_investigations": 0,
+        "active_anomalies": status["active_anomalies"],
+        "high_risk_cases": status["high_risk_cases"],
+        "active_investigations": status["active_investigations"],
         "latest_timestamp": status["latest_timestamp"],
     }
 
@@ -91,6 +116,147 @@ def get_consumer_history(
     if not history:
         raise HTTPException(status_code=404, detail="Consumer not found")
     return history
+
+
+@router.get("/consumers/{consumer_id}/analysis", response_model=ConsumerAnalysisOut)
+def get_consumer_analysis(
+    consumer_id: str,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> ConsumerAnalysisOut:
+    return repository.consumer_analysis(consumer_id)
+
+
+@router.post("/ml/predictions", response_model=MlPredictionIngestResponse)
+def ingest_ml_predictions(
+    payload: MlPredictionBatchIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> MlPredictionIngestResponse:
+    predictions, cases = repository.ingest_predictions(payload.predictions)
+    return MlPredictionIngestResponse(
+        accepted=len(predictions),
+        cases_created=len(cases),
+        production_model=payload.production_model,
+        model_version=payload.model_version,
+    )
+
+
+@router.post("/ml/predictions/load-sample", response_model=MlPredictionIngestResponse)
+def load_ml_prediction_sample(
+    repository: TelemetryRepository = Depends(get_repository),
+) -> MlPredictionIngestResponse:
+    if not PREDICTIONS_SAMPLE_PATH.exists():
+        raise HTTPException(status_code=404, detail="ML predictions sample file not found")
+    with PREDICTIONS_SAMPLE_PATH.open("r", encoding="utf-8") as f:
+        payload = MlPredictionBatchIn.model_validate(json.load(f))
+    predictions, cases = repository.ingest_predictions(payload.predictions)
+    return MlPredictionIngestResponse(
+        accepted=len(predictions),
+        cases_created=len(cases),
+        production_model=payload.production_model,
+        model_version=payload.model_version,
+    )
+
+
+@router.get("/anomalies", response_model=list[AnomalyOut])
+def list_anomalies(
+    limit: int = 100,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> list[AnomalyOut]:
+    return repository.list_anomalies(limit=max(1, min(limit, 1000)))
+
+
+@router.get("/anomalies/queue", response_model=AnomalyQueueOut)
+def get_anomaly_queue(
+    limit: int = 100,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> AnomalyQueueOut:
+    return repository.anomaly_queue(limit=max(1, min(limit, 1000)))
+
+
+@router.get("/anomalies/{anomaly_id}", response_model=AnomalyOut)
+def get_anomaly(
+    anomaly_id: str,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> AnomalyOut:
+    anomaly = repository.get_anomaly(anomaly_id)
+    if anomaly is None:
+        raise HTTPException(status_code=404, detail="Anomaly not found")
+    return anomaly
+
+
+@router.post("/copilot/ask", response_model=CopilotAnswerOut)
+def ask_copilot(
+    payload: CopilotAskIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> CopilotAnswerOut:
+    return repository.answer_question(payload)
+
+
+@router.get("/investigations", response_model=list[InvestigationCaseOut])
+def list_investigations(
+    limit: int = 100,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> list[InvestigationCaseOut]:
+    return repository.list_investigation_cases(limit=max(1, min(limit, 1000)))
+
+
+@router.get("/investigations/{case_id}", response_model=InvestigationCaseDetailOut)
+def get_investigation(
+    case_id: str,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> InvestigationCaseDetailOut:
+    case = repository.get_investigation_case(case_id)
+    if case is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return case
+
+
+@router.patch("/investigations/{case_id}", response_model=InvestigationCaseOut)
+def update_investigation(
+    case_id: str,
+    payload: InvestigationCaseUpdateIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> InvestigationCaseOut:
+    case = repository.update_investigation_case(case_id, payload)
+    if case is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return case
+
+
+@router.post("/investigations/{case_id}/observations", response_model=FieldObservationOut)
+def add_investigation_observation(
+    case_id: str,
+    payload: FieldObservationIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> FieldObservationOut:
+    observation = repository.add_field_observation(case_id, payload)
+    if observation is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return observation
+
+
+@router.patch("/investigations/{case_id}/checklist", response_model=ChecklistItemOut)
+def update_investigation_checklist(
+    case_id: str,
+    payload: ChecklistUpdateIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> ChecklistItemOut:
+    item = repository.update_checklist_item(case_id, payload)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return item
+
+
+@router.post("/investigations/{case_id}/resolve", response_model=CaseResolutionOut)
+def resolve_investigation(
+    case_id: str,
+    payload: CaseResolutionIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> CaseResolutionOut:
+    resolution = repository.resolve_case(case_id, payload)
+    if resolution is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return resolution
 
 
 @router.get("/transformers", response_model=list[TransformerSummary])
@@ -149,15 +315,25 @@ def voice_consumer_summary(
 
 
 @router.post("/voice/tools/anomaly-evidence", response_model=VoiceToolResponse)
-def voice_anomaly_evidence(payload: ConsumerToolRequest) -> VoiceToolResponse:
+def voice_anomaly_evidence(
+    payload: ConsumerToolRequest,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> VoiceToolResponse:
+    analysis = repository.consumer_analysis(payload.consumer_id)
+    if not analysis.data_available or analysis.latest_anomaly is None:
+        return VoiceToolResponse(
+            data_available=False,
+            message="Anomaly evidence is unavailable because no ML prediction exists for this consumer.",
+            payload={
+                "consumer_id": payload.consumer_id,
+                "predicted_cause": "UNCERTAIN",
+                "evidence": [],
+            },
+        )
     return VoiceToolResponse(
-        data_available=False,
-        message="Anomaly evidence is unavailable because the ML anomaly layer is not integrated yet.",
-        payload={
-            "consumer_id": payload.consumer_id,
-            "predicted_cause": "UNCERTAIN",
-            "evidence": [],
-        },
+        data_available=True,
+        message="Anomaly evidence retrieved from ML prediction records.",
+        payload=analysis.model_dump(),
     )
 
 
@@ -181,29 +357,56 @@ def voice_transformer_summary(
 
 
 @router.post("/voice/tools/field-observation", response_model=VoiceToolResponse)
-def voice_field_observation(payload: FieldObservationRequest) -> VoiceToolResponse:
+def voice_field_observation(
+    payload: FieldObservationRequest,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> VoiceToolResponse:
+    observation = repository.add_field_observation(
+        payload.case_id,
+        FieldObservationIn(
+            source=payload.source,
+            original_text=payload.observation,
+            normalized_evidence={"raw_observation": payload.observation},
+            language=payload.language,
+            confidence=None,
+        ),
+    )
+    if observation is None:
+        return VoiceToolResponse(
+            data_available=False,
+            message="Field observation could not be stored because the case does not exist.",
+            payload={"case_id": payload.case_id},
+        )
     return VoiceToolResponse(
-        data_available=False,
-        message="Field observation was accepted for contract testing only. Persistent case workflow is not implemented yet.",
+        data_available=True,
+        message="Field observation stored in the investigation case.",
         payload={
-            "case_id": payload.case_id,
-            "observation": payload.observation,
-            "language": payload.language,
-            "source": payload.source,
+            "observation": observation.model_dump(),
             "requires_confirmation": True,
         },
     )
 
 
 @router.post("/voice/tools/checklist-update", response_model=VoiceToolResponse)
-def voice_checklist_update(payload: ChecklistUpdateRequest) -> VoiceToolResponse:
+def voice_checklist_update(
+    payload: ChecklistUpdateRequest,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> VoiceToolResponse:
+    item = repository.update_checklist_item(
+        payload.case_id,
+        ChecklistUpdateIn(item_id=payload.item_id, status=payload.status),
+    )
+    if item is None:
+        return VoiceToolResponse(
+            data_available=False,
+            message="Checklist update could not be stored because the case does not exist.",
+            payload={"case_id": payload.case_id, "item_id": payload.item_id},
+        )
     return VoiceToolResponse(
-        data_available=False,
-        message="Checklist update was accepted for contract testing only. Persistent checklist workflow is not implemented yet.",
+        data_available=True,
+        message="Checklist update stored in the investigation case.",
         payload={
-            "case_id": payload.case_id,
-            "item_id": payload.item_id,
-            "status": payload.status,
+            "checklist_item": item.model_dump(),
             "requires_confirmation": True,
         },
     )

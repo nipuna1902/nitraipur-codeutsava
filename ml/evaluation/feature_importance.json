@@ -1,102 +1,102 @@
 [
   {
     "feature": "std_consumption",
-    "importance": 0.19009999930858612
+    "importance": 0.18719999492168427
   },
   {
     "feature": "last_30d_mean",
-    "importance": 0.09130000323057175
-  },
-  {
-    "feature": "max_consumption",
-    "importance": 0.061000000685453415
+    "importance": 0.08820000290870667
   },
   {
     "feature": "recent_vs_hist_drop_pct",
-    "importance": 0.0608999989926815
+    "importance": 0.0771000012755394
   },
   {
-    "feature": "missing_reading_ratio",
-    "importance": 0.053199999034404755
+    "feature": "max_consumption",
+    "importance": 0.06350000202655792
   },
   {
     "feature": "cv",
-    "importance": 0.03790000081062317
-  },
-  {
-    "feature": "iqr_consumption",
-    "importance": 0.03620000183582306
-  },
-  {
-    "feature": "isolation_forest_anomaly_score",
-    "importance": 0.0340999998152256
-  },
-  {
-    "feature": "recent_vs_hist_ratio",
-    "importance": 0.03319999948143959
+    "importance": 0.03999999910593033
   },
   {
     "feature": "flatline_ratio",
-    "importance": 0.03280000016093254
+    "importance": 0.039000000804662704
+  },
+  {
+    "feature": "isolation_forest_anomaly_score",
+    "importance": 0.03709999844431877
   },
   {
     "feature": "zero_days_ratio",
-    "importance": 0.032600000500679016
+    "importance": 0.03420000150799751
   },
   {
-    "feature": "load_factor",
-    "importance": 0.0284000001847744
+    "feature": "iqr_consumption",
+    "importance": 0.03350000083446503
   },
   {
-    "feature": "last_14d_mean",
-    "importance": 0.027799999341368675
+    "feature": "recent_vs_hist_ratio",
+    "importance": 0.0333000011742115
   },
   {
     "feature": "last_7d_mean",
-    "importance": 0.026599999517202377
-  },
-  {
-    "feature": "historical_mean",
-    "importance": 0.02630000002682209
-  },
-  {
-    "feature": "kurtosis",
-    "importance": 0.026100000366568565
+    "importance": 0.030300000682473183
   },
   {
     "feature": "sustained_low_streak",
-    "importance": 0.026100000366568565
+    "importance": 0.029600000008940697
   },
   {
-    "feature": "max_daily_drop",
-    "importance": 0.02500000037252903
-  },
-  {
-    "feature": "rolling_volatility_change",
-    "importance": 0.023399999365210533
-  },
-  {
-    "feature": "median_consumption",
-    "importance": 0.022600000724196434
-  },
-  {
-    "feature": "max_daily_spike",
-    "importance": 0.02239999920129776
-  },
-  {
-    "feature": "skewness",
-    "importance": 0.021299999207258224
-  },
-  {
-    "feature": "min_consumption",
-    "importance": 0.021199999377131462
+    "feature": "historical_mean",
+    "importance": 0.028999999165534973
   },
   {
     "feature": "longest_zero_streak",
-    "importance": 0.0210999995470047
+    "importance": 0.027799999341368675
+  },
+  {
+    "feature": "max_daily_drop",
+    "importance": 0.027499999850988388
+  },
+  {
+    "feature": "load_factor",
+    "importance": 0.027000000700354576
+  },
+  {
+    "feature": "kurtosis",
+    "importance": 0.026900000870227814
+  },
+  {
+    "feature": "min_consumption",
+    "importance": 0.026799999177455902
+  },
+  {
+    "feature": "median_consumption",
+    "importance": 0.02630000002682209
+  },
+  {
+    "feature": "last_14d_mean",
+    "importance": 0.025100000202655792
+  },
+  {
+    "feature": "rolling_volatility_change",
+    "importance": 0.025100000202655792
+  },
+  {
+    "feature": "skewness",
+    "importance": 0.02329999953508377
+  },
+  {
+    "feature": "max_daily_spike",
+    "importance": 0.023000000044703484
   },
   {
     "feature": "mean_consumption",
-    "importance": 0.018400000408291817
+    "importance": 0.01899999938905239
+  },
+  {
+    "feature": "missing_reading_ratio",
+    "importance": 0.0
   }
 ]

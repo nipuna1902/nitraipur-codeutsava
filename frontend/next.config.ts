@@ -5,3 +5,9 @@ const config: NextConfig = {
   },
 };
 export default config;
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true
+};
+
+export default nextConfig;

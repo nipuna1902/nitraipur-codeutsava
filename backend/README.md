@@ -19,10 +19,23 @@ http://127.0.0.1:8000/docs
 - `GET /health`
 - `POST /telemetry/readings`
 - `GET /telemetry/readings`
+- `POST /ml/predictions`
+- `POST /ml/predictions/load-sample`
+- `GET /anomalies`
+- `GET /anomalies/queue`
+- `GET /anomalies/{anomaly_id}`
+- `POST /copilot/ask`
 - `GET /dashboard/summary`
 - `GET /consumers`
 - `GET /consumers/{consumer_id}`
 - `GET /consumers/{consumer_id}/history`
+- `GET /consumers/{consumer_id}/analysis`
+- `GET /investigations`
+- `GET /investigations/{case_id}`
+- `PATCH /investigations/{case_id}`
+- `POST /investigations/{case_id}/observations`
+- `PATCH /investigations/{case_id}/checklist`
+- `POST /investigations/{case_id}/resolve`
 - `GET /transformers`
 - `GET /transformers/{transformer_id}`
 - `GET /simulation/status`
@@ -57,7 +70,7 @@ Invoke-RestMethod `
   -ContentType "application/json"
 ```
 
-Get anomaly evidence placeholder:
+Get anomaly evidence:
 
 ```powershell
 Invoke-RestMethod `
@@ -67,7 +80,151 @@ Invoke-RestMethod `
   -ContentType "application/json"
 ```
 
-Until ML and investigation workflow are integrated, unavailable evidence returns `data_available=false` and preserves `UNCERTAIN` instead of inventing facts.
+Before ML predictions are loaded, unavailable evidence returns `data_available=false` and preserves `UNCERTAIN` instead of inventing facts. After loading predictions, this endpoint returns structured ML evidence.
+
+## ML Prediction Testing
+
+Load the generated prediction sample from `ml/evaluation/predictions_sample.json`:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/ml/predictions/load-sample `
+  -Method POST
+```
+
+Then inspect:
+
+- `GET /dashboard/summary`
+- `GET /anomalies`
+- `GET /investigations`
+- `GET /consumers/{consumer_id}/analysis`
+- `POST /voice/tools/anomaly-evidence`
+
+Only `HIGH` and `CRITICAL` risk predictions create investigation cases automatically.
+
+To verify anomaly list size clearly, use:
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/anomalies/queue?limit=100" `
+  -Method GET
+```
+
+This returns `total`, `limit`, `returned`, and `items`.
+
+## Structured Copilot Questions
+
+`POST /copilot/ask` answers from structured backend data only. It does not call an LLM and does not invent missing values.
+
+Grid status:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"What is the current grid status?"}' `
+  -ContentType "application/json"
+```
+
+Top risky consumers:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"Show me the top risky consumers","limit":5}' `
+  -ContentType "application/json"
+```
+
+Consumer explanation:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"Why was this consumer flagged?","consumer_id":"CONSUMER_ID_HERE"}' `
+  -ContentType "application/json"
+```
+
+Case checklist:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"What should the field team inspect?","case_id":"CASE_ID_HERE"}' `
+  -ContentType "application/json"
+```
+
+Transformer summary:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"Give transformer summary","transformer_id":"T01"}' `
+  -ContentType "application/json"
+```
+
+## Investigation Workflow Testing
+
+After loading ML predictions, get a case:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations `
+  -Method GET
+```
+
+Copy a `case_id`, then fetch full case context:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE `
+  -Method GET
+```
+
+Update status:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE `
+  -Method PATCH `
+  -Body '{"status":"UNDER_INVESTIGATION"}' `
+  -ContentType "application/json"
+```
+
+Add a field observation:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE/observations `
+  -Method POST `
+  -Body '{"investigator_id":"FIELD_01","source":"TEXT","original_text":"Seal intact but connected load is higher than declared.","normalized_evidence":{"seal_status":"INTACT","load_mismatch":true},"language":"EN","confidence":0.9}' `
+  -ContentType "application/json"
+```
+
+Update checklist:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE/checklist `
+  -Method PATCH `
+  -Body '{"item_id":"seal_inspected","status":"DONE"}' `
+  -ContentType "application/json"
+```
+
+Resolve the case:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE/resolve `
+  -Method POST `
+  -Body '{"actual_outcome":"METER_MALFUNCTION","resolution_notes":"Meter display intermittently failed during site visit.","resolved_by":"FIELD_01"}' `
+  -ContentType "application/json"
+```
+
+The resolution stores `predicted_cause` and `actual_outcome` separately so Electron can later evaluate model predictions against field truth.
 
 ## Current Storage
 
@@ -91,7 +248,6 @@ Tables are created on startup for the prototype. A migration tool should be adde
 ## Not Implemented Yet
 
 - authentication
-- ML anomaly scoring
-- investigation workflow
+- live ML model inference from telemetry
 - WebSockets
 - ElevenLabs, OpenAI, MQTT, or ThingsBoard integrations
