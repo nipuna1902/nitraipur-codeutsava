@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+import asyncio
 import json
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import uuid4
+
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
 from backend.app.schemas.anomaly import (
@@ -35,6 +41,7 @@ from backend.app.schemas.voice import (
     VoiceToolResponse,
 )
 from backend.app.services.repository import TelemetryRepository
+from backend.app.websocket.manager import ws_manager
 
 router = APIRouter()
 
@@ -403,3 +410,12 @@ def voice_checklist_update(
             "requires_confirmation": True,
         },
     )
+
+@router.websocket("/ws/telemetry")
+async def websocket_telemetry_endpoint(websocket: WebSocket):
+    await ws_manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)

@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+export default function Home() { redirect("/simulator"); }
 import Link from "next/link";
 import { Activity, BrainCircuit, RadioTower, Route, ShieldAlert, Zap } from "lucide-react";
 import { AppNavigation } from "@/components/dashboard/app-navigation";
