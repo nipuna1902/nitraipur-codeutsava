@@ -1,9 +1,9 @@
 import { ClipboardCheck, MapPin } from "lucide-react";
-import type { Anomaly, InvestigationCase } from "@/types/dashboard";
+import type { InvestigationCase } from "@/types/dashboard";
 
 type CaseQueueProps = {
   cases: InvestigationCase[];
-  anomalies: Anomaly[];
+  anomalies?: unknown[];
 };
 
 const priorityClass: Record<string, string> = {
@@ -14,17 +14,6 @@ const priorityClass: Record<string, string> = {
 };
 
 export function CaseQueue({ cases, anomalies }: CaseQueueProps) {
-  const fallbackCases = cases.length
-    ? cases
-    : anomalies.slice(0, 4).map((anomaly, index) => ({
-        case_id: `CASE-${index + 1}`,
-        anomaly_id: anomaly.id,
-        consumer_id: anomaly.consumer_id,
-        priority: anomaly.risk_score > 80 ? "CRITICAL" : anomaly.risk_score > 65 ? "HIGH" : "MEDIUM",
-        status: "EVIDENCE_REVIEW",
-        assigned_to: index === 0 ? "Team Alpha" : null
-      }));
-
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-3">
@@ -37,7 +26,7 @@ export function CaseQueue({ cases, anomalies }: CaseQueueProps) {
         </div>
       </div>
       <div className="mt-6 space-y-3">
-        {fallbackCases.map((item) => (
+        {cases.length ? cases.map((item) => (
           <article key={`${item.case_id}-${item.consumer_id}`} className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -55,7 +44,12 @@ export function CaseQueue({ cases, anomalies }: CaseQueueProps) {
               <span className="text-slate-500">{item.assigned_to ?? "Unassigned"}</span>
             </div>
           </article>
-        ))}
+        )) : (
+          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+            <p className="font-medium text-slate-800">No investigation cases returned</p>
+            <p className="mt-1 text-sm text-slate-500">Use Load ML Sample or backend case creation to populate this queue.</p>
+          </div>
+        )}
       </div>
     </section>
   );

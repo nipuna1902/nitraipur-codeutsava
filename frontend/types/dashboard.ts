@@ -66,7 +66,7 @@ export type Transformer = {
 };
 
 export type DashboardData = {
-  source: "LIVE API" | "DEMO DATA";
+  source: "LIVE API" | "BACKEND OFFLINE";
   summary: DashboardSummary;
   anomalies: Anomaly[];
   consumers: Consumer[];
