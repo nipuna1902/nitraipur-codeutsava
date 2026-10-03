@@ -29,6 +29,11 @@ http://127.0.0.1:8000/docs
 - `GET /consumers/{consumer_id}/history`
 - `GET /consumers/{consumer_id}/analysis`
 - `GET /investigations`
+- `GET /investigations/{case_id}`
+- `PATCH /investigations/{case_id}`
+- `POST /investigations/{case_id}/observations`
+- `PATCH /investigations/{case_id}/checklist`
+- `POST /investigations/{case_id}/resolve`
 - `GET /transformers`
 - `GET /transformers/{transformer_id}`
 - `GET /simulation/status`
@@ -95,6 +100,66 @@ Then inspect:
 
 Only `HIGH` and `CRITICAL` risk predictions create investigation cases automatically.
 
+## Investigation Workflow Testing
+
+After loading ML predictions, get a case:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations `
+  -Method GET
+```
+
+Copy a `case_id`, then fetch full case context:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE `
+  -Method GET
+```
+
+Update status:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE `
+  -Method PATCH `
+  -Body '{"status":"UNDER_INVESTIGATION"}' `
+  -ContentType "application/json"
+```
+
+Add a field observation:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE/observations `
+  -Method POST `
+  -Body '{"investigator_id":"FIELD_01","source":"TEXT","original_text":"Seal intact but connected load is higher than declared.","normalized_evidence":{"seal_status":"INTACT","load_mismatch":true},"language":"EN","confidence":0.9}' `
+  -ContentType "application/json"
+```
+
+Update checklist:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE/checklist `
+  -Method PATCH `
+  -Body '{"item_id":"seal_inspected","status":"DONE"}' `
+  -ContentType "application/json"
+```
+
+Resolve the case:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/investigations/CASE_ID_HERE/resolve `
+  -Method POST `
+  -Body '{"actual_outcome":"METER_MALFUNCTION","resolution_notes":"Meter display intermittently failed during site visit.","resolved_by":"FIELD_01"}' `
+  -ContentType "application/json"
+```
+
+The resolution stores `predicted_cause` and `actual_outcome` separately so Electron can later evaluate model predictions against field truth.
+
 ## Current Storage
 
 The backend now uses SQLAlchemy models and a repository layer.
@@ -118,6 +183,5 @@ Tables are created on startup for the prototype. A migration tool should be adde
 
 - authentication
 - live ML model inference from telemetry
-- full investigation workflow updates/resolution
 - WebSockets
 - ElevenLabs, OpenAI, MQTT, or ThingsBoard integrations

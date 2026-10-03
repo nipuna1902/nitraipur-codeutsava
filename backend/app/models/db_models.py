@@ -86,3 +86,40 @@ class InvestigationCase(Base):
     status: Mapped[str] = mapped_column(String, default="AI_FLAGGED", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+class FieldObservation(Base):
+    __tablename__ = "field_observations"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    case_id: Mapped[str] = mapped_column(String, ForeignKey("investigation_cases.case_id"), index=True)
+    investigator_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    source: Mapped[str] = mapped_column(String, default="TEXT")
+    original_text: Mapped[str] = mapped_column(String)
+    normalized_evidence: Mapped[dict] = mapped_column(JSON, default=dict)
+    language: Mapped[str] = mapped_column(String, default="EN")
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+class ChecklistItem(Base):
+    __tablename__ = "checklist_items"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    case_id: Mapped[str] = mapped_column(String, ForeignKey("investigation_cases.case_id"), index=True)
+    item_id: Mapped[str] = mapped_column(String, index=True)
+    label: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="PENDING")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+class CaseResolution(Base):
+    __tablename__ = "case_resolutions"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    case_id: Mapped[str] = mapped_column(String, ForeignKey("investigation_cases.case_id"), unique=True, index=True)
+    predicted_cause: Mapped[str] = mapped_column(String)
+    actual_outcome: Mapped[str] = mapped_column(String)
+    resolution_notes: Mapped[str | None] = mapped_column(String, nullable=True)
+    resolved_by: Mapped[str] = mapped_column(String)
+    resolved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

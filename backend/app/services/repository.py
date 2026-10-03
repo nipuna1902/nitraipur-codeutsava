@@ -1,17 +1,34 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from backend.app.models import AnomalyPrediction, Consumer, InvestigationCase, TelemetryReading, Transformer
+from backend.app.models import (
+    AnomalyPrediction,
+    CaseResolution,
+    ChecklistItem,
+    Consumer,
+    FieldObservation,
+    InvestigationCase,
+    TelemetryReading,
+    Transformer,
+)
 from backend.app.schemas.anomaly import (
     AnomalyOut,
+    CaseResolutionIn,
+    CaseResolutionOut,
+    ChecklistItemOut,
+    ChecklistUpdateIn,
     ConsumerAnalysisOut,
+    FieldObservationIn,
+    FieldObservationOut,
+    InvestigationCaseDetailOut,
     InvestigationCaseOut,
+    InvestigationCaseUpdateIn,
     MlPredictionIn,
 )
 from backend.app.schemas.common import CommunicationStatus, MeterStatus, TelemetrySource
@@ -27,6 +44,16 @@ DEFAULT_TRANSFORMERS = {
 }
 
 CASE_CREATING_RISK_LEVELS = {"HIGH", "CRITICAL"}
+
+DEFAULT_CHECKLIST = {
+    "meter_inspected": "Meter physically inspected",
+    "seal_inspected": "Seal inspected",
+    "connected_load_verified": "Connected load verified",
+    "meter_reading_verified": "Meter reading verified",
+    "bypass_checked": "Bypass checked",
+    "physical_anomaly_observed": "Physical anomaly observed",
+    "additional_notes": "Additional notes captured",
+}
 
 
 class TelemetryRepository:
@@ -91,7 +118,7 @@ class TelemetryRepository:
             select(func.count(AnomalyPrediction.id)).where(AnomalyPrediction.risk_level.in_(CASE_CREATING_RISK_LEVELS))
         ) or 0
         active_case_count = self.db.scalar(
-            select(func.count(InvestigationCase.id)).where(InvestigationCase.status != "RESOLVED")
+            select(func.count(InvestigationCase.id)).where(InvestigationCase.status.not_in(["RESOLVED", "DISMISSED"]))
         ) or 0
         return {
             "telemetry_readings": telemetry_count,
@@ -203,6 +230,122 @@ class TelemetryRepository:
         ).all()
         return [self._to_case_out(row) for row in rows]
 
+    def get_investigation_case(self, case_id: str) -> InvestigationCaseDetailOut | None:
+        case = self._get_case_model(case_id)
+        if case is None:
+            return None
+        anomaly = self.db.scalar(select(AnomalyPrediction).where(AnomalyPrediction.id == case.anomaly_id))
+        if anomaly is None:
+            return None
+        self._ensure_checklist(case.case_id)
+        observations = self.db.scalars(
+            select(FieldObservation)
+            .where(FieldObservation.case_id == case.case_id)
+            .order_by(FieldObservation.timestamp.asc())
+        ).all()
+        checklist = self.db.scalars(
+            select(ChecklistItem)
+            .where(ChecklistItem.case_id == case.case_id)
+            .order_by(ChecklistItem.item_id.asc())
+        ).all()
+        resolution = self.db.scalar(select(CaseResolution).where(CaseResolution.case_id == case.case_id))
+        return InvestigationCaseDetailOut(
+            case=self._to_case_out(case),
+            anomaly=self._to_anomaly_out(anomaly),
+            observations=[self._to_observation_out(row) for row in observations],
+            checklist=[self._to_checklist_out(row) for row in checklist],
+            resolution=self._to_resolution_out(resolution) if resolution is not None else None,
+        )
+
+    def update_investigation_case(
+        self, case_id: str, payload: InvestigationCaseUpdateIn
+    ) -> InvestigationCaseOut | None:
+        case = self._get_case_model(case_id)
+        if case is None:
+            return None
+        if payload.status is not None:
+            case.status = payload.status
+        case.updated_at = datetime.now(timezone.utc)
+        self.db.commit()
+        self.db.refresh(case)
+        return self._to_case_out(case)
+
+    def add_field_observation(self, case_id: str, payload: FieldObservationIn) -> FieldObservationOut | None:
+        case = self._get_case_model(case_id)
+        if case is None:
+            return None
+        observation = FieldObservation(
+            id=str(uuid4()),
+            case_id=case.case_id,
+            investigator_id=payload.investigator_id,
+            source=payload.source,
+            original_text=payload.original_text,
+            normalized_evidence=payload.normalized_evidence,
+            language=payload.language,
+            confidence=payload.confidence,
+        )
+        case.status = "UNDER_INVESTIGATION" if case.status == "AI_FLAGGED" else case.status
+        case.updated_at = datetime.now(timezone.utc)
+        self.db.add(observation)
+        self.db.commit()
+        self.db.refresh(observation)
+        return self._to_observation_out(observation)
+
+    def update_checklist_item(self, case_id: str, payload: ChecklistUpdateIn) -> ChecklistItemOut | None:
+        case = self._get_case_model(case_id)
+        if case is None:
+            return None
+        self._ensure_checklist(case.case_id)
+        item = self.db.scalar(
+            select(ChecklistItem)
+            .where(ChecklistItem.case_id == case.case_id)
+            .where(ChecklistItem.item_id == payload.item_id)
+        )
+        if item is None:
+            item = ChecklistItem(
+                id=str(uuid4()),
+                case_id=case.case_id,
+                item_id=payload.item_id,
+                label=payload.item_id.replace("_", " ").title(),
+                status=payload.status,
+            )
+            self.db.add(item)
+        else:
+            item.status = payload.status
+            item.updated_at = datetime.now(timezone.utc)
+        case.status = "UNDER_INVESTIGATION" if case.status == "AI_FLAGGED" else case.status
+        case.updated_at = datetime.now(timezone.utc)
+        self.db.commit()
+        self.db.refresh(item)
+        return self._to_checklist_out(item)
+
+    def resolve_case(self, case_id: str, payload: CaseResolutionIn) -> CaseResolutionOut | None:
+        case = self._get_case_model(case_id)
+        if case is None:
+            return None
+        existing = self.db.scalar(select(CaseResolution).where(CaseResolution.case_id == case.case_id))
+        if existing is None:
+            resolution = CaseResolution(
+                id=str(uuid4()),
+                case_id=case.case_id,
+                predicted_cause=case.predicted_cause,
+                actual_outcome=payload.actual_outcome,
+                resolution_notes=payload.resolution_notes,
+                resolved_by=payload.resolved_by,
+            )
+            self.db.add(resolution)
+        else:
+            resolution = existing
+            resolution.actual_outcome = payload.actual_outcome
+            resolution.resolution_notes = payload.resolution_notes
+            resolution.resolved_by = payload.resolved_by
+            resolution.resolved_at = datetime.now(timezone.utc)
+        case.status = "RESOLVED"
+        case.updated_at = datetime.now(timezone.utc)
+        self.db.commit()
+        self.db.refresh(resolution)
+        return self._to_resolution_out(resolution)
+
     def get_case_for_consumer(self, consumer_id: str) -> InvestigationCaseOut | None:
         case = self.db.scalar(
             select(InvestigationCase)
@@ -232,6 +375,9 @@ class TelemetryRepository:
         )
 
     def reset(self) -> None:
+        self.db.execute(delete(CaseResolution))
+        self.db.execute(delete(ChecklistItem))
+        self.db.execute(delete(FieldObservation))
         self.db.execute(delete(InvestigationCase))
         self.db.execute(delete(AnomalyPrediction))
         self.db.execute(delete(TelemetryReading))
@@ -272,6 +418,26 @@ class TelemetryRepository:
         self.db.flush()
         return consumer
 
+    def _get_case_model(self, case_id: str) -> InvestigationCase | None:
+        return self.db.scalar(select(InvestigationCase).where(InvestigationCase.case_id == case_id))
+
+    def _ensure_checklist(self, case_id: str) -> None:
+        existing = set(
+            self.db.scalars(select(ChecklistItem.item_id).where(ChecklistItem.case_id == case_id)).all()
+        )
+        for item_id, label in DEFAULT_CHECKLIST.items():
+            if item_id not in existing:
+                self.db.add(
+                    ChecklistItem(
+                        id=str(uuid4()),
+                        case_id=case_id,
+                        item_id=item_id,
+                        label=label,
+                        status="PENDING",
+                    )
+                )
+        self.db.flush()
+
     def _create_case_for_prediction(self, prediction: AnomalyPrediction) -> InvestigationCase:
         existing = self.db.scalar(
             select(InvestigationCase)
@@ -292,6 +458,7 @@ class TelemetryRepository:
         )
         self.db.add(case)
         self.db.flush()
+        self._ensure_checklist(case.case_id)
         return case
 
     def _recommended_action(self, risk_level: str) -> str:
@@ -380,4 +547,38 @@ class TelemetryRepository:
             status=case.status,
             created_at=case.created_at,
             updated_at=case.updated_at,
+        )
+
+    def _to_observation_out(self, observation: FieldObservation) -> FieldObservationOut:
+        return FieldObservationOut(
+            id=observation.id,
+            case_id=observation.case_id,
+            investigator_id=observation.investigator_id,
+            source=observation.source,
+            original_text=observation.original_text,
+            normalized_evidence=observation.normalized_evidence or {},
+            language=observation.language,
+            confidence=observation.confidence,
+            timestamp=observation.timestamp,
+        )
+
+    def _to_checklist_out(self, item: ChecklistItem) -> ChecklistItemOut:
+        return ChecklistItemOut(
+            id=item.id,
+            case_id=item.case_id,
+            item_id=item.item_id,
+            label=item.label,
+            status=item.status,
+            updated_at=item.updated_at,
+        )
+
+    def _to_resolution_out(self, resolution: CaseResolution) -> CaseResolutionOut:
+        return CaseResolutionOut(
+            id=resolution.id,
+            case_id=resolution.case_id,
+            predicted_cause=resolution.predicted_cause,
+            actual_outcome=resolution.actual_outcome,
+            resolution_notes=resolution.resolution_notes,
+            resolved_by=resolution.resolved_by,
+            resolved_at=resolution.resolved_at,
         )
