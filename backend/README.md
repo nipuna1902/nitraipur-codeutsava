@@ -26,6 +26,48 @@ http://127.0.0.1:8000/docs
 - `GET /transformers`
 - `GET /transformers/{transformer_id}`
 - `GET /simulation/status`
+- `POST /voice/session`
+- `POST /voice/tools/consumer-summary`
+- `POST /voice/tools/anomaly-evidence`
+- `POST /voice/tools/transformer-summary`
+- `POST /voice/tools/field-observation`
+- `POST /voice/tools/checklist-update`
+
+## ElevenLabs / Voice Testing Endpoints
+
+These endpoints are controlled backend tool contracts for future ElevenLabs integration. They do not call ElevenLabs yet.
+
+Create placeholder voice session:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/voice/session `
+  -Method POST `
+  -Body '{"consumer_id":"C001","language":"HI"}' `
+  -ContentType "application/json"
+```
+
+Get consumer summary for voice agent:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/voice/tools/consumer-summary `
+  -Method POST `
+  -Body '{"consumer_id":"C001"}' `
+  -ContentType "application/json"
+```
+
+Get anomaly evidence placeholder:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/voice/tools/anomaly-evidence `
+  -Method POST `
+  -Body '{"consumer_id":"C001"}' `
+  -ContentType "application/json"
+```
+
+Until ML and investigation workflow are integrated, unavailable evidence returns `data_available=false` and preserves `UNCERTAIN` instead of inventing facts.
 
 ## Current Storage
 
