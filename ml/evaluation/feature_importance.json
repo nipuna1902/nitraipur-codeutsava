@@ -1,58 +1,102 @@
 [
   {
     "feature": "std_consumption",
-    "importance": 0.3145260810852051
+    "importance": 0.19009999930858612
+  },
+  {
+    "feature": "last_30d_mean",
+    "importance": 0.09130000323057175
   },
   {
     "feature": "max_consumption",
-    "importance": 0.10450655221939087
+    "importance": 0.061000000685453415
+  },
+  {
+    "feature": "recent_vs_hist_drop_pct",
+    "importance": 0.0608999989926815
+  },
+  {
+    "feature": "missing_reading_ratio",
+    "importance": 0.053199999034404755
   },
   {
     "feature": "cv",
-    "importance": 0.0649043619632721
+    "importance": 0.03790000081062317
   },
   {
     "feature": "iqr_consumption",
-    "importance": 0.06001582369208336
+    "importance": 0.03620000183582306
+  },
+  {
+    "feature": "isolation_forest_anomaly_score",
+    "importance": 0.0340999998152256
+  },
+  {
+    "feature": "recent_vs_hist_ratio",
+    "importance": 0.03319999948143959
   },
   {
     "feature": "flatline_ratio",
-    "importance": 0.05964908376336098
-  },
-  {
-    "feature": "skewness",
-    "importance": 0.050292763859033585
-  },
-  {
-    "feature": "min_consumption",
-    "importance": 0.04974668100476265
+    "importance": 0.03280000016093254
   },
   {
     "feature": "zero_days_ratio",
-    "importance": 0.04881640523672104
+    "importance": 0.032600000500679016
   },
   {
     "feature": "load_factor",
-    "importance": 0.044279053807258606
+    "importance": 0.0284000001847744
   },
   {
-    "feature": "max_daily_drop",
-    "importance": 0.04405519738793373
+    "feature": "last_14d_mean",
+    "importance": 0.027799999341368675
   },
   {
-    "feature": "median_consumption",
-    "importance": 0.04192760959267616
+    "feature": "last_7d_mean",
+    "importance": 0.026599999517202377
   },
   {
-    "feature": "max_daily_spike",
-    "importance": 0.04055704176425934
+    "feature": "historical_mean",
+    "importance": 0.02630000002682209
   },
   {
     "feature": "kurtosis",
-    "importance": 0.03908054530620575
+    "importance": 0.026100000366568565
+  },
+  {
+    "feature": "sustained_low_streak",
+    "importance": 0.026100000366568565
+  },
+  {
+    "feature": "max_daily_drop",
+    "importance": 0.02500000037252903
+  },
+  {
+    "feature": "rolling_volatility_change",
+    "importance": 0.023399999365210533
+  },
+  {
+    "feature": "median_consumption",
+    "importance": 0.022600000724196434
+  },
+  {
+    "feature": "max_daily_spike",
+    "importance": 0.02239999920129776
+  },
+  {
+    "feature": "skewness",
+    "importance": 0.021299999207258224
+  },
+  {
+    "feature": "min_consumption",
+    "importance": 0.021199999377131462
+  },
+  {
+    "feature": "longest_zero_streak",
+    "importance": 0.0210999995470047
   },
   {
     "feature": "mean_consumption",
-    "importance": 0.03764282912015915
+    "importance": 0.018400000408291817
   }
 ]

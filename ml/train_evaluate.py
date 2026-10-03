@@ -12,9 +12,10 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     f1_score,
+    fbeta_score,
     confusion_matrix
 )
-from sklearn.model_selection import StratifiedKFold, train_test_split
+from sklearn.model_selection import train_test_split
 
 import xgboost as xgb
 import lightgbm as lgb
@@ -34,7 +35,7 @@ def log(msg: str):
 
 
 def load_datasets():
-    log("Loading feature datasets from data/processed...")
+    log("Loading enhanced feature datasets from data/processed...")
     path_sgcc = os.path.join(PROCESSED_DIR, "features_sgcc.csv")
     path_eth = os.path.join(PROCESSED_DIR, "features_electricity_theft.csv")
 
@@ -45,16 +46,83 @@ def load_datasets():
         c for c in df_sgcc.columns if c not in ["consumer_id", "label"]
     ]
 
-    log(f"SGCC Feature Shape: {df_sgcc.shape} | Labels: {df_sgcc['label'].value_counts().to_dict()}")
-    log(f"Electricity Theft Feature Shape: {df_eth.shape} | Labels: {df_eth['label'].value_counts().to_dict()}")
-    log(f"Feature list ({len(feature_cols)} features): {feature_cols}")
+    log(f"SGCC Shape: {df_sgcc.shape} | Labels: {df_sgcc['label'].value_counts().to_dict()}")
+    log(f"Electricity Theft Shape: {df_eth.shape} | Labels: {df_eth['label'].value_counts().to_dict()}")
+    log(f"Feature count: {len(feature_cols)} features")
 
     return df_sgcc, df_eth, feature_cols
 
 
-def evaluate_predictions(y_true, y_prob, threshold=0.5):
+def find_best_threshold(y_true, y_prob, mode="best_f1"):
     """
-    Compute comprehensive classification metrics.
+    Tune operating threshold on Validation split.
+    Finds threshold that maximizes F1 or F2 score.
+    Also finds thresholds required to achieve 70%, 80%, 85% recall.
+    """
+    thresholds = np.linspace(0.05, 0.95, 181)
+    best_t = 0.5
+    best_score = -1.0
+
+    recall_targets = {0.70: None, 0.80: None, 0.85: None}
+
+    for t in thresholds:
+        y_pred = (y_prob >= t).astype(int)
+        rec = recall_score(y_true, y_pred, zero_division=0)
+        prec = precision_score(y_true, y_pred, zero_division=0)
+        
+        if mode == "best_f2":
+            score = fbeta_score(y_true, y_pred, beta=2, zero_division=0)
+        else:
+            score = f1_score(y_true, y_pred, zero_division=0)
+
+        if score > best_score:
+            best_score = score
+            best_t = t
+
+        # Track thresholds for recall targets
+        for target in recall_targets.keys():
+            if rec >= target and recall_targets[target] is None:
+                recall_targets[target] = round(float(t), 4)
+
+    return round(float(best_t), 4), recall_targets
+
+
+def compute_top_k_metrics(y_true, y_prob):
+    """
+    Compute prototype-friendly ranking metrics:
+    - Precision@50, Precision@100
+    - Recall@Top5%, Recall@Top10%
+    - False Positives per 100 inspected consumers
+    """
+    order = np.argsort(-y_prob)
+    y_true_sorted = y_true[order]
+    n_total = len(y_true)
+    n_positives = sum(y_true)
+
+    # Top 50 & Top 100
+    p_at_50 = float(np.mean(y_true_sorted[:50])) if n_total >= 50 else 0.0
+    p_at_100 = float(np.mean(y_true_sorted[:100])) if n_total >= 100 else 0.0
+    fp_per_100 = int(100 - np.sum(y_true_sorted[:100])) if n_total >= 100 else 0
+
+    # Top 5% & Top 10%
+    k_5pct = int(np.ceil(0.05 * n_total))
+    k_10pct = int(np.ceil(0.10 * n_total))
+
+    rec_top_5pct = float(np.sum(y_true_sorted[:k_5pct]) / (n_positives + 1e-6))
+    rec_top_10pct = float(np.sum(y_true_sorted[:k_10pct]) / (n_positives + 1e-6))
+
+    return {
+        "precision_at_50": round(p_at_50, 4),
+        "precision_at_100": round(p_at_100, 4),
+        "false_positives_per_100_inspected": fp_per_100,
+        "recall_at_top_5_percent": round(rec_top_5pct, 4),
+        "recall_at_top_10_percent": round(rec_top_10pct, 4)
+    }
+
+
+def compute_metrics(y_true, y_prob, threshold=0.5):
+    """
+    Calculate classification metrics at specified threshold.
     """
     y_pred = (y_prob >= threshold).astype(int)
     roc_auc = roc_auc_score(y_true, y_prob)
@@ -62,6 +130,7 @@ def evaluate_predictions(y_true, y_prob, threshold=0.5):
     prec = precision_score(y_true, y_pred, zero_division=0)
     rec = recall_score(y_true, y_pred, zero_division=0)
     f1 = f1_score(y_true, y_pred, zero_division=0)
+    f2 = fbeta_score(y_true, y_pred, beta=2, zero_division=0)
     cm = confusion_matrix(y_true, y_pred).tolist()
 
     return {
@@ -70,155 +139,239 @@ def evaluate_predictions(y_true, y_prob, threshold=0.5):
         "precision": round(float(prec), 4),
         "recall": round(float(rec), 4),
         "f1_score": round(float(f1), 4),
+        "f2_score": round(float(f2), 4),
         "confusion_matrix": cm,
-        "threshold": threshold
+        "threshold_used": round(float(threshold), 4)
     }
 
 
-def train_and_eval_models(X_train, y_train, X_test, y_test, exp_name):
+def assign_risk_bands(y_prob, missing_ratio=None):
     """
-    Train XGBoost, LightGBM, Random Forest, and Isolation Forest on X_train/y_train
-    and evaluate on X_test/y_test.
+    Assign risk score (0-100) and risk band:
+    CRITICAL (score >= 85), HIGH (70-84), MEDIUM (45-69), LOW (<45), UNCERTAIN (missingness > 0.5)
     """
-    log(f"=== Running Experiment: {exp_name} ===")
-    results = {}
+    risk_scores = np.round(y_prob * 100.0, 1)
+    bands = []
+    for idx, s in enumerate(risk_scores):
+        if missing_ratio is not None and missing_ratio[idx] > 0.50:
+            bands.append("UNCERTAIN")
+        elif s >= 85.0:
+            bands.append("CRITICAL")
+        elif s >= 70.0:
+            bands.append("HIGH")
+        elif s >= 45.0:
+            bands.append("MEDIUM")
+        else:
+            bands.append("LOW")
+    return risk_scores, bands
 
+
+def train_and_eval_suite(X_train, y_train, X_val, y_val, X_test, y_test, exp_name):
+    """
+    Train XGBoost, LightGBM, Random Forest, and Ensemble Blend.
+    Tune thresholds on Validation split and report test performance.
+    """
+    log(f"=== Executing Experiment Suite: {exp_name} ===")
     scale_pos = (len(y_train) - sum(y_train)) / (sum(y_train) + 1e-6)
 
-    # 1. XGBoost Classifier
+    # 1. XGBoost
     log("Training XGBoost Classifier...")
     xgb_model = xgb.XGBClassifier(
-        n_estimators=150,
+        n_estimators=200,
         max_depth=6,
-        learning_rate=0.05,
+        learning_rate=0.04,
         scale_pos_weight=scale_pos,
         random_state=42,
         eval_metric="logloss"
     )
     xgb_model.fit(X_train, y_train)
-    xgb_probs = xgb_model.predict_proba(X_test)[:, 1]
-    results["XGBoost"] = evaluate_predictions(y_test, xgb_probs)
+    xgb_val_prob = xgb_model.predict_proba(X_val)[:, 1]
+    xgb_test_prob = xgb_model.predict_proba(X_test)[:, 1]
 
-    # 2. LightGBM Classifier
+    # 2. LightGBM
     log("Training LightGBM Classifier...")
     lgb_model = lgb.LGBMClassifier(
-        n_estimators=150,
+        n_estimators=200,
         max_depth=6,
-        learning_rate=0.05,
+        learning_rate=0.04,
         scale_pos_weight=scale_pos,
         random_state=42,
         verbosity=-1
     )
     lgb_model.fit(X_train, y_train)
-    lgb_probs = lgb_model.predict_proba(X_test)[:, 1]
-    results["LightGBM"] = evaluate_predictions(y_test, lgb_probs)
+    lgb_val_prob = lgb_model.predict_proba(X_val)[:, 1]
+    lgb_test_prob = lgb_model.predict_proba(X_test)[:, 1]
 
-    # 3. Random Forest Classifier
+    # 3. Random Forest
     log("Training Random Forest Classifier...")
     rf_model = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=10,
+        n_estimators=150,
+        max_depth=12,
         class_weight="balanced",
         random_state=42,
         n_jobs=-1
     )
     rf_model.fit(X_train, y_train)
-    rf_probs = rf_model.predict_proba(X_test)[:, 1]
-    results["RandomForest"] = evaluate_predictions(y_test, rf_probs)
+    rf_val_prob = rf_model.predict_proba(X_val)[:, 1]
+    rf_test_prob = rf_model.predict_proba(X_test)[:, 1]
 
-    # 4. Isolation Forest (Unsupervised Anomaly Scoring)
-    log("Training Isolation Forest (Unsupervised)...")
-    iso_model = IsolationForest(
-        n_estimators=100,
-        contamination=float(np.mean(y_train)),
-        random_state=42,
-        n_jobs=-1
-    )
-    iso_model.fit(X_train)
-    # Isolation Forest score_samples returns higher for normal, lower for anomaly
-    # Invert score so higher value = more anomalous
-    iso_scores = -iso_model.score_samples(X_test)
-    # Min-max scale scores to [0, 1]
-    iso_probs = (iso_scores - iso_scores.min()) / (iso_scores.max() - iso_scores.min() + 1e-6)
-    results["IsolationForest"] = evaluate_predictions(y_test, iso_probs)
+    # 4. Ensemble Blend (XGBoost + LightGBM weighted average)
+    ens_val_prob = 0.55 * xgb_val_prob + 0.45 * lgb_val_prob
+    ens_test_prob = 0.55 * xgb_test_prob + 0.45 * lgb_test_prob
 
-    for mname, metrics in results.items():
-        log(f"[{exp_name}] {mname} -> ROC-AUC: {metrics['roc_auc']}, PR-AUC: {metrics['pr_auc']}, F1: {metrics['f1_score']}")
+    # 5. Standalone Isolation Forest (Auxiliary Baseline)
+    log("Evaluating Standalone Isolation Forest...")
+    iso = IsolationForest(n_estimators=100, contamination=float(np.mean(y_train)), random_state=42, n_jobs=-1)
+    iso.fit(X_train)
+    iso_val_scores = -iso.score_samples(X_val)
+    iso_test_scores = -iso.score_samples(X_test)
+    iso_val_prob = (iso_val_scores - iso_val_scores.min()) / (iso_val_scores.max() - iso_val_scores.min() + 1e-6)
+    iso_test_prob = (iso_test_scores - iso_test_scores.min()) / (iso_test_scores.max() - iso_test_scores.min() + 1e-6)
 
-    return results, xgb_model, lgb_model, rf_model
+    models_val = {
+        "XGBoost": (xgb_val_prob, xgb_test_prob, xgb_model),
+        "LightGBM": (lgb_val_prob, lgb_test_prob, lgb_model),
+        "RandomForest": (rf_val_prob, rf_test_prob, rf_model),
+        "Ensemble_XGB_LGB": (ens_val_prob, ens_test_prob, None),
+        "IsolationForest_Aux": (iso_val_prob, iso_test_prob, iso)
+    }
 
+    suite_results = {}
 
-def extract_feature_importance(model, feature_cols, model_name="XGBoost"):
-    if hasattr(model, "feature_importances_"):
-        importances = model.feature_importances_
-        fi_df = pd.DataFrame({
-            "feature": feature_cols,
-            "importance": importances
-        }).sort_values(by="importance", ascending=False)
-        return fi_df.to_dict(orient="records")
-    return []
+    for mname, (v_prob, t_prob, model_obj) in models_val.items():
+        # Tune threshold on Validation split
+        best_t, recall_ts = find_best_threshold(y_val, v_prob, mode="best_f1")
+
+        # Evaluate on Test split using tuned threshold
+        test_metrics_tuned = compute_metrics(y_test, t_prob, threshold=best_t)
+        test_metrics_baseline = compute_metrics(y_test, t_prob, threshold=0.50)
+        top_k_metrics = compute_top_k_metrics(y_test, t_prob)
+
+        # Evaluate recall target thresholds on Test set
+        recall_target_evals = {}
+        for r_target, r_thresh in recall_ts.items():
+            if r_thresh is not None:
+                recall_target_evals[f"target_recall_{int(r_target*100)}%"] = compute_metrics(y_test, t_prob, threshold=r_thresh)
+
+        suite_results[mname] = {
+            "val_tuned_threshold": best_t,
+            "test_metrics_at_tuned_threshold": test_metrics_tuned,
+            "test_metrics_at_fixed_0.5_baseline": test_metrics_baseline,
+            "top_k_ranking_metrics": top_k_metrics,
+            "recall_target_scenarios": recall_target_evals
+        }
+
+        log(f"[{exp_name} | {mname}] Tuned Threshold: {best_t} -> Test F1: {test_metrics_tuned['f1_score']}, F2: {test_metrics_tuned['f2_score']}, ROC-AUC: {test_metrics_tuned['roc_auc']}, Prec@100: {top_k_metrics['precision_at_100']}")
+
+    return suite_results, xgb_model, ens_test_prob
 
 
 def main():
-    log("Starting ML Model Training and Dual Evaluation Pipeline...")
+    log("Starting ML Improvement Plan Execution (Threshold Tuning, Top-K & Risk Bands)...")
     df_sgcc, df_eth, feature_cols = load_datasets()
 
+    # --- EXPERIMENT 1: Cross-Grid Out-Of-Distribution Transferability ---
+    # Train on SGCC (70% Train, 30% Val) -> Test on Electricity Theft
     X_sgcc = df_sgcc[feature_cols].values
     y_sgcc = df_sgcc["label"].values
 
     X_eth = df_eth[feature_cols].values
     y_eth = df_eth["label"].values
 
-    all_results = {}
-
-    # --- EXPERIMENT 1: Cross-Grid Out-Of-Distribution Transferability ---
-    # Train on SGCC (42,372 consumers) -> Test on Electricity Theft (9,956 consumers)
-    exp1_results, exp1_xgb, exp1_lgb, exp1_rf = train_and_eval_models(
-        X_sgcc, y_sgcc, X_eth, y_eth, exp_name="CrossGrid_SGCC_to_ElectricityTheft"
+    X_sgcc_tr, X_sgcc_va, y_sgcc_tr, y_sgcc_va = train_test_split(
+        X_sgcc, y_sgcc, test_size=0.30, random_state=42, stratify=y_sgcc
     )
-    all_results["CrossGrid_Transferability"] = exp1_results
 
-    # --- EXPERIMENT 2: Combined Dataset Stratified Train/Test & 5-Fold CV ---
+    exp1_results, exp1_xgb, _ = train_and_eval_suite(
+        X_sgcc_tr, y_sgcc_tr, X_sgcc_va, y_sgcc_va, X_eth, y_eth, exp_name="CrossGrid_Transferability"
+    )
+
+    # --- EXPERIMENT 2: Merged Dataset 3-Way Split (70% Train, 15% Val, 15% Test) ---
     df_combined = pd.concat([df_sgcc, df_eth], ignore_index=True)
     X_comb = df_combined[feature_cols].values
     y_comb = df_combined["label"].values
+    missing_ratio_comb = df_combined.get("missing_reading_ratio", pd.Series(np.zeros(len(df_combined)))).values
 
-    log(f"Combined Dataset Shape: {X_comb.shape} | Theft Ratio: {np.mean(y_comb):.4f}")
-
-    X_train_c, X_test_c, y_train_c, y_test_c = train_test_split(
-        X_comb, y_comb, test_size=0.20, random_state=42, stratify=y_comb
+    # Step 1: 85% Train/Val, 15% Test
+    X_tr_va, X_test, y_tr_va, y_test, miss_tr_va, miss_test = train_test_split(
+        X_comb, y_comb, missing_ratio_comb, test_size=0.15, random_state=42, stratify=y_comb
+    )
+    # Step 2: Split Train/Val (70% Train total, 15% Val total -> 70/85 = 82.35% of tr_va)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_tr_va, y_tr_va, test_size=0.1765, random_state=42, stratify=y_tr_va
     )
 
-    exp2_results, exp2_xgb, exp2_lgb, exp2_rf = train_and_eval_models(
-        X_train_c, y_train_c, X_test_c, y_test_c, exp_name="MergedDataset_Holdout"
-    )
-    all_results["MergedDataset_Holdout"] = exp2_results
+    log(f"Merged 3-Way Split -> Train: {X_train.shape[0]}, Val: {X_val.shape[0]}, Test: {X_test.shape[0]}")
 
-    # Extract Feature Importances from the top XGBoost model
-    fi_list = extract_feature_importance(exp2_xgb, feature_cols, "XGBoost")
-    log("Top 5 Most Important Features for Theft Detection (XGBoost):")
+    exp2_results, exp2_xgb, ens_test_probs = train_and_eval_suite(
+        X_train, y_train, X_val, y_val, X_test, y_test, exp_name="MergedDataset_Holdout"
+    )
+
+    # --- Risk Band Assignments on Test Set ---
+    risk_scores, risk_bands = assign_risk_bands(ens_test_probs, missing_ratio=miss_test)
+    test_results_df = pd.DataFrame({
+        "consumer_id": df_combined.iloc[-len(y_test):]["consumer_id"].values,
+        "true_label": y_test,
+        "risk_score": risk_scores,
+        "risk_band": risk_bands
+    })
+
+    band_counts = pd.Series(risk_bands).value_counts().to_dict()
+    band_theft_rates = {}
+    for b in ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNCERTAIN"]:
+        sub = test_results_df[test_results_df["risk_band"] == b]
+        if len(sub) > 0:
+            band_theft_rates[b] = {
+                "count": len(sub),
+                "actual_theft_count": int(sub["true_label"].sum()),
+                "precision": round(float(sub["true_label"].mean()), 4)
+            }
+
+    log("Risk Band Distribution & Precision on Test Set:")
+    for b, stats in band_theft_rates.items():
+        log(f"  - {b:10s}: Count={stats['count']:5d} | Actual Theft={stats['actual_theft_count']:4d} | Precision={stats['precision']:.4f}")
+
+    # --- Feature Importances ---
+    importances = exp2_xgb.feature_importances_
+    fi_df = pd.DataFrame({
+        "feature": feature_cols,
+        "importance": np.round(importances, 4)
+    }).sort_values(by="importance", ascending=False)
+    fi_list = fi_df.to_dict(orient="records")
+
+    log("Top 5 Contributing Features for Theft Classification:")
     for item in fi_list[:5]:
         log(f"  - {item['feature']}: {item['importance']:.4f}")
 
-    # --- Save Best Production Model ---
+    # --- Save Artifacts ---
     best_model_path = os.path.join(ARTIFACTS_DIR, "best_xgboost_model.pkl")
     with open(best_model_path, "wb") as f:
         pickle.dump(exp2_xgb, f)
-    log(f"Saved production XGBoost model to {best_model_path}")
 
-    # Save feature importances and evaluation metrics
+    overall_output = {
+        "CrossGrid_Transferability": exp1_results,
+        "MergedDataset_Holdout": exp2_results,
+        "risk_band_test_performance": band_theft_rates
+    }
+
     eval_json_path = os.path.join(EVALUATION_DIR, "evaluation_results.json")
     fi_json_path = os.path.join(EVALUATION_DIR, "feature_importance.json")
+    risk_json_path = os.path.join(EVALUATION_DIR, "risk_band_distribution.json")
 
     with open(eval_json_path, "w") as f:
-        json.dump(all_results, f, indent=2)
+        json.dump(overall_output, f, indent=2)
 
     with open(fi_json_path, "w") as f:
         json.dump(fi_list, f, indent=2)
 
-    log(f"Evaluation metrics written to {eval_json_path}")
-    log(f"Feature importances written to {fi_json_path}")
-    log("ML Training and Dual Evaluation Pipeline Completed Successfully!")
+    with open(risk_json_path, "w") as f:
+        json.dump(band_theft_rates, f, indent=2)
+
+    log(f"Saved best model binary to {best_model_path}")
+    log(f"Saved evaluation metrics to {eval_json_path}")
+    log(f"Saved feature importances to {fi_json_path}")
+    log(f"Saved risk band distribution to {risk_json_path}")
+    log("ML Improvement Plan Execution Completed Successfully!")
 
 
 if __name__ == "__main__":
