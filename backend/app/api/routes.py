@@ -7,8 +7,16 @@ from uuid import uuid4
 from backend.app.database import get_db
 from backend.app.schemas.anomaly import (
     AnomalyOut,
+    CaseResolutionIn,
+    CaseResolutionOut,
+    ChecklistItemOut,
+    ChecklistUpdateIn,
     ConsumerAnalysisOut,
+    FieldObservationIn,
+    FieldObservationOut,
+    InvestigationCaseDetailOut,
     InvestigationCaseOut,
+    InvestigationCaseUpdateIn,
     MlPredictionBatchIn,
     MlPredictionIngestResponse,
 )
@@ -166,6 +174,65 @@ def list_investigations(
     return repository.list_investigation_cases(limit=max(1, min(limit, 1000)))
 
 
+@router.get("/investigations/{case_id}", response_model=InvestigationCaseDetailOut)
+def get_investigation(
+    case_id: str,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> InvestigationCaseDetailOut:
+    case = repository.get_investigation_case(case_id)
+    if case is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return case
+
+
+@router.patch("/investigations/{case_id}", response_model=InvestigationCaseOut)
+def update_investigation(
+    case_id: str,
+    payload: InvestigationCaseUpdateIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> InvestigationCaseOut:
+    case = repository.update_investigation_case(case_id, payload)
+    if case is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return case
+
+
+@router.post("/investigations/{case_id}/observations", response_model=FieldObservationOut)
+def add_investigation_observation(
+    case_id: str,
+    payload: FieldObservationIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> FieldObservationOut:
+    observation = repository.add_field_observation(case_id, payload)
+    if observation is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return observation
+
+
+@router.patch("/investigations/{case_id}/checklist", response_model=ChecklistItemOut)
+def update_investigation_checklist(
+    case_id: str,
+    payload: ChecklistUpdateIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> ChecklistItemOut:
+    item = repository.update_checklist_item(case_id, payload)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return item
+
+
+@router.post("/investigations/{case_id}/resolve", response_model=CaseResolutionOut)
+def resolve_investigation(
+    case_id: str,
+    payload: CaseResolutionIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> CaseResolutionOut:
+    resolution = repository.resolve_case(case_id, payload)
+    if resolution is None:
+        raise HTTPException(status_code=404, detail="Investigation case not found")
+    return resolution
+
+
 @router.get("/transformers", response_model=list[TransformerSummary])
 def list_transformers(repository: TelemetryRepository = Depends(get_repository)) -> list[TransformerSummary]:
     return repository.list_transformers()
@@ -264,29 +331,56 @@ def voice_transformer_summary(
 
 
 @router.post("/voice/tools/field-observation", response_model=VoiceToolResponse)
-def voice_field_observation(payload: FieldObservationRequest) -> VoiceToolResponse:
+def voice_field_observation(
+    payload: FieldObservationRequest,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> VoiceToolResponse:
+    observation = repository.add_field_observation(
+        payload.case_id,
+        FieldObservationIn(
+            source=payload.source,
+            original_text=payload.observation,
+            normalized_evidence={"raw_observation": payload.observation},
+            language=payload.language,
+            confidence=None,
+        ),
+    )
+    if observation is None:
+        return VoiceToolResponse(
+            data_available=False,
+            message="Field observation could not be stored because the case does not exist.",
+            payload={"case_id": payload.case_id},
+        )
     return VoiceToolResponse(
-        data_available=False,
-        message="Field observation was accepted for contract testing only. Persistent case workflow is not implemented yet.",
+        data_available=True,
+        message="Field observation stored in the investigation case.",
         payload={
-            "case_id": payload.case_id,
-            "observation": payload.observation,
-            "language": payload.language,
-            "source": payload.source,
+            "observation": observation.model_dump(),
             "requires_confirmation": True,
         },
     )
 
 
 @router.post("/voice/tools/checklist-update", response_model=VoiceToolResponse)
-def voice_checklist_update(payload: ChecklistUpdateRequest) -> VoiceToolResponse:
+def voice_checklist_update(
+    payload: ChecklistUpdateRequest,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> VoiceToolResponse:
+    item = repository.update_checklist_item(
+        payload.case_id,
+        ChecklistUpdateIn(item_id=payload.item_id, status=payload.status),
+    )
+    if item is None:
+        return VoiceToolResponse(
+            data_available=False,
+            message="Checklist update could not be stored because the case does not exist.",
+            payload={"case_id": payload.case_id, "item_id": payload.item_id},
+        )
     return VoiceToolResponse(
-        data_available=False,
-        message="Checklist update was accepted for contract testing only. Persistent checklist workflow is not implemented yet.",
+        data_available=True,
+        message="Checklist update stored in the investigation case.",
         payload={
-            "case_id": payload.case_id,
-            "item_id": payload.item_id,
-            "status": payload.status,
+            "checklist_item": item.model_dump(),
             "requires_confirmation": True,
         },
     )

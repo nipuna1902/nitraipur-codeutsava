@@ -176,6 +176,120 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(summary.status_code, 200)
         self.assertGreater(summary.json()["active_anomalies"], 0)
 
+    def test_investigation_lifecycle_persists_updates(self):
+        self._create_prediction("C077", risk_level="CRITICAL", risk_score=93.0)
+        cases = self.client.get("/investigations").json()
+        case_id = cases[0]["case_id"]
+
+        detail = self.client.get(f"/investigations/{case_id}")
+        self.assertEqual(detail.status_code, 200)
+        self.assertEqual(detail.json()["case"]["case_id"], case_id)
+        self.assertGreaterEqual(len(detail.json()["checklist"]), 7)
+        self.assertEqual(detail.json()["resolution"], None)
+
+        status_update = self.client.patch(
+            f"/investigations/{case_id}",
+            json={"status": "INSPECTION_PENDING"},
+        )
+        self.assertEqual(status_update.status_code, 200)
+        self.assertEqual(status_update.json()["status"], "INSPECTION_PENDING")
+
+        observation = self.client.post(
+            f"/investigations/{case_id}/observations",
+            json={
+                "investigator_id": "FIELD_01",
+                "source": "TEXT",
+                "original_text": "Seal intact but connected load is higher than declared.",
+                "normalized_evidence": {"seal_status": "INTACT", "load_mismatch": True},
+                "language": "EN",
+                "confidence": 0.9,
+            },
+        )
+        self.assertEqual(observation.status_code, 200)
+        self.assertEqual(observation.json()["normalized_evidence"]["load_mismatch"], True)
+
+        checklist = self.client.patch(
+            f"/investigations/{case_id}/checklist",
+            json={"item_id": "seal_inspected", "status": "DONE"},
+        )
+        self.assertEqual(checklist.status_code, 200)
+        self.assertEqual(checklist.json()["status"], "DONE")
+
+        resolution = self.client.post(
+            f"/investigations/{case_id}/resolve",
+            json={
+                "actual_outcome": "METER_MALFUNCTION",
+                "resolution_notes": "Meter display intermittently failed during site visit.",
+                "resolved_by": "FIELD_01",
+            },
+        )
+        self.assertEqual(resolution.status_code, 200)
+        self.assertEqual(resolution.json()["predicted_cause"], "THEFT_TAMPERING")
+        self.assertEqual(resolution.json()["actual_outcome"], "METER_MALFUNCTION")
+
+        final_detail = self.client.get(f"/investigations/{case_id}").json()
+        self.assertEqual(final_detail["case"]["status"], "RESOLVED")
+        self.assertEqual(len(final_detail["observations"]), 1)
+        self.assertEqual(final_detail["resolution"]["actual_outcome"], "METER_MALFUNCTION")
+
+        summary = self.client.get("/dashboard/summary").json()
+        self.assertEqual(summary["active_investigations"], 0)
+
+    def test_voice_tools_write_to_investigation_case(self):
+        self._create_prediction("C088", risk_level="HIGH", risk_score=78.0)
+        case_id = self.client.get("/investigations").json()[0]["case_id"]
+
+        voice_observation = self.client.post(
+            "/voice/tools/field-observation",
+            json={
+                "case_id": case_id,
+                "observation": "Bypass wire found near meter terminal.",
+                "language": "EN",
+                "source": "VOICE",
+            },
+        )
+        self.assertEqual(voice_observation.status_code, 200)
+        self.assertTrue(voice_observation.json()["data_available"])
+
+        voice_checklist = self.client.post(
+            "/voice/tools/checklist-update",
+            json={"case_id": case_id, "item_id": "bypass_checked", "status": "DONE"},
+        )
+        self.assertEqual(voice_checklist.status_code, 200)
+        self.assertTrue(voice_checklist.json()["data_available"])
+
+        detail = self.client.get(f"/investigations/{case_id}").json()
+        self.assertEqual(len(detail["observations"]), 1)
+        bypass = [item for item in detail["checklist"] if item["item_id"] == "bypass_checked"][0]
+        self.assertEqual(bypass["status"], "DONE")
+
+    def _create_prediction(self, consumer_id: str, risk_level: str = "CRITICAL", risk_score: float = 91.0):
+        return self.client.post(
+            "/ml/predictions",
+            json={
+                "model_version": "xgboost_ranker_v1",
+                "production_model": "XGBoost",
+                "predictions": [
+                    {
+                        "consumer_id": consumer_id,
+                        "risk_score": risk_score,
+                        "risk_level": risk_level,
+                        "predicted_cause": "THEFT_TAMPERING",
+                        "confidence": risk_score / 100.0,
+                        "anomaly_score": risk_score / 100.0,
+                        "model_version": "xgboost_ranker_v1",
+                        "evidence": [
+                            {
+                                "feature": "recent_vs_hist_drop_pct",
+                                "value": 60,
+                                "direction": "supports_anomaly",
+                            }
+                        ],
+                    }
+                ],
+            },
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
