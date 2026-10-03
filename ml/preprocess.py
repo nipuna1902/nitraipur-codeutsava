@@ -7,6 +7,8 @@ import pandas as pd
 from scipy.stats import skew, kurtosis
 from sklearn.ensemble import IsolationForest
 
+from ml.contracts import FEATURE_COLUMNS
+
 # File paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_DIR = os.path.join(BASE_DIR, "data", "raw")
@@ -55,6 +57,31 @@ def preprocess_electricity_theft_data():
     - Date columns format: DD-MM-YY.
     """
     raw_path = os.path.join(RAW_DIR, "Electricity_Theft_Data.csv")
+    clean_path = os.path.join(PROCESSED_DIR, "clean_electricity_theft.csv")
+    if not os.path.exists(raw_path) and os.path.exists(clean_path):
+        log(f"Raw electricity theft CSV not found. Reusing cleaned dataset {clean_path}...")
+        clean_df = pd.read_csv(clean_path)
+        date_cols = [c for c in clean_df.columns if c not in ["consumer_id", "label"]]
+        labels = clean_df["label"].astype(int)
+        missing_ratio_per_row = np.zeros(len(clean_df))
+        meta = {
+            "dataset_name": "Electricity_Theft_Data",
+            "rows": int(clean_df.shape[0]),
+            "total_days": len(date_cols),
+            "start_date": date_cols[0],
+            "end_date": date_cols[-1],
+            "class_distribution": {
+                "normal_0": int((labels == 0).sum()),
+                "theft_1": int((labels == 1).sum()),
+                "theft_ratio": float((labels == 1).mean())
+            },
+            "missing_before_imputation": None,
+            "missing_after_imputation": 0,
+            "missing_ratio_before": None,
+            "source": "clean_processed_fallback"
+        }
+        return clean_df, meta, date_cols, missing_ratio_per_row
+
     log(f"Loading {raw_path}...")
     df = pd.read_csv(raw_path)
 
@@ -133,6 +160,31 @@ def preprocess_sgcc_data():
     - FLAG: target label
     """
     raw_path = os.path.join(RAW_DIR, "data.csv")
+    clean_path = os.path.join(PROCESSED_DIR, "clean_sgcc.csv")
+    if not os.path.exists(raw_path) and os.path.exists(clean_path):
+        log(f"Raw SGCC CSV not found. Reusing cleaned dataset {clean_path}...")
+        clean_df = pd.read_csv(clean_path)
+        date_cols = [c for c in clean_df.columns if c not in ["consumer_id", "label"]]
+        labels = clean_df["label"].astype(int)
+        missing_ratio_per_row = np.zeros(len(clean_df))
+        meta = {
+            "dataset_name": "SGCC_Electricity_Theft_Data",
+            "rows": int(clean_df.shape[0]),
+            "total_days": len(date_cols),
+            "start_date": date_cols[0],
+            "end_date": date_cols[-1],
+            "class_distribution": {
+                "normal_0": int((labels == 0).sum()),
+                "theft_1": int((labels == 1).sum()),
+                "theft_ratio": float((labels == 1).mean())
+            },
+            "missing_before_imputation": None,
+            "missing_after_imputation": 0,
+            "missing_ratio_before": None,
+            "source": "clean_processed_fallback"
+        }
+        return clean_df, meta, date_cols, missing_ratio_per_row
+
     log(f"Loading {raw_path}...")
     df = pd.read_csv(raw_path)
 
@@ -296,6 +348,7 @@ def extract_enhanced_features(clean_df, date_cols, missing_ratio_per_row, datase
         "missing_reading_ratio": np.round(missing_ratio_per_row, 4),
         "isolation_forest_anomaly_score": np.round(iso_anomaly_score, 4)
     })
+    feature_df = feature_df[["consumer_id", "label"] + FEATURE_COLUMNS]
 
     out_file = os.path.join(PROCESSED_DIR, f"features_{dataset_name.lower()}.csv")
     feature_df.to_csv(out_file, index=False)
@@ -308,7 +361,14 @@ def generate_telemetry_schema_sample(clean_df, date_cols, n_consumers=100, n_day
     Generate telemetry sample file adhering to Electron DB schema.
     """
     log("Generating telemetry sample according to Electron schema...")
-    sample_df = clean_df.head(n_consumers)
+    label_counts = clean_df["label"].value_counts()
+    if {0, 1}.issubset(set(label_counts.index)):
+        per_class = max(1, n_consumers // 2)
+        normal_df = clean_df[clean_df["label"] == 0].head(per_class)
+        anomaly_df = clean_df[clean_df["label"] == 1].head(per_class)
+        sample_df = pd.concat([normal_df, anomaly_df], ignore_index=True).head(n_consumers)
+    else:
+        sample_df = clean_df.head(n_consumers)
     selected_dates = date_cols[:n_days]
 
     records = []
