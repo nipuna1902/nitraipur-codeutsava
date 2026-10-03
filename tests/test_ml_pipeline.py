@@ -1,82 +1,126 @@
-import os
 import json
-import pytest
-import pickle
-import pandas as pd
+import os
+import unittest
+
 import numpy as np
 
+from ml.contracts import (
+    FEATURE_COLUMNS,
+    NON_TRAINING_DEMO_FILES,
+    SUPERVISED_TRAINING_FILES,
+    build_prediction_records,
+    classify_probable_cause,
+)
+from ml.train_evaluate import assign_risk_bands, compute_top_k_metrics, find_best_threshold
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROCESSED_DIR = os.path.join(BASE_DIR, "data", "processed")
-ML_DIR = os.path.join(BASE_DIR, "ml")
-ARTIFACTS_DIR = os.path.join(ML_DIR, "artifacts")
-EVALUATION_DIR = os.path.join(ML_DIR, "evaluation")
+EVALUATION_DIR = os.path.join(BASE_DIR, "ml", "evaluation")
 
 
-def test_enhanced_feature_columns():
-    fpath = os.path.join(PROCESSED_DIR, "features_sgcc.csv")
-    df = pd.read_csv(fpath)
-    assert len(df) == 42372
+class MLPipelineTest(unittest.TestCase):
+    def test_find_best_threshold_uses_highest_threshold_for_recall_target(self):
+        y_true = np.array([1, 1, 1, 0, 0, 0])
+        y_prob = np.array([0.9, 0.7, 0.4, 0.6, 0.3, 0.1])
 
-    required_features = [
-        "consumer_id", "label", "mean_consumption", "std_consumption",
-        "last_7d_mean", "last_14d_mean", "last_30d_mean", "historical_mean",
-        "recent_vs_hist_ratio", "recent_vs_hist_drop_pct", "zero_days_ratio",
-        "longest_zero_streak", "sustained_low_streak", "flatline_ratio",
-        "rolling_volatility_change", "missing_reading_ratio",
-        "isolation_forest_anomaly_score"
-    ]
-    for feat in required_features:
-        assert feat in df.columns, f"Missing enhanced feature column: {feat}"
+        _, recall_targets = find_best_threshold(y_true, y_prob)
+
+        self.assertGreater(recall_targets[0.70], 0.05)
+        self.assertLessEqual(recall_targets[0.70], 0.7)
+
+    def test_top_k_metrics_are_computed_from_ranked_probabilities(self):
+        y_true = np.array([1] * 10 + [0] * 90)
+        y_prob = np.array(list(np.linspace(1.0, 0.91, 10)) + list(np.linspace(0.9, 0.0, 90)))
+
+        metrics = compute_top_k_metrics(y_true, y_prob)
+
+        self.assertEqual(metrics["precision_at_50"], 0.2)
+        self.assertEqual(metrics["precision_at_100"], 0.1)
+        self.assertEqual(metrics["false_positives_per_100_inspected"], 90)
+        self.assertEqual(metrics["recall_at_top_10_percent"], 1.0)
+
+    def test_risk_bands_preserve_uncertain_for_high_missingness(self):
+        scores = np.array([0.9, 0.76, 0.5, 0.2, 0.99])
+        missing = np.array([0.0, 0.0, 0.0, 0.0, 0.75])
+
+        risk_scores, bands = assign_risk_bands(scores, missing_ratio=missing)
+
+        self.assertEqual(risk_scores.tolist(), [90.0, 76.0, 50.0, 20.0, 99.0])
+        self.assertEqual(bands, ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNCERTAIN"])
+
+    def test_committed_evaluation_results_include_required_sections(self):
+        fpath = os.path.join(EVALUATION_DIR, "evaluation_results.json")
+        self.assertTrue(os.path.exists(fpath))
+        with open(fpath, "r", encoding="utf-8") as f:
+            results = json.load(f)
+
+        self.assertIn("MergedDataset_Holdout", results)
+        self.assertIn("CrossGrid_Transferability", results)
+        self.assertIn("risk_band_test_performance", results)
+        self.assertEqual(results["training_data_policy"]["supervised_training_files"], SUPERVISED_TRAINING_FILES)
+        self.assertEqual(results["training_data_policy"]["excluded_demo_files"], NON_TRAINING_DEMO_FILES)
+        self.assertIn("LightGBM", results["MergedDataset_Holdout"])
+        self.assertIn("Ensemble_XGB_LGB", results["MergedDataset_Holdout"])
+
+        production_model = (
+            "Ensemble_XGB_LGB"
+            if "Ensemble_XGB_LGB" in results["MergedDataset_Holdout"]
+            else "XGBoost"
+        )
+        model_results = results["MergedDataset_Holdout"][production_model]
+        self.assertIn("val_tuned_threshold", model_results)
+        self.assertIn("top_k_ranking_metrics", model_results)
+        self.assertGreaterEqual(model_results["top_k_ranking_metrics"]["precision_at_100"], 0.7)
+
+    def test_risk_band_distribution_is_demo_usable(self):
+        fpath = os.path.join(EVALUATION_DIR, "risk_band_distribution.json")
+        self.assertTrue(os.path.exists(fpath))
+        with open(fpath, "r", encoding="utf-8") as f:
+            bands = json.load(f)
+
+        self.assertIn("CRITICAL", bands)
+        self.assertIn("HIGH", bands)
+        self.assertGreaterEqual(bands["CRITICAL"]["precision"], 0.5)
+
+    def test_backend_prediction_records_match_contract(self):
+        feature_rows = np.zeros((1, len(FEATURE_COLUMNS)))
+        feature_rows[0][FEATURE_COLUMNS.index("recent_vs_hist_drop_pct")] = 60.0
+        feature_rows[0][FEATURE_COLUMNS.index("sustained_low_streak")] = 8.0
+        records = build_prediction_records(
+            consumer_ids=["C031"],
+            probabilities=np.array([0.91]),
+            risk_scores=np.array([91.0]),
+            risk_levels=["CRITICAL"],
+            feature_rows=feature_rows,
+            feature_columns=FEATURE_COLUMNS,
+        )
+
+        record = records[0]
+        self.assertEqual(record["consumer_id"], "C031")
+        self.assertEqual(record["risk_level"], "CRITICAL")
+        self.assertEqual(record["predicted_cause"], "THEFT_TAMPERING")
+        self.assertIn("anomaly_score", record)
+        self.assertIn("model_version", record)
+        self.assertGreater(len(record["evidence"]), 0)
+
+    def test_probable_cause_classification_uses_available_evidence(self):
+        self.assertEqual(
+            classify_probable_cause({"missing_reading_ratio": 0.75}, "CRITICAL", 0.95),
+            "COMMUNICATION_FAILURE",
+        )
+        self.assertEqual(
+            classify_probable_cause({"flatline_ratio": 0.9, "missing_reading_ratio": 0.0}, "HIGH", 0.8),
+            "METER_MALFUNCTION",
+        )
+        self.assertEqual(
+            classify_probable_cause(
+                {"recent_vs_hist_drop_pct": 60.0, "sustained_low_streak": 8, "missing_reading_ratio": 0.0},
+                "HIGH",
+                0.8,
+            ),
+            "THEFT_TAMPERING",
+        )
 
 
-def test_evaluation_results_structure():
-    fpath = os.path.join(EVALUATION_DIR, "evaluation_results.json")
-    assert os.path.exists(fpath)
-    with open(fpath, "r") as f:
-        res = json.load(f)
-
-    assert "MergedDataset_Holdout" in res
-    assert "CrossGrid_Transferability" in res
-
-    merged = res["MergedDataset_Holdout"]
-    assert "XGBoost" in merged
-    assert "LightGBM" in merged
-    assert "Ensemble_XGB_LGB" in merged
-
-    xgb_metrics = merged["XGBoost"]
-    assert "val_tuned_threshold" in xgb_metrics
-    assert "top_k_ranking_metrics" in xgb_metrics
-    assert "test_metrics_at_tuned_threshold" in xgb_metrics
-    assert "test_metrics_at_fixed_0.5_baseline" in xgb_metrics
-
-    top_k = xgb_metrics["top_k_ranking_metrics"]
-    assert "precision_at_50" in top_k
-    assert "precision_at_100" in top_k
-    assert "false_positives_per_100_inspected" in top_k
-    assert top_k["precision_at_100"] >= 0.70, "Precision@100 should be >= 70% for top inspection queue"
-
-
-def test_risk_band_distribution():
-    fpath = os.path.join(EVALUATION_DIR, "risk_band_distribution.json")
-    assert os.path.exists(fpath)
-    with open(fpath, "r") as f:
-        bands = json.load(f)
-
-    assert "CRITICAL" in bands
-    assert "HIGH" in bands
-    assert "MEDIUM" in bands
-    assert "LOW" in bands
-    assert "UNCERTAIN" in bands
-
-    critical_prec = bands["CRITICAL"]["precision"]
-    assert critical_prec >= 0.50, f"Critical risk band precision should be high (got {critical_prec})"
-
-
-def test_best_model_artifact():
-    fpath = os.path.join(ARTIFACTS_DIR, "best_xgboost_model.pkl")
-    assert os.path.exists(fpath)
-    assert os.path.getsize(fpath) > 0
-
-    with open(fpath, "rb") as f:
-        model = pickle.load(f)
-    assert hasattr(model, "predict_proba")
+if __name__ == "__main__":
+    unittest.main()

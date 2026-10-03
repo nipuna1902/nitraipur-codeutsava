@@ -1,0 +1,17 @@
+{
+  "production_model": "XGBoost",
+  "MergedDataset_Holdout": {
+    "precision_at_50": 0.78,
+    "precision_at_100": 0.76,
+    "false_positives_per_100_inspected": 24,
+    "recall_at_top_5_percent": 0.2796,
+    "recall_at_top_10_percent": 0.4194
+  },
+  "CrossGrid_Transferability": {
+    "precision_at_50": 0.76,
+    "precision_at_100": 0.79,
+    "false_positives_per_100_inspected": 21,
+    "recall_at_top_5_percent": 0.2296,
+    "recall_at_top_10_percent": 0.3709
+  }
+}
