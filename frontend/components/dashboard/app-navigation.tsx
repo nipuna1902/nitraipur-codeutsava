@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Activity, GaugeCircle, GitCompareArrows, Network, RadioTower, ShieldAlert } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Overview", icon: Activity },
-  { href: "/simulation", label: "Simulator", icon: RadioTower },
-  { href: "/dual-injection", label: "Bad-Data Lab", icon: GitCompareArrows },
+  { href: "/", label: "Overview", icon: Activity, step: "1" },
+  { href: "/simulation", label: "Simulator", icon: RadioTower, step: "2" },
+  { href: "/dual-injection", label: "Known Injection", icon: GitCompareArrows, step: "3" },
   { href: "http://127.0.0.1:8000/docs", label: "Swagger", icon: Network, external: true },
-  { href: "http://127.0.0.1:8000/anomalies/queue?limit=100", label: "Anomaly Queue", icon: ShieldAlert, external: true },
+  { href: "http://127.0.0.1:8000/anomalies/queue?limit=100", label: "ML Queue", icon: ShieldAlert, external: true },
   { href: "http://127.0.0.1:8000/dashboard/summary", label: "API Summary", icon: GaugeCircle, external: true }
 ];
 
@@ -30,6 +30,7 @@ export function AppNavigation() {
 
           return (
             <Link key={item.href} href={item.href} className={className}>
+              {item.step ? <span className="text-xs text-slate-400">{item.step}</span> : null}
               <Icon size={16} />
               {item.label}
             </Link>

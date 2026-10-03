@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Activity, BrainCircuit, RadioTower, Route, ShieldAlert, Zap } from "lucide-react";
 import { AppNavigation } from "@/components/dashboard/app-navigation";
 import { AnomalyChart } from "@/components/dashboard/anomaly-chart";
@@ -55,6 +56,58 @@ export default async function DashboardPage() {
 
         <DemoActions />
 
+        <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Demo Flow</p>
+            <h2 className="mt-1 text-xl font-semibold text-slate-950">Suggested judging path</h2>
+            <div className="mt-5 grid gap-2 text-sm">
+              {[
+                "Load ML sample",
+                "Sync anomaly queue",
+                "Inspect transformer correlation",
+                "Run simulator preview",
+                "Inject known bad data",
+                "Ask Electron for evidence"
+              ].map((step, index) => (
+                <div key={step} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <span className="grid size-7 place-items-center rounded-md bg-white text-xs font-semibold text-slate-600">
+                    {index + 1}
+                  </span>
+                  <span className="text-slate-700">{step}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link href="/simulation" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white">
+                Next: Simulator
+              </Link>
+              <Link href="/dual-injection" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white">
+                Next: Known Injection
+              </Link>
+            </div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Feature Map</p>
+            <h2 className="mt-1 text-xl font-semibold text-slate-950">Where to look</h2>
+            <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 text-sm">
+              {[
+                ["What is happening right now?", "Overview"],
+                ["Which consumers are risky?", "Overview / ML Queue"],
+                ["Can we simulate grid behavior?", "Simulator"],
+                ["Can we inject known wrong data?", "Known Injection"],
+                ["Did Electron predict correctly?", "Known Injection"],
+                ["What should field teams inspect?", "Investigations / Queue"],
+                ["Can field workers ask questions?", "Ask Electron"]
+              ].map(([question, page]) => (
+                <div key={question} className="grid gap-3 border-b border-slate-200 px-4 py-3 last:border-b-0 sm:grid-cols-[1.3fr_0.7fr]">
+                  <span className="text-slate-600">{question}</span>
+                  <span className="font-medium text-slate-900">{page}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <AnomalyChart anomalies={data.anomalies} />
           <CaseQueue cases={data.investigations} anomalies={data.anomalies} />
@@ -74,7 +127,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Digital Twin</p>
-                <h2 className="text-xl font-semibold text-slate-950">Self-testing grid laboratory</h2>
+                <h2 className="text-xl font-semibold text-slate-950">Scenario Runner</h2>
               </div>
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
