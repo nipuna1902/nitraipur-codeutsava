@@ -1,0 +1,58 @@
+[
+  {
+    "feature": "std_consumption",
+    "importance": 0.3145260810852051
+  },
+  {
+    "feature": "max_consumption",
+    "importance": 0.10450655221939087
+  },
+  {
+    "feature": "cv",
+    "importance": 0.0649043619632721
+  },
+  {
+    "feature": "iqr_consumption",
+    "importance": 0.06001582369208336
+  },
+  {
+    "feature": "flatline_ratio",
+    "importance": 0.05964908376336098
+  },
+  {
+    "feature": "skewness",
+    "importance": 0.050292763859033585
+  },
+  {
+    "feature": "min_consumption",
+    "importance": 0.04974668100476265
+  },
+  {
+    "feature": "zero_days_ratio",
+    "importance": 0.04881640523672104
+  },
+  {
+    "feature": "load_factor",
+    "importance": 0.044279053807258606
+  },
+  {
+    "feature": "max_daily_drop",
+    "importance": 0.04405519738793373
+  },
+  {
+    "feature": "median_consumption",
+    "importance": 0.04192760959267616
+  },
+  {
+    "feature": "max_daily_spike",
+    "importance": 0.04055704176425934
+  },
+  {
+    "feature": "kurtosis",
+    "importance": 0.03908054530620575
+  },
+  {
+    "feature": "mean_consumption",
+    "importance": 0.03764282912015915
+  }
+]
