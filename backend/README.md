@@ -22,7 +22,9 @@ http://127.0.0.1:8000/docs
 - `POST /ml/predictions`
 - `POST /ml/predictions/load-sample`
 - `GET /anomalies`
+- `GET /anomalies/queue`
 - `GET /anomalies/{anomaly_id}`
+- `POST /copilot/ask`
 - `GET /dashboard/summary`
 - `GET /consumers`
 - `GET /consumers/{consumer_id}`
@@ -99,6 +101,70 @@ Then inspect:
 - `POST /voice/tools/anomaly-evidence`
 
 Only `HIGH` and `CRITICAL` risk predictions create investigation cases automatically.
+
+To verify anomaly list size clearly, use:
+
+```powershell
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/anomalies/queue?limit=100" `
+  -Method GET
+```
+
+This returns `total`, `limit`, `returned`, and `items`.
+
+## Structured Copilot Questions
+
+`POST /copilot/ask` answers from structured backend data only. It does not call an LLM and does not invent missing values.
+
+Grid status:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"What is the current grid status?"}' `
+  -ContentType "application/json"
+```
+
+Top risky consumers:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"Show me the top risky consumers","limit":5}' `
+  -ContentType "application/json"
+```
+
+Consumer explanation:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"Why was this consumer flagged?","consumer_id":"CONSUMER_ID_HERE"}' `
+  -ContentType "application/json"
+```
+
+Case checklist:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"What should the field team inspect?","case_id":"CASE_ID_HERE"}' `
+  -ContentType "application/json"
+```
+
+Transformer summary:
+
+```powershell
+Invoke-RestMethod `
+  -Uri http://127.0.0.1:8000/copilot/ask `
+  -Method POST `
+  -Body '{"question":"Give transformer summary","transformer_id":"T01"}' `
+  -ContentType "application/json"
+```
 
 ## Investigation Workflow Testing
 

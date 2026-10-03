@@ -2,10 +2,13 @@ from .common import CommunicationStatus, MeterStatus, TelemetrySource
 from .telemetry import TelemetryBatchIn, TelemetryReadingIn, TelemetryReadingOut
 from .anomaly import (
     AnomalyOut,
+    AnomalyQueueOut,
     CaseResolutionIn,
     CaseResolutionOut,
     ChecklistItemOut,
     ChecklistUpdateIn,
+    CopilotAnswerOut,
+    CopilotAskIn,
     ConsumerAnalysisOut,
     FieldObservationIn,
     FieldObservationOut,
@@ -18,11 +21,14 @@ from .anomaly import (
 
 __all__ = [
     "AnomalyOut",
+    "AnomalyQueueOut",
     "CaseResolutionIn",
     "CaseResolutionOut",
     "ChecklistItemOut",
     "ChecklistUpdateIn",
     "CommunicationStatus",
+    "CopilotAnswerOut",
+    "CopilotAskIn",
     "ConsumerAnalysisOut",
     "FieldObservationIn",
     "FieldObservationOut",

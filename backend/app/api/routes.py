@@ -7,11 +7,14 @@ from uuid import uuid4
 from backend.app.database import get_db
 from backend.app.schemas.anomaly import (
     AnomalyOut,
+    AnomalyQueueOut,
     CaseResolutionIn,
     CaseResolutionOut,
     ChecklistItemOut,
     ChecklistUpdateIn,
     ConsumerAnalysisOut,
+    CopilotAnswerOut,
+    CopilotAskIn,
     FieldObservationIn,
     FieldObservationOut,
     InvestigationCaseDetailOut,
@@ -155,6 +158,14 @@ def list_anomalies(
     return repository.list_anomalies(limit=max(1, min(limit, 1000)))
 
 
+@router.get("/anomalies/queue", response_model=AnomalyQueueOut)
+def get_anomaly_queue(
+    limit: int = 100,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> AnomalyQueueOut:
+    return repository.anomaly_queue(limit=max(1, min(limit, 1000)))
+
+
 @router.get("/anomalies/{anomaly_id}", response_model=AnomalyOut)
 def get_anomaly(
     anomaly_id: str,
@@ -164,6 +175,14 @@ def get_anomaly(
     if anomaly is None:
         raise HTTPException(status_code=404, detail="Anomaly not found")
     return anomaly
+
+
+@router.post("/copilot/ask", response_model=CopilotAnswerOut)
+def ask_copilot(
+    payload: CopilotAskIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> CopilotAnswerOut:
+    return repository.answer_question(payload)
 
 
 @router.get("/investigations", response_model=list[InvestigationCaseOut])
