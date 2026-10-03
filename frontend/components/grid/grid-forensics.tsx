@@ -26,7 +26,7 @@ export function GridForensics({ transformers }: GridForensicsProps) {
           return (
             <article key={transformer.transformer_id} className="rounded-lg border border-slate-200 bg-white p-5">
               <p className="text-lg font-semibold text-slate-950">{transformer.transformer_id}</p>
-              <p className="text-sm text-slate-500">{transformer.feeder_id} · {transformer.rated_capacity} kVA</p>
+              <p className="text-sm text-slate-500">{transformer.feeder_id} / {transformer.rated_capacity} kVA</p>
               <div className="mt-6">
                 <div className="mb-2 flex justify-between text-sm">
                   <span className="text-slate-500">Unexplained loss</span>
@@ -39,11 +39,11 @@ export function GridForensics({ transformers }: GridForensicsProps) {
               <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <dt className="text-slate-500">Input</dt>
-                  <dd className="font-semibold text-slate-950">{snapshot?.input_energy ?? "—"}</dd>
+                  <dd className="font-semibold text-slate-950">{snapshot?.input_energy ?? "-"}</dd>
                 </div>
                 <div>
                   <dt className="text-slate-500">Consumer</dt>
-                  <dd className="font-semibold text-slate-950">{snapshot?.consumer_energy ?? "—"}</dd>
+                  <dd className="font-semibold text-slate-950">{snapshot?.consumer_energy ?? "-"}</dd>
                 </div>
               </dl>
             </article>

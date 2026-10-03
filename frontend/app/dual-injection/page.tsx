@@ -2,8 +2,11 @@ import Link from "next/link";
 import { ArrowLeft, GitCompareArrows, ShieldCheck } from "lucide-react";
 import { AppNavigation } from "@/components/dashboard/app-navigation";
 import { BadDataLab } from "@/components/simulation/bad-data-lab";
+import { getDashboardData } from "@/lib/api";
 
-export default function DualInjectionPage() {
+export default async function DualInjectionPage() {
+  const data = await getDashboardData();
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-5 py-6 sm:px-8 lg:px-10">
@@ -28,7 +31,7 @@ export default function DualInjectionPage() {
           </div>
         </header>
 
-        <BadDataLab />
+        <BadDataLab consumers={data.consumers} transformers={data.transformers} />
 
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-start gap-4">
@@ -36,7 +39,7 @@ export default function DualInjectionPage() {
               <ShieldCheck />
             </div>
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Demo Guardrail</p>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Validation Guardrail</p>
               <h2 className="mt-1 text-xl font-semibold text-slate-950">Known truth stays separate from prediction</h2>
               <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-600">
                 The injected fault label is the test truth. The ML prediction is the model output. We should present both

@@ -1,18 +1,24 @@
 "use client";
 
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Anomaly } from "@/types/dashboard";
 
 type AnomalyChartProps = {
   anomalies: Anomaly[];
 };
 
+function shortId(value: string) {
+  if (value.length <= 10) return value;
+  return `${value.slice(0, 4)}...${value.slice(-4)}`;
+}
+
 export function AnomalyChart({ anomalies }: AnomalyChartProps) {
-  const chartData = anomalies.map((anomaly, index) => ({
-    name: anomaly.consumer_id,
-    risk: anomaly.risk_score,
-    anomaly: Math.round(anomaly.anomaly_score * 100),
-    confidence: Math.round((anomaly.confidence ?? 0.5) * 100),
+  const chartData = anomalies.slice(0, 14).map((anomaly, index) => ({
+    name: shortId(anomaly.consumer_id),
+    consumer: anomaly.consumer_id,
+    risk: Number((anomaly.risk_score ?? 0).toFixed(1)),
+    adjusted: Number((anomaly.adjusted_risk_score ?? anomaly.risk_score ?? 0).toFixed(1)),
+    anomaly: Math.round((anomaly.anomaly_score ?? 0) * 100),
     order: index + 1
   }));
 
@@ -21,26 +27,21 @@ export function AnomalyChart({ anomalies }: AnomalyChartProps) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Anomaly Intelligence</p>
-          <h2 className="mt-1 text-xl font-semibold text-slate-950">Risk curve by consumer</h2>
+          <h2 className="mt-1 text-xl font-semibold text-slate-950">Top live risk scores</h2>
         </div>
         <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
-          Model scores are evidence, not verdicts
+          Showing top {chartData.length} of {anomalies.length}
         </div>
       </div>
-      <div className="mt-6 h-72">
+      <div className="mt-6 h-80">
         {chartData.length ? (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ left: -18, right: 8, top: 10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#64748b" stopOpacity={0.24} />
-                  <stop offset="95%" stopColor="#64748b" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.14)" />
-              <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-              <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
+            <ComposedChart data={chartData} margin={{ left: -10, right: 12, top: 12, bottom: 12 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.24)" />
+              <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 11 }} interval={0} />
+              <YAxis domain={[0, 100]} stroke="#64748b" tick={{ fontSize: 12 }} />
               <Tooltip
+                labelFormatter={(_, items) => items?.[0]?.payload?.consumer ?? ""}
                 contentStyle={{
                   background: "#ffffff",
                   border: "1px solid #e2e8f0",
@@ -48,10 +49,9 @@ export function AnomalyChart({ anomalies }: AnomalyChartProps) {
                   color: "#0f172a"
                 }}
               />
-              <Area type="monotone" dataKey="risk" stroke="#334155" strokeWidth={2} fill="url(#riskGradient)" />
-              <Area type="monotone" dataKey="confidence" stroke="#64748b" strokeWidth={2} fill="transparent" />
-              <Area type="monotone" dataKey="anomaly" stroke="#94a3b8" strokeWidth={2} fill="transparent" />
-            </AreaChart>
+              <Bar dataKey="risk" name="Raw ML risk" fill="#0f766e" radius={[4, 4, 0, 0]} />
+              <Line type="monotone" dataKey="adjusted" name="Adjusted priority" stroke="#b45309" strokeWidth={2} dot={false} />
+            </ComposedChart>
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-center">
