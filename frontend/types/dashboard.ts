@@ -10,9 +10,11 @@ export type DashboardSummary = {
 export type Anomaly = {
   id?: string;
   consumer_id: string;
-  timestamp: string;
+  timestamp?: string;
+  created_at?: string;
   anomaly_score: number;
   risk_score: number;
+  risk_level?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | "UNCERTAIN";
   predicted_cause:
     | "NORMAL"
     | "THEFT_TAMPERING"
@@ -28,8 +30,16 @@ export type Anomaly = {
   communication_health_score?: number;
   transformer_loss_score?: number;
   cluster_score?: number;
-  evidence?: string[];
+  evidence?: Array<string | { feature: string; value?: string | number | null; direction?: string }>;
   model_version?: string;
+  case_type?: "STANDARD" | "AGGREGATE_REVIEW";
+  raw_risk_score?: number;
+  adjusted_risk_score?: number;
+  outlier_flags?: string[];
+  allocation_confidence?: "UNKNOWN" | "LOW" | "MEDIUM" | "HIGH";
+  attribution_status?: "AGGREGATE_ONLY" | "SINGLE_BUILDING" | "DIRECT_METER" | "UNKNOWN";
+  recommendation?: string;
+  risk_adjustment_reason?: string;
 };
 
 export type Consumer = {
@@ -50,6 +60,16 @@ export type InvestigationCase = {
   status?: string;
   assigned_to?: string | null;
   created_at?: string;
+  risk_score?: number;
+  predicted_cause?: Anomaly["predicted_cause"];
+  case_type?: "STANDARD" | "AGGREGATE_REVIEW";
+  raw_risk_score?: number;
+  adjusted_risk_score?: number;
+  outlier_flags?: string[];
+  allocation_confidence?: "UNKNOWN" | "LOW" | "MEDIUM" | "HIGH";
+  attribution_status?: "AGGREGATE_ONLY" | "SINGLE_BUILDING" | "DIRECT_METER" | "UNKNOWN";
+  recommendation?: string;
+  risk_adjustment_reason?: string;
 };
 
 export type Transformer = {
