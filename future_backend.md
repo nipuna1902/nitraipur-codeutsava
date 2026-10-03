@@ -4,7 +4,7 @@ This document captures the backend layers to add after the current prototype bra
 
 ## Current Backend State
 
-The backend currently provides a FastAPI foundation with in-memory storage.
+The backend currently provides a FastAPI foundation with SQLAlchemy persistence. It defaults to SQLite for local testing and can use PostgreSQL through `DATABASE_URL`.
 
 Implemented:
 
@@ -16,10 +16,12 @@ Implemented:
 - consumer history
 - transformer summary
 - simulation readiness status
+- SQLAlchemy models for consumers, transformers, and telemetry readings
+- repository layer behind the API routes
 
 Not implemented yet:
 
-- PostgreSQL persistence
+- Alembic migrations
 - ML anomaly scoring
 - investigation workflow
 - WebSockets
@@ -28,15 +30,14 @@ Not implemented yet:
 
 ## Layer 1 - PostgreSQL Persistence
 
-Replace the in-memory store with real persistence.
+Harden the persistence layer for team use.
 
 Add:
 
-- SQLAlchemy or SQLModel models
-- database session management
 - migrations
-- repository/service layer
 - test database setup
+- PostgreSQL connection documentation
+- seed scripts for feeders, transformers, and demo consumers
 
 Tables:
 

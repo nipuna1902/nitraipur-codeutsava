@@ -29,12 +29,26 @@ http://127.0.0.1:8000/docs
 
 ## Current Storage
 
-The backend currently uses an in-memory prototype store. PostgreSQL models and migrations are the next backend step.
+The backend now uses SQLAlchemy models and a repository layer.
+
+By default it runs with local SQLite for easy testing:
+
+```text
+sqlite:///./electron_backend.db
+```
+
+For PostgreSQL, set `DATABASE_URL` before starting the server:
+
+```powershell
+$env:DATABASE_URL="postgresql+psycopg://USER:PASSWORD@localhost:5432/electron"
+python -m uvicorn backend.app.main:app --reload
+```
+
+Tables are created on startup for the prototype. A migration tool should be added before production use.
 
 ## Not Implemented Yet
 
 - authentication
-- PostgreSQL persistence
 - ML anomaly scoring
 - investigation workflow
 - WebSockets

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.api.routes import router
+from backend.app.database import init_db
 
 
 def create_app() -> FastAPI:
@@ -18,6 +19,11 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(router)
+
+    @app.on_event("startup")
+    def on_startup() -> None:
+        init_db()
+
     return app
 
 

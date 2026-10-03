@@ -56,6 +56,12 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["total_consumers"], 0)
 
+    def test_default_transformers_are_created_in_database(self):
+        response = self.client.get("/transformers")
+        self.assertEqual(response.status_code, 200)
+        transformer_ids = {item["transformer_id"] for item in response.json()}
+        self.assertEqual(transformer_ids, {"T01", "T02", "T03", "T04"})
+
 
 if __name__ == "__main__":
     unittest.main()
