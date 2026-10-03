@@ -4,11 +4,15 @@ __pycache__/
 *.pyc
 node_modules/
 .next/
+*.tsbuildinfo
+frontend/test-results/
+frontend/playwright-report/
 dist/
 build/
 .venv/
 venv/
 *.log
+*.tsbuildinfo
 data/raw/*
 data/processed/*
 data/synthetic/*

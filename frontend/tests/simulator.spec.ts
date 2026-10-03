@@ -1,0 +1,51 @@
+import { test, expect } from "@playwright/test";
+test("interactive topology, faults, pause, and snapshot publishing", async ({ page }) => {
+  const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
+  await page.route("**/api/telemetry/readings", async route => {
+    const payload = route.request().postDataJSON();
+    expect(payload.readings).toHaveLength(3);
+    expect(payload.readings.every((r: { source: string }) => r.source === "SIMULATOR")).toBeTruthy();
+    await route.fulfill({ json: { accepted: 3 } });
+  });
+  await page.goto("/simulator");
+  await expect(page.getByRole("heading", { name: "Grid simulator" })).toBeVisible();
+  await expect(page.locator("canvas")).toBeVisible();
+  await page.getByRole("button", { name: "Select North residential", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "North residential", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Inject fault on F01", exact: true }).click();
+  await expect(page.getByText("critical / Fault detected", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Clear all injections" }).click();
+  await expect(page.getByText("normal operation", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(page.getByText("PAUSED", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Resume", exact: true }).click();
+  await page.getByRole("button", { name: "Publish snapshot to backend" }).click();
+  await expect(page.getByRole("status")).toContainText("3 simulated readings saved");
+  await page.screenshot({ path: "test-results/simulator-desktop.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("heading", { name: "Node Telemetry" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+  await page.screenshot({ path: "test-results/simulator-mobile.png", fullPage: true });
+  expect(errors).toEqual([]);
+});
+test("backend empty, stale and failure states do not substitute demo telemetry", async ({ page }) => {
+  await page.route("**/api/telemetry/readings?*", route => route.fulfill({ json: [] }));
+  await page.goto("/simulator");
+  await page.getByLabel("Telemetry source").selectOption("live");
+  await expect(page.getByText("NO READINGS YET", { exact: true })).toBeVisible();
+  await expect(page.getByText("No recent telemetry", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Inject fault on F01", exact: true })).toHaveCount(0);
+  await page.route("**/api/telemetry/readings?*", route => route.fulfill({ status: 503, json: {} }));
+  await expect(page.getByText("BACKEND UNAVAILABLE · RETRYING", { exact: true })).toBeVisible({ timeout: 12000 });
+});
+test("real backend snapshot round trip", async ({ page }) => {
+  test.skip(!process.env.TEST_REAL_BACKEND, "Set TEST_REAL_BACKEND=1 with an isolated backend and BACKEND_URL configured.");
+  await page.goto("/simulator");
+  await expect(page.locator("canvas")).toBeVisible();
+  await page.getByRole("button", { name: "Inject fault on F01", exact: true }).click();
+  await page.getByRole("button", { name: "Publish snapshot to backend" }).click();
+  await expect(page.getByRole("status")).toContainText("3 simulated readings saved");
+  await page.getByLabel("Telemetry source").selectOption("live");
+  await expect(page.getByText("CONNECTED", { exact: true })).toBeVisible();
+  await expect(page.getByText("critical / Fault detected", { exact: true })).toBeVisible();
+});

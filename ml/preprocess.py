@@ -5,6 +5,9 @@ import time
 import numpy as np
 import pandas as pd
 from scipy.stats import skew, kurtosis
+from sklearn.ensemble import IsolationForest
+
+from ml.contracts import FEATURE_COLUMNS
 
 # File paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,35 +21,84 @@ def log(msg: str):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}")
 
 
+def get_longest_consecutive_streak(arr_bool):
+    """
+    Compute maximum consecutive True values in a boolean 1D array.
+    """
+    max_streak = 0
+    curr_streak = 0
+    for val in arr_bool:
+        if val:
+            curr_streak += 1
+            if curr_streak > max_streak:
+                max_streak = curr_streak
+        else:
+            curr_streak = 0
+    return max_streak
+
+
+def get_row_streaks(bool_matrix):
+    """
+    Compute longest consecutive True streak for each row in a 2D boolean matrix.
+    """
+    streaks = np.zeros(bool_matrix.shape[0], dtype=int)
+    for i in range(bool_matrix.shape[0]):
+        streaks[i] = get_longest_consecutive_streak(bool_matrix[i])
+    return streaks
+
+
 def preprocess_electricity_theft_data():
     """
     Preprocess Electricity_Theft_Data.csv:
-    - Shape in raw: (9957, 367)
-    - Row 0 is a dummy index row (1.0..365.0) which is dropped.
+    - Raw shape: (9957, 367)
+    - Row 0 dummy index row is dropped.
     - CONS_NO is consumer ID.
     - CHK_STATE is target label (1.0 = theft, 0.0 = normal).
-    - Date columns format: DD-MM-YY (e.g., 01-01-15 to 31-12-15).
+    - Date columns format: DD-MM-YY.
     """
     raw_path = os.path.join(RAW_DIR, "Electricity_Theft_Data.csv")
+    clean_path = os.path.join(PROCESSED_DIR, "clean_electricity_theft.csv")
+    if not os.path.exists(raw_path) and os.path.exists(clean_path):
+        log(f"Raw electricity theft CSV not found. Reusing cleaned dataset {clean_path}...")
+        clean_df = pd.read_csv(clean_path)
+        date_cols = [c for c in clean_df.columns if c not in ["consumer_id", "label"]]
+        labels = clean_df["label"].astype(int)
+        missing_ratio_per_row = np.zeros(len(clean_df))
+        meta = {
+            "dataset_name": "Electricity_Theft_Data",
+            "rows": int(clean_df.shape[0]),
+            "total_days": len(date_cols),
+            "start_date": date_cols[0],
+            "end_date": date_cols[-1],
+            "class_distribution": {
+                "normal_0": int((labels == 0).sum()),
+                "theft_1": int((labels == 1).sum()),
+                "theft_ratio": float((labels == 1).mean())
+            },
+            "missing_before_imputation": None,
+            "missing_after_imputation": 0,
+            "missing_ratio_before": None,
+            "source": "clean_processed_fallback"
+        }
+        return clean_df, meta, date_cols, missing_ratio_per_row
+
     log(f"Loading {raw_path}...")
     df = pd.read_csv(raw_path)
 
-    # 1. Drop dummy row 0 if CONS_NO is NaN and first date column has 1.0
+    # 1. Drop dummy row 0 if CONS_NO is NaN
     if pd.isna(df.iloc[0]["CONS_NO"]):
         log("Dropping dummy index header row (row 0)...")
         df = df.iloc[1:].reset_index(drop=True)
 
-    # 2. Extract and format Consumer ID and Label
+    # 2. Extract consumer ID and target label
     labels = df["CHK_STATE"].fillna(0.0).astype(int)
     consumer_ids = df["CONS_NO"].apply(
         lambda x: f"ETH_{int(float(x))}" if pd.notna(x) else "ETH_UNKNOWN"
     )
 
-    # Date columns are all columns except CONS_NO and CHK_STATE
     date_cols = [c for c in df.columns if c not in ["CONS_NO", "CHK_STATE"]]
 
     # 3. Parse and sort dates chronologically
-    # Date strings are DD-MM-YY -> e.g. 01-01-15 -> 2015-01-01
     dt_map = {}
     for col in date_cols:
         try:
@@ -58,25 +110,22 @@ def preprocess_electricity_theft_data():
     sorted_cols = sorted(date_cols, key=lambda c: dt_map[c])
     formatted_date_cols = [dt_map[c].strftime("%Y-%m-%d") for c in sorted_cols]
 
-    # Reorder time series dataframe
     ts_df = df[sorted_cols].astype(float)
     ts_df.columns = formatted_date_cols
 
-    # 4. Clean invalid consumption (negative values -> NaN)
+    # Replace invalid values
     ts_df[ts_df < 0] = np.nan
 
-    # Track missing values before imputation
     total_cells = ts_df.size
     missing_before = ts_df.isna().sum().sum()
+    missing_ratio_per_row = ts_df.isna().mean(axis=1).values
 
-    # 5. Time-series missing value imputation:
-    # Interpolate linearly across rows, then ffill/bfill, then fill remainder with 0.0
+    # 4. Impute missing time series values
     ts_imputed = ts_df.interpolate(axis=1, method="linear", limit_direction="both")
     ts_imputed = ts_imputed.ffill(axis=1).bfill(axis=1).fillna(0.0)
 
     missing_after = ts_imputed.isna().sum().sum()
 
-    # Combine clean dataframe
     clean_df = pd.DataFrame({"consumer_id": consumer_ids, "label": labels})
     clean_df = pd.concat([clean_df, ts_imputed], axis=1)
 
@@ -100,18 +149,42 @@ def preprocess_electricity_theft_data():
         "missing_ratio_before": float(missing_before / total_cells)
     }
 
-    return clean_df, meta, formatted_date_cols
+    return clean_df, meta, formatted_date_cols, missing_ratio_per_row
 
 
 def preprocess_sgcc_data():
     """
-    Preprocess data.csv (SGCC Electricity Theft Dataset):
-    - Shape: (42372, 1036)
+    Preprocess data.csv (SGCC Dataset):
+    - Raw shape: (42372, 1036)
     - CONS_NO: string ID
-    - FLAG: target label (0 = normal, 1 = theft)
-    - Date columns: 2014/1/1 to 2016/10/31 (1034 daily dates)
+    - FLAG: target label
     """
     raw_path = os.path.join(RAW_DIR, "data.csv")
+    clean_path = os.path.join(PROCESSED_DIR, "clean_sgcc.csv")
+    if not os.path.exists(raw_path) and os.path.exists(clean_path):
+        log(f"Raw SGCC CSV not found. Reusing cleaned dataset {clean_path}...")
+        clean_df = pd.read_csv(clean_path)
+        date_cols = [c for c in clean_df.columns if c not in ["consumer_id", "label"]]
+        labels = clean_df["label"].astype(int)
+        missing_ratio_per_row = np.zeros(len(clean_df))
+        meta = {
+            "dataset_name": "SGCC_Electricity_Theft_Data",
+            "rows": int(clean_df.shape[0]),
+            "total_days": len(date_cols),
+            "start_date": date_cols[0],
+            "end_date": date_cols[-1],
+            "class_distribution": {
+                "normal_0": int((labels == 0).sum()),
+                "theft_1": int((labels == 1).sum()),
+                "theft_ratio": float((labels == 1).mean())
+            },
+            "missing_before_imputation": None,
+            "missing_after_imputation": 0,
+            "missing_ratio_before": None,
+            "source": "clean_processed_fallback"
+        }
+        return clean_df, meta, date_cols, missing_ratio_per_row
+
     log(f"Loading {raw_path}...")
     df = pd.read_csv(raw_path)
 
@@ -120,7 +193,6 @@ def preprocess_sgcc_data():
 
     date_cols = [c for c in df.columns if c not in ["CONS_NO", "FLAG"]]
 
-    # Parse and sort dates chronologically (since raw CSV dates are lexicographically ordered)
     dt_map = {}
     for col in date_cols:
         dt = pd.to_datetime(col, format="%Y/%m/%d")
@@ -129,18 +201,16 @@ def preprocess_sgcc_data():
     sorted_cols = sorted(date_cols, key=lambda c: dt_map[c])
     formatted_date_cols = [dt_map[c].strftime("%Y-%m-%d") for c in sorted_cols]
 
-    # Extract time-series values
     ts_df = df[sorted_cols].astype(float)
     ts_df.columns = formatted_date_cols
 
-    # Clean invalid consumption (negative values -> NaN)
     ts_df[ts_df < 0] = np.nan
 
     total_cells = ts_df.size
     missing_before = ts_df.isna().sum().sum()
+    missing_ratio_per_row = ts_df.isna().mean(axis=1).values
 
     log("Performing time-series missing value imputation for SGCC dataset...")
-    # Fast row-wise interpolation + fill
     ts_imputed = ts_df.interpolate(axis=1, method="linear", limit_direction="both")
     ts_imputed = ts_imputed.ffill(axis=1).bfill(axis=1).fillna(0.0)
 
@@ -169,16 +239,23 @@ def preprocess_sgcc_data():
         "missing_ratio_before": float(missing_before / total_cells)
     }
 
-    return clean_df, meta, formatted_date_cols
+    return clean_df, meta, formatted_date_cols, missing_ratio_per_row
 
 
-def extract_features(clean_df, date_cols, dataset_name):
+def extract_enhanced_features(clean_df, date_cols, missing_ratio_per_row, dataset_name):
     """
-    Extract statistical and behavioral baseline features for ML models and Consumer Profiles.
+    Extract comprehensive statistical, temporal, and anomaly baseline features.
+    Includes:
+    - Personal baseline (mean, median, std, min, max, iqr, skewness, kurtosis, load_factor, cv)
+    - Multi-window temporal features (last 7, 14, 30-day means, historical mean)
+    - Recent vs historical ratio & drop percentage
+    - Zero streaks, sustained low streaks, flatline ratio
+    - Rolling volatility change
+    - Auxiliary Isolation Forest Anomaly Score
     """
-    log(f"Extracting consumer baseline features for {dataset_name}...")
+    log(f"Extracting enhanced baseline & temporal features for {dataset_name}...")
     ts_data = clean_df[date_cols].values
-    n_consumers = ts_data.shape[0]
+    n_consumers, n_days = ts_data.shape
 
     means = np.mean(ts_data, axis=1)
     medians = np.median(ts_data, axis=1)
@@ -189,28 +266,58 @@ def extract_features(clean_df, date_cols, dataset_name):
     q75 = np.percentile(ts_data, 75, axis=1)
     iqr = q75 - q25
 
-    # Load factor: mean / (max + 1e-6)
     load_factor = means / (maxs + 1e-6)
-    # Coefficient of Variation: std / (mean + 1e-6)
     cv = stds / (means + 1e-6)
 
-    # Zero consumption ratio (< 0.01 kWh)
-    zero_ratio = np.mean(ts_data < 0.01, axis=1)
+    # Multi-window recent means
+    last_7d_mean = np.mean(ts_data[:, -7:], axis=1) if n_days >= 7 else means
+    last_14d_mean = np.mean(ts_data[:, -14:], axis=1) if n_days >= 14 else means
+    last_30d_mean = np.mean(ts_data[:, -30:], axis=1) if n_days >= 30 else means
+
+    historical_mean = np.mean(ts_data[:, :-14], axis=1) if n_days > 14 else means
+
+    recent_vs_hist_ratio = last_14d_mean / (historical_mean + 1e-6)
+    recent_vs_hist_drop_pct = np.clip(
+        (historical_mean - last_14d_mean) / (historical_mean + 1e-6) * 100.0,
+        -100.0, 100.0
+    )
+
+    # Zero days & streaks
+    zero_days_mask = ts_data < 0.01
+    zero_ratio = np.mean(zero_days_mask, axis=1)
+    longest_zero_streak = get_row_streaks(zero_days_mask)
+
+    # Sustained low consumption streak (< 10% of personal mean)
+    threshold_low = (means * 0.10)[:, np.newaxis]
+    low_days_mask = ts_data < threshold_low
+    sustained_low_streak = get_row_streaks(low_days_mask)
 
     # Day-over-day changes
     diffs = np.diff(ts_data, axis=1)
     max_daily_spike = np.max(diffs, axis=1) if diffs.shape[1] > 0 else np.zeros(n_consumers)
     max_daily_drop = np.abs(np.min(diffs, axis=1)) if diffs.shape[1] > 0 else np.zeros(n_consumers)
 
-    # Skewness and Kurtosis (row-wise)
+    # Flatline ratio (consecutive identical readings)
+    flatline_count = np.sum(np.abs(diffs) < 1e-5, axis=1)
+    flatline_ratio = flatline_count / float(max(1, ts_data.shape[1] - 1))
+
+    # Rolling volatility (last 7 days std vs historical std)
+    recent_7d_std = np.std(ts_data[:, -7:], axis=1) if n_days >= 7 else stds
+    rolling_volatility_change = recent_7d_std / (stds + 1e-6)
+
+    # Skewness & Kurtosis
     skews = skew(ts_data, axis=1, nan_policy="omit")
     kurts = kurtosis(ts_data, axis=1, nan_policy="omit")
     skews = np.nan_to_num(skews, nan=0.0)
     kurts = np.nan_to_num(kurts, nan=0.0)
 
-    # Flatline days ratio: consecutive identical readings
-    flatline_count = np.sum(np.abs(diffs) < 1e-5, axis=1)
-    flatline_ratio = flatline_count / float(ts_data.shape[1] - 1)
+    # Auxiliary Isolation Forest Anomaly Feature
+    log(f"Computing auxiliary Isolation Forest score feature for {dataset_name}...")
+    iso = IsolationForest(n_estimators=100, contamination=0.1, random_state=42, n_jobs=-1)
+    base_features = np.column_stack([means, stds, load_factor, cv, zero_ratio, flatline_ratio])
+    iso.fit(base_features)
+    iso_scores = -iso.score_samples(base_features)
+    iso_anomaly_score = (iso_scores - iso_scores.min()) / (iso_scores.max() - iso_scores.min() + 1e-6)
 
     feature_df = pd.DataFrame({
         "consumer_id": clean_df["consumer_id"],
@@ -225,11 +332,23 @@ def extract_features(clean_df, date_cols, dataset_name):
         "kurtosis": np.round(kurts, 4),
         "load_factor": np.round(load_factor, 4),
         "cv": np.round(cv, 4),
+        "last_7d_mean": np.round(last_7d_mean, 4),
+        "last_14d_mean": np.round(last_14d_mean, 4),
+        "last_30d_mean": np.round(last_30d_mean, 4),
+        "historical_mean": np.round(historical_mean, 4),
+        "recent_vs_hist_ratio": np.round(recent_vs_hist_ratio, 4),
+        "recent_vs_hist_drop_pct": np.round(recent_vs_hist_drop_pct, 4),
         "zero_days_ratio": np.round(zero_ratio, 4),
+        "longest_zero_streak": longest_zero_streak,
+        "sustained_low_streak": sustained_low_streak,
         "flatline_ratio": np.round(flatline_ratio, 4),
         "max_daily_spike": np.round(max_daily_spike, 4),
-        "max_daily_drop": np.round(max_daily_drop, 4)
+        "max_daily_drop": np.round(max_daily_drop, 4),
+        "rolling_volatility_change": np.round(rolling_volatility_change, 4),
+        "missing_reading_ratio": np.round(missing_ratio_per_row, 4),
+        "isolation_forest_anomaly_score": np.round(iso_anomaly_score, 4)
     })
+    feature_df = feature_df[["consumer_id", "label"] + FEATURE_COLUMNS]
 
     out_file = os.path.join(PROCESSED_DIR, f"features_{dataset_name.lower()}.csv")
     feature_df.to_csv(out_file, index=False)
@@ -237,13 +356,19 @@ def extract_features(clean_df, date_cols, dataset_name):
     return feature_df
 
 
-def generate_telemetry_schema_sample(clean_df, date_cols, n_consumers=50, n_days=30):
+def generate_telemetry_schema_sample(clean_df, date_cols, n_consumers=100, n_days=30):
     """
-    Generate long-format telemetry dataset sample adhering to the Electron DB schema:
-    consumer_id, timestamp, voltage, current, power, energy, meter_status, communication_status
+    Generate telemetry sample file adhering to Electron DB schema.
     """
     log("Generating telemetry sample according to Electron schema...")
-    sample_df = clean_df.head(n_consumers)
+    label_counts = clean_df["label"].value_counts()
+    if {0, 1}.issubset(set(label_counts.index)):
+        per_class = max(1, n_consumers // 2)
+        normal_df = clean_df[clean_df["label"] == 0].head(per_class)
+        anomaly_df = clean_df[clean_df["label"] == 1].head(per_class)
+        sample_df = pd.concat([normal_df, anomaly_df], ignore_index=True).head(n_consumers)
+    else:
+        sample_df = clean_df.head(n_consumers)
     selected_dates = date_cols[:n_days]
 
     records = []
@@ -252,11 +377,10 @@ def generate_telemetry_schema_sample(clean_df, date_cols, n_consumers=50, n_days
         label = row["label"]
         for d in selected_dates:
             energy_val = float(row[d])
-            # Simulated telemetry values based on daily energy
-            voltage = round(np.random.normal(230.0, 3.5), 2)
+            voltage = round(float(np.random.normal(230.0, 3.5)), 2)
             current = round(energy_val / (230.0 * 0.9 / 1000.0 + 1e-4), 2) if energy_val > 0 else 0.0
             power = round(voltage * current * 0.9 / 1000.0, 3)
-            
+
             meter_status = "FAULT" if (label == 1 and np.random.rand() < 0.2) else "NORMAL"
             comm_status = "DISCONNECTED" if (energy_val == 0 and np.random.rand() < 0.3) else "CONNECTED"
 
@@ -279,27 +403,24 @@ def generate_telemetry_schema_sample(clean_df, date_cols, n_consumers=50, n_days
 
 
 def main():
-    log("Starting Data Preprocessing Pipeline for Electron Project...")
+    log("Starting Enhanced Feature Preprocessing Pipeline for Electron...")
     start_t = time.time()
 
-    # Process Dataset 1: Electricity Theft Data
-    clean_eth, meta_eth, dates_eth = preprocess_electricity_theft_data()
-    features_eth = extract_features(clean_eth, dates_eth, "electricity_theft")
+    clean_eth, meta_eth, dates_eth, miss_eth = preprocess_electricity_theft_data()
+    features_eth = extract_enhanced_features(clean_eth, dates_eth, miss_eth, "electricity_theft")
 
-    # Process Dataset 2: SGCC Data
-    clean_sgcc, meta_sgcc, dates_sgcc = preprocess_sgcc_data()
-    features_sgcc = extract_features(clean_sgcc, dates_sgcc, "sgcc")
+    clean_sgcc, meta_sgcc, dates_sgcc, miss_sgcc = preprocess_sgcc_data()
+    features_sgcc = extract_enhanced_features(clean_sgcc, dates_sgcc, miss_sgcc, "sgcc")
 
-    # Generate schema telemetry sample
     generate_telemetry_schema_sample(clean_eth, dates_eth, n_consumers=100, n_days=30)
 
-    # Save Metadata summary JSON
     overall_meta = {
         "processed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         "datasets": {
             "electricity_theft": meta_eth,
             "sgcc": meta_sgcc
         },
+        "feature_count": features_sgcc.shape[1] - 2,
         "processed_files": [
             "data/processed/clean_electricity_theft.csv",
             "data/processed/clean_sgcc.csv",
@@ -313,8 +434,7 @@ def main():
     with open(meta_path, "w") as f:
         json.dump(overall_meta, f, indent=2)
 
-    log(f"Pipeline completed successfully in {time.time() - start_t:.2f} seconds.")
-    log(f"Metadata written to {meta_path}")
+    log(f"Enhanced preprocessing completed in {time.time() - start_t:.2f} seconds.")
 
 
 if __name__ == "__main__":

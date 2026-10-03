@@ -1,0 +1,22 @@
+{
+  "CRITICAL": {
+    "count": 202,
+    "actual_theft_count": 132,
+    "precision": 0.6535
+  },
+  "HIGH": {
+    "count": 408,
+    "actual_theft_count": 145,
+    "precision": 0.3554
+  },
+  "MEDIUM": {
+    "count": 1556,
+    "actual_theft_count": 229,
+    "precision": 0.1472
+  },
+  "LOW": {
+    "count": 5684,
+    "actual_theft_count": 245,
+    "precision": 0.0431
+  }
+}

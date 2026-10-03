@@ -1,0 +1,7207 @@
+{
+  "model_version": "xgboost_ranker_v1",
+  "production_model": "XGBoost",
+  "selection_policy": "highest Precision@100, then F2, then PR-AUC; IsolationForest_Aux excluded",
+  "predictions": [
+    {
+      "consumer_id": "ETH_2604280051",
+      "risk_score": 45.2,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5484,
+      "anomaly_score": 0.4516,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 22.98,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 20.2763,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 16.435,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 11.7101,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 11.619,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "065A0C4567EFDA414AAB4880163530FE",
+      "risk_score": 6.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.9327,
+      "anomaly_score": 0.0673,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -18.9402,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 6.09,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 5.23,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 4.54,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 4.0821,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "646F1A3C0E5D841192FAE14C12608FB3",
+      "risk_score": 38.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6126,
+      "anomaly_score": 0.3874,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 32.14,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 30.1807,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 17.48,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 17.0205,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 16.9509,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "3191D7F58959DA4FCDF086F16B566789",
+      "risk_score": 68.6,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.6861,
+      "anomaly_score": 0.6861,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -43.2953,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 35.06,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 22.53,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 17.2221,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 16.9418,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "079E19E7FA044FE327AC2C68399F9D00",
+      "risk_score": 30.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7004,
+      "anomaly_score": 0.2996,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 40.56,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 40.4751,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 25.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 20.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 9.7282,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "2D94B4617A9E4968ADD6A6BEDA60F761",
+      "risk_score": 27.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7263,
+      "anomaly_score": 0.2737,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 58.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 23.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 21.55,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 13.46,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "57B055FCF40D4F766D7C7A6F543D6877",
+      "risk_score": 19.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8007,
+      "anomaly_score": 0.1993,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 22.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 22.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 10.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 5.32,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "9D0E7CA6137CB62DABC937EB4A75B0EC",
+      "risk_score": 13.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8633,
+      "anomaly_score": 0.1367,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 9.76,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 9.76,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -6.792,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 6.0373,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 5.5636,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "187C6BCC6DBC1A9BFBCB7F537E27B6F7",
+      "risk_score": 83.1,
+      "risk_level": "HIGH",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8306,
+      "anomaly_score": 0.8306,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 101.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 101.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 60.83,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 53.82,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "D8806C42B4F1D74B3687D0C5D1A31C5F",
+      "risk_score": 77.7,
+      "risk_level": "HIGH",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.7772,
+      "anomaly_score": 0.7772,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 77.06,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 29.0252,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 28.3539,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 25.7008,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 25.6644,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "00ED3E4E2643B4204EF4850ACA983A97",
+      "risk_score": 12.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8797,
+      "anomaly_score": 0.1203,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 26.525,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 19.22,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 10.18,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 8.67,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 8.6628,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "AC3145FB9ABF9C725CA4BF3CE6E0FFA8",
+      "risk_score": 16.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8307,
+      "anomaly_score": 0.1693,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 164.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 148.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9999,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 7.34,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 5.17,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "32E5292867DE38DF79B2A46D3EB338BC",
+      "risk_score": 46.9,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.531,
+      "anomaly_score": 0.469,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 73.67,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 70.94,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 67.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 56.7573,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 13.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_446320065",
+      "risk_score": 87.2,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.8722,
+      "anomaly_score": 0.8722,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 207.11,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 82.8702,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 82.2378,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 66.385,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 65.87,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "4917A3ECAE9A24E3B5F89E3E35363FC6",
+      "risk_score": 37.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.623,
+      "anomaly_score": 0.377,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 28.07,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 19.8161,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 17.28,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 11.54,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 7.8623,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "B428819EFDC691C6416833C38385437B",
+      "risk_score": 25.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7431,
+      "anomaly_score": 0.2569,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 7.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 6.09,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 5.29,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 2.9271,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 2.9012,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6184C91D100CF2088FB745E71B29749F",
+      "risk_score": 62.4,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.6239,
+      "anomaly_score": 0.6239,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 45.33,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 38.8645,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 25.59,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 21.28,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 14.2576,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "FCA8D8CA77037A1A07F129B24C55E78B",
+      "risk_score": 37.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6272,
+      "anomaly_score": 0.3728,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 42.91,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 24.22,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 22.11,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 14.7343,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 13.8586,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_9192100023",
+      "risk_score": 10.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8962,
+      "anomaly_score": 0.1038,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -48.9936,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 4.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 3.46,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 2.19,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 2.1079,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "89073AE91966584301B2FA9BD7EA8A34",
+      "risk_score": 72.2,
+      "risk_level": "HIGH",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.722,
+      "anomaly_score": 0.722,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 66.36,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 34.2208,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 29.52,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 26.62,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 16.7031,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "97A3C8FC6A077F283150A3843E3AD8E4",
+      "risk_score": 52.2,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5223,
+      "anomaly_score": 0.5223,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 70.8117,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 22.87,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 22.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 22.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 11.5578,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "2C9E145C9657A3646CD814A922F6E98C",
+      "risk_score": 15.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8494,
+      "anomaly_score": 0.1506,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 44.3086,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 29.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.28,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 19.28,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 12.9079,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "2FB54C03BC8ACE9E2FF27CFC9C3C4D23",
+      "risk_score": 12.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8751,
+      "anomaly_score": 0.1249,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -20.6943,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 8.31,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 5.0614,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 4.877,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 4.7729,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "E038F52A7BBA65DF843075AE77499233",
+      "risk_score": 13.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8633,
+      "anomaly_score": 0.1367,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 32.57,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 18.77,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 17.24,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 16.6122,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 13.9846,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "D792A060B11D6D6C62CEB2D2BFB2B3B6",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "80121453570B4C97A06D9FCF9582A6B3",
+      "risk_score": 55.7,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.5573,
+      "anomaly_score": 0.5573,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 38.23,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -36.9076,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 24.26,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.3,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 12.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_2131903141",
+      "risk_score": 12.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8764,
+      "anomaly_score": 0.1236,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 15.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 15.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 10.5984,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_ratio",
+          "value": 5.8977,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6A211ED0C0825FCC2B6728C79A777611",
+      "risk_score": 33.6,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.664,
+      "anomaly_score": 0.336,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 36.6849,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 33.86,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 28.57,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 21.92,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 7.7774,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "520E91BA4EB2B0053EEAE41CD119056F",
+      "risk_score": 10.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8994,
+      "anomaly_score": 0.1006,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 14.6305,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 11.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 11.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 9.07,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 6.71,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "EA3149A264A2E3BA615A98146128D604",
+      "risk_score": 40.4,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.5957,
+      "anomaly_score": 0.4043,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 139.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 139.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -77.8653,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 18.7034,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 15.71,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "C6E25546A74987C871695BC767BAAABB",
+      "risk_score": 12.8,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8723,
+      "anomaly_score": 0.1277,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9984,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 85.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 85.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 5.4763,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 2.1811,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "55DC6E3190E93DF37C32AFA2E8A2DED8",
+      "risk_score": 35.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6469,
+      "anomaly_score": 0.3531,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -35.5547,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 14.57,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 9.96,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 8.37,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 5.6529,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "5B68519FAB74F683B492906915038D7A",
+      "risk_score": 36.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6351,
+      "anomaly_score": 0.3649,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 22.4316,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 13.58,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 9.93,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 9.12,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 4.1203,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "4217FB8FE5CFDFD6A3B318A0ADB6115F",
+      "risk_score": 45.8,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5419,
+      "anomaly_score": 0.4581,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 81.5531,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 51.33,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 36.27,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 30.93,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "iqr_consumption",
+          "value": 19.6325,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "BBE3DCD57B969AAF506AA0D702AEB01C",
+      "risk_score": 28.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7128,
+      "anomaly_score": 0.2872,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 29.82,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.29,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 18.59,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 16.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 14.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "CAE93AC5D0B4A745475AF273F1645AEB",
+      "risk_score": 41.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5901,
+      "anomaly_score": 0.4099,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 34.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 16.4841,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 13.9092,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 13.8782,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 13.55,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "9331BBC8F24ED57D4640D0454D5CD89B",
+      "risk_score": 37.4,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.6265,
+      "anomaly_score": 0.3735,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 389.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 389.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9998,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 33.9963,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 23.33,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "52BEC6651736CB2F5BF21ECC3DFB57D9",
+      "risk_score": 18.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8146,
+      "anomaly_score": 0.1854,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 52.0089,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 39.95,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 23.46,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.24,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 11.2789,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "908E649F0F1987318B6FEB11B76D5996",
+      "risk_score": 11.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.889,
+      "anomaly_score": 0.111,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 17.9239,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 17.64,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 9.3956,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 9.02,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 6.28,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "E29CBBD0FB2A73F6F0E696DBBF8B8DDB",
+      "risk_score": 90.3,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.9033,
+      "anomaly_score": 0.9033,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 164.77,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 107.05,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 102.62,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 87.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 87.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "58CD1AC40936C655A4ED91BE37619D36",
+      "risk_score": 66.0,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.6601,
+      "anomaly_score": 0.6601,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -85.1825,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 21.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 10.9543,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 10.6179,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 9.52,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "4CC084BAE0A607E58EAE37DF6A764EAA",
+      "risk_score": 36.8,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6315,
+      "anomaly_score": 0.3685,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 86.75,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 54.5632,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 50.73,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 45.63,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 20.1818,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "169197C5F1FDBABE722562857B41E9FF",
+      "risk_score": 25.4,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.746,
+      "anomaly_score": 0.254,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9996,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 90.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 90.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 27.1934,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 4.5254,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_1055109393",
+      "risk_score": 66.4,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.6641,
+      "anomaly_score": 0.6641,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 32.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 30.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -20.7769,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 19.37,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 15.06,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F50E45B0751AF0EE74B45E7DB81797F4",
+      "risk_score": 6.5,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.9348,
+      "anomaly_score": 0.0652,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 626.6502,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 611.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 611.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.637,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 23.8084,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "1AF8B831825C7D216CB5BD976AB4C7B8",
+      "risk_score": 9.1,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.909,
+      "anomaly_score": 0.091,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 758.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 758.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_ratio",
+          "value": 5.6399,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 4.39,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_7793314033",
+      "risk_score": 35.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6427,
+      "anomaly_score": 0.3573,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 39.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 29.4515,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 11.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 6.38,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 6.13,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "76E8995B3E91B59856BA9FD9800551F3",
+      "risk_score": 14.4,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8563,
+      "anomaly_score": 0.1437,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 556.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 556.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 94.9302,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 28.8025,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 4.2337,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "A908805686CD3BD5E70A724A8C49B3D5",
+      "risk_score": 4.5,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.9553,
+      "anomaly_score": 0.0447,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 787.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 787.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 512.0019,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 95.1475,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 22.6716,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6402696E51AFB858ADD0A5096450FC99",
+      "risk_score": 43.2,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.5679,
+      "anomaly_score": 0.4321,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 482.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 482.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 23.99,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 14.66,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "53576A14CE9808AD44F6903165BAE216",
+      "risk_score": 25.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7494,
+      "anomaly_score": 0.2506,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 46.2042,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 13.15,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 6.58,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 6.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 6.3794,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "E4E1CC8CB2D24AABC0030B754B685452",
+      "risk_score": 31.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6904,
+      "anomaly_score": 0.3096,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 98.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -27.2883,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 19.33,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 17.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 11.54,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6D92A7D23552AAE7E41044466473D810",
+      "risk_score": 73.7,
+      "risk_level": "HIGH",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.7368,
+      "anomaly_score": 0.7368,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 57.8,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 29.81,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.55,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 16.4713,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 15.9186,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "7749A5D624493A21FFA60E128072755C",
+      "risk_score": 31.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6859,
+      "anomaly_score": 0.3141,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 25.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 25.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 22.29,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 21.8328,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 17.35,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "EF7AB22C5DD176581BF2298EF26F872B",
+      "risk_score": 29.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7011,
+      "anomaly_score": 0.2989,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 744.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 576.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9993,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 37.1087,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 6.0608,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6EE0FC0BC932BF71BDE8514B2AD95F81",
+      "risk_score": 41.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5858,
+      "anomaly_score": 0.4142,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 46.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -34.0611,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 32.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.55,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 16.864,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "34BDB6B6E77719F6B08941D26749DE67",
+      "risk_score": 40.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5911,
+      "anomaly_score": 0.4089,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 41.2516,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 20.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 12.43,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 7.85,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 7.02,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "8F39A72A4103FAF935074E34842049D8",
+      "risk_score": 26.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7386,
+      "anomaly_score": 0.2614,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 15.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 9.26,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 7.86,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 6.8414,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 6.7418,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "1A960FE5D5EC44FDA18A7E6A38E36BB1",
+      "risk_score": 28.1,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7187,
+      "anomaly_score": 0.2813,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 402.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 402.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 134.6477,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9987,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 11.74,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "FFB05EF8BA8CA682AB9AB58D6089C1CC",
+      "risk_score": 14.8,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8522,
+      "anomaly_score": 0.1478,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 66.62,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 66.62,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 36.42,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 28.8072,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 20.8789,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "0D92640C6CD4EE28EF0D37C860D40918",
+      "risk_score": 13.6,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8644,
+      "anomaly_score": 0.1356,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 19.1829,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 9.3,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 5.31,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 5.2146,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 5.2011,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "4E4A9A4A8CE241227D0BFD9A02B1EF13",
+      "risk_score": 54.6,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.5459,
+      "anomaly_score": 0.5459,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 57.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 50.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 49.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 28.96,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 26.22,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_9764300067",
+      "risk_score": 22.8,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7722,
+      "anomaly_score": 0.2278,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 365.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2565,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_6337160250",
+      "risk_score": 91.8,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.9177,
+      "anomaly_score": 0.9177,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 75.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -69.8623,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 45.74,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 36.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 35.7221,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_4775137657",
+      "risk_score": 12.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.871,
+      "anomaly_score": 0.129,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 15.03,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 9.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -7.6801,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 7.57,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 6.2381,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "3AD704592967876CA7C1DD796EDDA94E",
+      "risk_score": 7.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.9212,
+      "anomaly_score": 0.0788,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 1029.001,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 854.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 854.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.5937,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 32.1092,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "1C090A25BA5991349EB940D839A3084A",
+      "risk_score": 40.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5959,
+      "anomaly_score": 0.4041,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 50.7401,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 39.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 18.8,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 18.78,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 17.0843,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "21233356ECDCC4F701C4C7FD39209E4F",
+      "risk_score": 12.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8795,
+      "anomaly_score": 0.1205,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -12.6173,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 5.25,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 2.5036,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 2.4414,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 2.419,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "13C08F35FABA74954D1F6FF895D08317",
+      "risk_score": 48.6,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5142,
+      "anomaly_score": 0.4858,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 36.532,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 23.52,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 19.01,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 17.1954,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 17.1103,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "68532AF487E70C7D1A88E9A8EEB84F45",
+      "risk_score": 31.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.681,
+      "anomaly_score": 0.319,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 15.58,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 7.91,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 7.18,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -6.3417,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 5.5586,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "63DC41DFAFB0865CFF56978C5A3495F9",
+      "risk_score": 56.1,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5611,
+      "anomaly_score": 0.5611,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 80.2787,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 66.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 21.21,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 21.12,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "iqr_consumption",
+          "value": 15.8243,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "A4D7027A38B32292B79F0495F765D523",
+      "risk_score": 88.3,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.8835,
+      "anomaly_score": 0.8835,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 85.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 64.65,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 64.43,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 48.8468,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 28.7233,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "1D3CB38D76AC314C7A0502096A857A19",
+      "risk_score": 42.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5775,
+      "anomaly_score": 0.4225,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 33.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 23.1448,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 22.01,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 21.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 17.2,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "891E8EC1987AFA0DDD57AC80524DE4B2",
+      "risk_score": 68.0,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.6796,
+      "anomaly_score": 0.6796,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 110.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 97.8,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 94.2859,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 94.2476,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 91.9714,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "7007AA54F17706C7761A8E5FBFA5C48B",
+      "risk_score": 7.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.923,
+      "anomaly_score": 0.077,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 653502.79,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 653501.1,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 326749.25,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "std_consumption",
+          "value": 22701.8796,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 964.2895,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_3584430160",
+      "risk_score": 9.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.9096,
+      "anomaly_score": 0.0904,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 5.5062,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 3.77,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 2.63,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 2.2,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 1.5256,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "498BB2E993E1EB3ABED95BA728E6E341",
+      "risk_score": 63.1,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.6314,
+      "anomaly_score": 0.6314,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 154.25,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 90.2155,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 90.1762,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 88.1929,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 87.3143,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_7222340062",
+      "risk_score": 93.8,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.9384,
+      "anomaly_score": 0.9384,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 39.17,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -36.246,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 30.0657,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 27.29,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 25.2873,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "199C2D3AABBF69EBD8956DDC8CBA60C4",
+      "risk_score": 40.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.599,
+      "anomaly_score": 0.401,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 17.97,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 17.1857,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 8.3327,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 8.3133,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 8.1313,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_9480014383",
+      "risk_score": 23.6,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7638,
+      "anomaly_score": 0.2362,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 79.3439,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 17.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 10.9562,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 9.69,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 6.2,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "2B981D4283253BA362DB2915358B88BF",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_3114280051",
+      "risk_score": 22.8,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7722,
+      "anomaly_score": 0.2278,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 365.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2565,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "253D745568BE48EF938A2B4C09F25685",
+      "risk_score": 33.8,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6618,
+      "anomaly_score": 0.3382,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 81.262,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 12.37,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 12.37,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 10.0636,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 9.9529,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "9951437B910346B87F38DDFB77D89451",
+      "risk_score": 89.7,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.897,
+      "anomaly_score": 0.897,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 157.35,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 157.35,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 102.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 95.31,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "iqr_consumption",
+          "value": 95.1075,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "EC171F9E8475CA4BB70FC49DF46BDDB2",
+      "risk_score": 32.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6731,
+      "anomaly_score": 0.3269,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 35.38,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.38,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 19.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 11.2181,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 11.2044,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_2814968250",
+      "risk_score": 2.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.9713,
+      "anomaly_score": 0.0287,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 21.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 12.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -3.6481,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 1.83,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 1.44,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "FB97D0D92A2CA6AF7C129F7EA741BCD3",
+      "risk_score": 28.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7189,
+      "anomaly_score": 0.2811,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 55.1694,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 26.17,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 15.92,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 15.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 10.6369,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6EE378353106E9011A57850CF6BDF62B",
+      "risk_score": 13.4,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8662,
+      "anomaly_score": 0.1338,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 106.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 61.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 10.7202,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 8.8676,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 5.19,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "7449558354D9A015EC7B44269DBBE3A4",
+      "risk_score": 37.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6298,
+      "anomaly_score": 0.3702,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 62.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 28.3519,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 28.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -18.0486,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 17.11,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_10581700",
+      "risk_score": 24.2,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7581,
+      "anomaly_score": 0.2419,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 27.7826,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 25.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 25.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 9.4245,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 8.55,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "CF5DF466751C40613FBD219465268524",
+      "risk_score": 32.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6713,
+      "anomaly_score": 0.3287,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 80.8945,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 22.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 16.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 16.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 15.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F2A1C6646C3B5AA9AF2AE46353C22AF3",
+      "risk_score": 20.2,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7975,
+      "anomaly_score": 0.2025,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 35.4038,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 19.73,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 8.49,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 8.46,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 7.2417,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "DA802660C2B52123FE29038924E8F2F9",
+      "risk_score": 12.7,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8732,
+      "anomaly_score": 0.1268,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 952.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 952.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_ratio",
+          "value": 74.4078,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 57.0852,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6265D4C3C57BD3C2EBD221E0589D075E",
+      "risk_score": 33.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6611,
+      "anomaly_score": 0.3389,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 38.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 34.0893,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 24.47,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 17.83,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 13.5139,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "2C192FBEE78C6EF5E0217A42ADA3BA05",
+      "risk_score": 69.5,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.6953,
+      "anomaly_score": 0.6953,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 118.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 100.07,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 65.33,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 22.4129,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "std_consumption",
+          "value": 15.5009,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_5576610060",
+      "risk_score": 16.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.839,
+      "anomaly_score": 0.161,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 22.6906,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 21.03,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 8.8,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 8.2,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 7.9199,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_2280924383",
+      "risk_score": 10.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8973,
+      "anomaly_score": 0.1027,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 166.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 98.634,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 30.2051,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 11.1,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 8.25,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "456684F06F092A3443A8EBC247411BE3",
+      "risk_score": 76.4,
+      "risk_level": "HIGH",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.7638,
+      "anomaly_score": 0.7638,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 114.69,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 65.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 54.155,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 52.7157,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 52.5337,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "1D7505AF2EF9B5E34CE4BA3B081C71E6",
+      "risk_score": 50.0,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5004,
+      "anomaly_score": 0.5004,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 66.03,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 48.4269,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 22.18,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 21.42,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 16.3087,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "C66DE52D41C5F107B785292B40B91C8C",
+      "risk_score": 69.2,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.692,
+      "anomaly_score": 0.692,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -60.3832,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 15.35,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 12.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 10.96,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 10.5457,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "AEC033BA069D6B2609B27D189565734F",
+      "risk_score": 17.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8267,
+      "anomaly_score": 0.1733,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -61.707,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 5.81,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 3.4214,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 3.3486,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 3.3353,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_2940100023",
+      "risk_score": 10.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8962,
+      "anomaly_score": 0.1038,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 10.04,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 8.4368,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 5.0223,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 5.006,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 4.99,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_2545430160",
+      "risk_score": 59.3,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.5932,
+      "anomaly_score": 0.5932,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 41.78,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 27.9577,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 15.61,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 9.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 6.1729,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "27387A7AD78E6B2DFFC9AC778BF09393",
+      "risk_score": 6.7,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.9332,
+      "anomaly_score": 0.0668,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 778.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 778.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 421.1891,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9895,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 20.1121,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "9F1C06215DEBA01D2624E2E5C75EDB86",
+      "risk_score": 27.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7298,
+      "anomaly_score": 0.2702,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 15.9214,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 10.15,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 5.1,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 4.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 4.2834,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "0C7F9D63727293933BFE4B03588F6C92",
+      "risk_score": 68.5,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.6855,
+      "anomaly_score": 0.6855,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -75.5034,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 30.14,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 16.39,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 14.2321,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 14.1657,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_4411019057",
+      "risk_score": 25.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7461,
+      "anomaly_score": 0.2539,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 44.7792,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 31.53,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 20.04,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 15.438,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 15.37,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F63F47928ADFBC488B161BEBA4C7BB20",
+      "risk_score": 38.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6109,
+      "anomaly_score": 0.3891,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 96.051,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -52.2263,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 33.29,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 18.49,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 13.74,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "84243C4B540AA4822D6B9F16571007DD",
+      "risk_score": 16.2,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8378,
+      "anomaly_score": 0.1622,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 94.8405,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 19.46,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 15.59,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 14.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 12.34,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "0CB89981F61A62FB9C6A95740B9A98FE",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_1965096020",
+      "risk_score": 19.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8014,
+      "anomaly_score": 0.1986,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 15.1192,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 5.94,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 3.38,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 3.36,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 2.3229,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "BDFDB0BFF82C8645A3E3D5C38C8F71D4",
+      "risk_score": 50.1,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.5014,
+      "anomaly_score": 0.5014,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 423.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 423.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 46.8291,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 45.83,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 22.5,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_6393280051",
+      "risk_score": 55.7,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5574,
+      "anomaly_score": 0.5574,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 35.9242,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 14.89,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 11.205,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 9.8867,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 9.7505,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "67F2A2E2F09F681E9B6549FD7498DF82",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "E80AB94A3414C47C164D7BF8CC4BAB12",
+      "risk_score": 41.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5829,
+      "anomaly_score": 0.4171,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 52.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 25.57,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 25.35,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 20.4611,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 20.4256,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "7E1A7E7B05F9DAEE1B0C26E76300F699",
+      "risk_score": 31.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6834,
+      "anomaly_score": 0.3166,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 28.6357,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 27.8025,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 23.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 16.74,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 15.64,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "4D6E705E915608F53C8FD3FAC9E0B792",
+      "risk_score": 17.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8246,
+      "anomaly_score": 0.1754,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 11.73,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 6.93,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 6.77,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 4.9849,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 4.9844,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "72DD894BACD861F44865B1ED21536160",
+      "risk_score": 11.1,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8893,
+      "anomaly_score": 0.1107,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 807.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 807.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_ratio",
+          "value": 4.6327,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "cv",
+          "value": 1.8902,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "E43E170338139F46B7B5D19A2CE24BD7",
+      "risk_score": 43.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5665,
+      "anomaly_score": 0.4335,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 43.3277,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 29.02,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 13.02,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 12.2572,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 12.1853,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "CE29AFF91089DD39690FF190B336E245",
+      "risk_score": 75.5,
+      "risk_level": "HIGH",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7552,
+      "anomaly_score": 0.7552,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 443.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 373.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 45.17,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 35.6,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "38DE60FADC2D55058B9BE8C3412C061C",
+      "risk_score": 42.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5746,
+      "anomaly_score": 0.4254,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 65.4185,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 21.07,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 11.3853,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 11.3721,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 11.3229,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "DD2886201F78D97C3A3E418F382B8D58",
+      "risk_score": 49.0,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5095,
+      "anomaly_score": 0.4905,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 34.64,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 18.85,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 18.5331,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 18.48,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 12.6099,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "E9347822779366524865602232140568",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_1251924383",
+      "risk_score": 12.2,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.878,
+      "anomaly_score": 0.122,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -23.5199,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 5.31,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 3.14,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 3.14,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 2.7414,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "223A025F6B0C111FE0F84E8D1B29D1B3",
+      "risk_score": 18.4,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8157,
+      "anomaly_score": 0.1843,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 295.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 269.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -12.7681,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 10.61,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 9.03,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "790BB3C48F00246A376BFA94DD9D604C",
+      "risk_score": 29.2,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7083,
+      "anomaly_score": 0.2917,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 31.1325,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 24.74,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 14.52,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 11.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 8.78,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "7B5BDCAAC94BC21C5BAF81ACB14C6BD4",
+      "risk_score": 35.2,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.6475,
+      "anomaly_score": 0.3525,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 92.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 92.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 27.44,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 14.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 13.79,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "D828E8B7437AEBACDA381E0B75150265",
+      "risk_score": 23.5,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7654,
+      "anomaly_score": 0.2346,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 51.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 50.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 26.8169,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 8.93,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 8.145,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F7B37ACCE64D640719E2B266C1C30C75",
+      "risk_score": 50.8,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.5083,
+      "anomaly_score": 0.5083,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 67.52,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 42.1385,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 38.21,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 34.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 34.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "4A842F21EFF627DDC60E15C36F31B8E8",
+      "risk_score": 78.8,
+      "risk_level": "HIGH",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.7882,
+      "anomaly_score": 0.7882,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 177.5,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 78.6,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 74.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 72.3835,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 72.347,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "9798B2AD4DE534CA9538C3933134F1CC",
+      "risk_score": 27.1,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7293,
+      "anomaly_score": 0.2707,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 290.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 290.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9999,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 14.22,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 7.6136,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F801B7AC36AB921678A120E7FFA47CE6",
+      "risk_score": 47.6,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5244,
+      "anomaly_score": 0.4756,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 22.1239,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 19.7201,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 17.1,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 9.01,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 8.81,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "5B8ABDACA0ED3E844B6F87CDCD68FBB2",
+      "risk_score": 47.7,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5227,
+      "anomaly_score": 0.4773,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 40.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 35.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 26.26,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 15.6206,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 10.7643,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "248F439C534E8CB84E700EBD3F1A47C0",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "D33E71F333081C5DA55B26AA57602DAD",
+      "risk_score": 39.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6098,
+      "anomaly_score": 0.3902,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 20.55,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 10.7936,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 10.45,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 8.952,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 8.943,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "1340BE1EF643B462D3A54260169C5259",
+      "risk_score": 8.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.9112,
+      "anomaly_score": 0.0888,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 995.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 995.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 310.2953,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 17.0227,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "B81DBCAAB3118799336D36759B105760",
+      "risk_score": 29.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7015,
+      "anomaly_score": 0.2985,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 20.66,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 12.44,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 9.89,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 6.2071,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 6.1457,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_7258094557",
+      "risk_score": 21.1,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7887,
+      "anomaly_score": 0.2113,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 358.7106,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 283.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 283.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9526,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 18.9767,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "290904C2CA862CA42DCAA04CF9EBB961",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "455CDFC1BE506F4067E1B20CC587596F",
+      "risk_score": 25.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7449,
+      "anomaly_score": 0.2551,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 66.3794,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 11.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 6.6988,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 3.03,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 3.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "DAD8B5BA034732D44DA8AB39121A0CC8",
+      "risk_score": 36.1,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.639,
+      "anomaly_score": 0.361,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 396.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 396.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9999,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 20.27,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 10.65,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "B185FFBC643C16DA8730E516BE098AE3",
+      "risk_score": 34.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6514,
+      "anomaly_score": 0.3486,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 74.7102,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 37.61,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 16.62,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 13.49,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 10.4588,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_8099709057",
+      "risk_score": 81.5,
+      "risk_level": "HIGH",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.8148,
+      "anomaly_score": 0.8148,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 23.91,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 14.52,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 12.053,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 11.25,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 11.25,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "D6A6919AB3C73EB09506DA5FB07980E3",
+      "risk_score": 53.4,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.5345,
+      "anomaly_score": 0.5345,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 82.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 82.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 37.98,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 18.55,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 16.7901,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_8285110033",
+      "risk_score": 15.2,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8481,
+      "anomaly_score": 0.1519,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 21.01,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 12.26,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 10.98,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 9.9625,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 8.5179,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_5541020324",
+      "risk_score": 37.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6256,
+      "anomaly_score": 0.3744,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -31.2249,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 8.19,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 4.57,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 3.363,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 3.3586,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "29464E246DC892EE31064702C9788DD1",
+      "risk_score": 32.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6762,
+      "anomaly_score": 0.3238,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 44.9,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 42.4,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 39.42,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 33.0783,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -20.8292,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_9347970357",
+      "risk_score": 95.2,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.9517,
+      "anomaly_score": 0.9517,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 249.5,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 173.28,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 153.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 116.3436,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -100.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6E60F55979F282003FB76353B29A85BF",
+      "risk_score": 49.7,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.5035,
+      "anomaly_score": 0.4965,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 12.52,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -8.2669,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 5.2371,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 5.1383,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 5.0329,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "D18940ADC653D1BEF0AC25D9064BD7FB",
+      "risk_score": 16.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8361,
+      "anomaly_score": 0.1639,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 18.36,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 15.8556,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 13.65,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 13.133,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 13.1048,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F2E92AE2928A7B8D687049CD118EE828",
+      "risk_score": 82.7,
+      "risk_level": "HIGH",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.8267,
+      "anomaly_score": 0.8267,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 89.68,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 89.68,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 89.68,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 55.2774,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 28.7157,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_6971020324",
+      "risk_score": 27.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7234,
+      "anomaly_score": 0.2766,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 13.23,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 10.838,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 5.12,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 4.63,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 4.5398,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_6670020324",
+      "risk_score": 55.9,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.5593,
+      "anomaly_score": 0.5593,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -37.2779,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 36.06,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 23.4214,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 21.35,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 15.7748,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "975EB29215CC16FC83B54BA87D52834F",
+      "risk_score": 16.1,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8392,
+      "anomaly_score": 0.1608,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 41.48,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 33.7659,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 21.15,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 20.35,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 13.8302,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "FBAAD24B7ACF4B237D20280E7026584D",
+      "risk_score": 16.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8371,
+      "anomaly_score": 0.1629,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 17.621,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 16.29,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 8.605,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 8.5779,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 8.5575,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "EDF60869C47E949C1696560F386D4923",
+      "risk_score": 4.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.9568,
+      "anomaly_score": 0.0432,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 5.1441,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 2.4768,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_ratio",
+          "value": 0.9486,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "load_factor",
+          "value": 0.8829,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": -0.56,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "912D9311F1E75F4963D0A462FDF35994",
+      "risk_score": 15.5,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8451,
+      "anomaly_score": 0.1549,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 997.7208,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 885.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 885.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 98.8794,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 31.4308,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "B2595DC1BB5A02CFDA391C4CD3B1E53F",
+      "risk_score": 72.8,
+      "risk_level": "HIGH",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.7283,
+      "anomaly_score": 0.7283,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 45.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 38.56,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 21.82,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 17.321,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 17.07,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "EF9F4D90267810BD31B90D4B027747AE",
+      "risk_score": 48.8,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.5123,
+      "anomaly_score": 0.4877,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 77.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 51.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -33.8869,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 28.99,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 28.2,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "A322067FBCAA2B8AB45393DD6B2ED028",
+      "risk_score": 27.8,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7222,
+      "anomaly_score": 0.2778,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 29.4362,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 16.11,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 14.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 8.08,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 8.02,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "CFF418FB00E8EDCF9CF877CACB131C5B",
+      "risk_score": 84.5,
+      "risk_level": "HIGH",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.8445,
+      "anomaly_score": 0.8445,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 144.68,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_14d_mean",
+          "value": 78.1821,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 75.3107,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 74.1971,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 60.2266,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "AAFC20216EE45D4F1622217124A65606",
+      "risk_score": 14.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8513,
+      "anomaly_score": 0.1487,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 1034.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2315,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ABE0FAFC9F7C0D4C2F3E5E516491D823",
+      "risk_score": 14.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8565,
+      "anomaly_score": 0.1435,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 63.1424,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 24.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 20.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 15.5194,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 8.93,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "28E85843969E04AD7234A2F79A57993F",
+      "risk_score": 48.9,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5107,
+      "anomaly_score": 0.4893,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 34.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 20.9955,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 15.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 11.41,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 7.2933,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_8201312070",
+      "risk_score": 71.8,
+      "risk_level": "HIGH",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.7178,
+      "anomaly_score": 0.7178,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 116.54,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 75.33,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 64.78,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 37.8644,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 18.4872,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "0D908494A73898C11FFC365647CD4B83",
+      "risk_score": 38.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.62,
+      "anomaly_score": 0.38,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 79.3605,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 35.8002,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 18.21,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 14.9,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 10.85,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "20AA40693ACCDA4A2CFC050EB4650F79",
+      "risk_score": 39.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6012,
+      "anomaly_score": 0.3988,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -16.2035,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 15.03,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 15.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 6.22,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 5.98,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "71BEC86DF3C4DB5AC2D8BAAAD8B1D70F",
+      "risk_score": 19.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8103,
+      "anomaly_score": 0.1897,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 29.38,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 28.8912,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 20.06,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 17.73,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 8.5447,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "0AE2A935E8E6AD5A552033D7AA7E93BB",
+      "risk_score": 18.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8172,
+      "anomaly_score": 0.1828,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 29.84,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 24.7588,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 16.79,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 12.58,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 8.7955,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "BFC38D918D312C0124B4269C0B76F966",
+      "risk_score": 83.6,
+      "risk_level": "HIGH",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.8362,
+      "anomaly_score": 0.8362,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 45.5,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -42.4531,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 23.81,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 21.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 20.0693,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "232F7646C0EDDBADB25CA7CD20259D42",
+      "risk_score": 38.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.6162,
+      "anomaly_score": 0.3838,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 98.6385,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 64.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 46.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 18.72,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "iqr_consumption",
+          "value": 17.08,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_4040203016",
+      "risk_score": 12.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8751,
+      "anomaly_score": 0.1249,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 41.6072,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 25.6292,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 9.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 3.74,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 3.3562,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "A0FCE121D8A3513280B25DDF62F662B0",
+      "risk_score": 48.1,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5194,
+      "anomaly_score": 0.4806,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 1439.93,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 1407.76,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 713.725,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 184.2686,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "std_consumption",
+          "value": 100.9632,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "3E29360222730B7561B5C826CB94A3AB",
+      "risk_score": 41.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5832,
+      "anomaly_score": 0.4168,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -58.5291,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 35.69,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 19.27,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 18.47,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 17.1795,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "0BFDBC62D5673F7D83F6F5B987A7E8A1",
+      "risk_score": 48.0,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "UNCERTAIN",
+      "confidence": 0.5199,
+      "anomaly_score": 0.4801,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 51.4318,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 46.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 15.9,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 14.1789,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 14.0802,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "400802EECD0DD4F20D491FD82794876F",
+      "risk_score": 16.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8363,
+      "anomaly_score": 0.1637,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 30.7023,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 15.91,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 7.25,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 6.29,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 6.1391,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_4570257457",
+      "risk_score": 74.5,
+      "risk_level": "HIGH",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.7452,
+      "anomaly_score": 0.7452,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -40.4468,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 30.98,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 22.97,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 19.42,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 14.2186,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "11F7FD1156804D4D07593288AA135363",
+      "risk_score": 7.9,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.9207,
+      "anomaly_score": 0.0793,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 854.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 854.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 604.5122,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.8358,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": 23.5852,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_370009393",
+      "risk_score": 22.8,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7722,
+      "anomaly_score": 0.2278,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "longest_zero_streak",
+          "value": 365.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "zero_days_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "flatline_ratio",
+          "value": 1.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "isolation_forest_anomaly_score",
+          "value": 0.2565,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 0.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "E1C48102DB1CBE19B3F6DA7BB92BA9C3",
+      "risk_score": 91.1,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.9112,
+      "anomaly_score": 0.9112,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 104.31,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -72.9192,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 39.24,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 37.21,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_7d_mean",
+          "value": 33.2571,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F6D56B769BCB9054E30DCF2D21539511",
+      "risk_score": 42.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.5745,
+      "anomaly_score": 0.4255,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 50.2,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 29.7431,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 25.13,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 23.51,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 16.9885,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6C876C709B7197294CF5F14A20195DD3",
+      "risk_score": 61.0,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.6096,
+      "anomaly_score": 0.6096,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 64.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 58.46,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 50.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 29.24,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 23.34,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "2E478274FC224E6EF1E96AB936724DB6",
+      "risk_score": 12.3,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8766,
+      "anomaly_score": 0.1234,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 36.54,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 27.22,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 25.49,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 9.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 8.4711,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_5921058330",
+      "risk_score": 6.8,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.9323,
+      "anomaly_score": 0.0677,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 17.7703,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 13.07,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 5.8312,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 5.7915,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 5.65,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "B42F9D20C2D73767CBCFBDE499DA55D7",
+      "risk_score": 70.5,
+      "risk_level": "HIGH",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7049,
+      "anomaly_score": 0.7049,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 63.77,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 51.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 50.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 37.32,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 25.0283,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "8B02A85B0EA6287FF64C00EF9CCF0486",
+      "risk_score": 21.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7833,
+      "anomaly_score": 0.2167,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 56.9597,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 27.79,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 19.07,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 15.45,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 10.5732,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "1D98D5805C7D16EFA6121ABB73FB1A9C",
+      "risk_score": 13.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8635,
+      "anomaly_score": 0.1365,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 15.82,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 13.68,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 7.64,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "last_30d_mean",
+          "value": 7.019,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 6.2882,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "F9D9B3BD954E072014E9E9296CDD1A86",
+      "risk_score": 35.9,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.641,
+      "anomaly_score": 0.359,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 33.6506,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 12.64,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 7.8003,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 7.2011,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "median_consumption",
+          "value": 7.19,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "85A1FECDEBB94F27FA6EDFF7D0A6E9B1",
+      "risk_score": 20.6,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7942,
+      "anomaly_score": 0.2058,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 36.2533,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 24.37,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 15.47,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 15.06,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 7.1287,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "6B5610B2AC2081B408EEBDAD24530207",
+      "risk_score": 45.3,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "LEGITIMATE_ABNORMAL_CONSUMPTION",
+      "confidence": 0.5466,
+      "anomaly_score": 0.4534,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -20.7816,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 18.51,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 14.1342,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 13.74,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 9.04,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_1915000211",
+      "risk_score": 81.2,
+      "risk_level": "HIGH",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.8122,
+      "anomaly_score": 0.8122,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 52.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 42.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": -29.5773,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 27.31,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 12.63,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "EE97F1B84BB1F2F9D4DE20D3A7B12641",
+      "risk_score": 22.2,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7775,
+      "anomaly_score": 0.2225,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 39.6951,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 28.15,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 16.83,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 12.2,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 9.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "74764B8797757D861B0F25CCC28119C4",
+      "risk_score": 29.4,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7055,
+      "anomaly_score": 0.2945,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 39.93,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 33.2119,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 18.46,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 15.26,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 10.1074,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "ETH_7921903141",
+      "risk_score": 27.1,
+      "risk_level": "LOW",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.7293,
+      "anomaly_score": 0.2707,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 331.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 330.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 99.9998,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "kurtosis",
+          "value": 9.3871,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 6.99,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "D5212243C9C687D43867AC8C61FFD5F0",
+      "risk_score": 2.7,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.9731,
+      "anomaly_score": 0.0269,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "kurtosis",
+          "value": 24.1463,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 10.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 10.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "skewness",
+          "value": -4.9585,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 2.9702,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "BAFCDBE5D2040AC35D7DD772DA2E241F",
+      "risk_score": 24.5,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.7547,
+      "anomaly_score": 0.2453,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 67.5872,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 26.14,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 26.14,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 12.42,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 11.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "92CF5B48A7A1B5E3EEFDC38C75D17044",
+      "risk_score": 19.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.8097,
+      "anomaly_score": 0.1903,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 85.1059,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 37.32,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 18.81,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 15.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 13.74,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "C572318A94CBF5347DC8875C04C88300",
+      "risk_score": 95.2,
+      "risk_level": "CRITICAL",
+      "predicted_cause": "THEFT_TAMPERING",
+      "confidence": 0.9523,
+      "anomaly_score": 0.9523,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 74.99,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 42.71,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 42.42,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 25.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "sustained_low_streak",
+          "value": 25.0,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "2D4082A7C6C4839863B28CD1D7F06EF1",
+      "risk_score": 6.0,
+      "risk_level": "LOW",
+      "predicted_cause": "NORMAL",
+      "confidence": 0.9396,
+      "anomaly_score": 0.0604,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "max_consumption",
+          "value": 20.46,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_drop",
+          "value": 13.58,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_daily_spike",
+          "value": 11.57,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "historical_mean",
+          "value": 9.6954,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "mean_consumption",
+          "value": 9.6834,
+          "direction": "supports_anomaly"
+        }
+      ]
+    },
+    {
+      "consumer_id": "CDB481529CAA2505C98D486F7D1BC8A5",
+      "risk_score": 55.9,
+      "risk_level": "MEDIUM",
+      "predicted_cause": "METER_MALFUNCTION",
+      "confidence": 0.5592,
+      "anomaly_score": 0.5592,
+      "model_version": "xgboost_ranker_v1",
+      "evidence": [
+        {
+          "feature": "sustained_low_streak",
+          "value": 111.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "longest_zero_streak",
+          "value": 54.0,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "max_consumption",
+          "value": 34.54,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "recent_vs_hist_drop_pct",
+          "value": 16.5338,
+          "direction": "supports_anomaly"
+        },
+        {
+          "feature": "iqr_consumption",
+          "value": 14.7883,
+          "direction": "supports_anomaly"
+        }
+      ]
+    }
+  ]
+}
