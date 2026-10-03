@@ -7,7 +7,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from backend.app.models import Consumer, TelemetryReading, Transformer
+from backend.app.models import AnomalyPrediction, Consumer, InvestigationCase, TelemetryReading, Transformer
+from backend.app.schemas.anomaly import (
+    AnomalyOut,
+    ConsumerAnalysisOut,
+    InvestigationCaseOut,
+    MlPredictionIn,
+)
 from backend.app.schemas.common import CommunicationStatus, MeterStatus, TelemetrySource
 from backend.app.schemas.grid import ConsumerSummary, TransformerSummary
 from backend.app.schemas.telemetry import TelemetryReadingIn, TelemetryReadingOut
@@ -19,6 +25,8 @@ DEFAULT_TRANSFORMERS = {
     "T03": "F02",
     "T04": "F02",
 }
+
+CASE_CREATING_RISK_LEVELS = {"HIGH", "CRITICAL"}
 
 
 class TelemetryRepository:
@@ -78,9 +86,19 @@ class TelemetryRepository:
     def status(self) -> dict:
         telemetry_count = self.db.scalar(select(func.count(TelemetryReading.id))) or 0
         consumer_count = self.db.scalar(select(func.count(Consumer.id))) or 0
+        anomaly_count = self.db.scalar(select(func.count(AnomalyPrediction.id))) or 0
+        high_risk_count = self.db.scalar(
+            select(func.count(AnomalyPrediction.id)).where(AnomalyPrediction.risk_level.in_(CASE_CREATING_RISK_LEVELS))
+        ) or 0
+        active_case_count = self.db.scalar(
+            select(func.count(InvestigationCase.id)).where(InvestigationCase.status != "RESOLVED")
+        ) or 0
         return {
             "telemetry_readings": telemetry_count,
             "consumers": consumer_count,
+            "active_anomalies": anomaly_count,
+            "high_risk_cases": high_risk_count,
+            "active_investigations": active_case_count,
             "latest_timestamp": self.latest_timestamp(),
         }
 
@@ -131,7 +149,91 @@ class TelemetryRepository:
             return None
         return self._transformer_summary(transformer)
 
+    def ingest_predictions(self, predictions: list[MlPredictionIn]) -> tuple[list[AnomalyOut], list[InvestigationCaseOut]]:
+        saved_predictions: list[AnomalyOut] = []
+        created_cases: list[InvestigationCaseOut] = []
+        for prediction in predictions:
+            self._ensure_consumer(prediction.consumer_id)
+            record = AnomalyPrediction(
+                id=str(uuid4()),
+                consumer_id=prediction.consumer_id,
+                anomaly_score=prediction.anomaly_score,
+                risk_score=prediction.risk_score,
+                risk_level=prediction.risk_level,
+                predicted_cause=prediction.predicted_cause,
+                confidence=prediction.confidence,
+                evidence=[item.model_dump() for item in prediction.evidence],
+                model_version=prediction.model_version,
+            )
+            self.db.add(record)
+            self.db.flush()
+            saved_predictions.append(self._to_anomaly_out(record))
+            if prediction.risk_level in CASE_CREATING_RISK_LEVELS:
+                case = self._create_case_for_prediction(record)
+                created_cases.append(self._to_case_out(case))
+        self.db.commit()
+        return saved_predictions, created_cases
+
+    def list_anomalies(self, limit: int = 100) -> list[AnomalyOut]:
+        rows = self.db.scalars(
+            select(AnomalyPrediction).order_by(AnomalyPrediction.risk_score.desc()).limit(limit)
+        ).all()
+        return [self._to_anomaly_out(row) for row in rows]
+
+    def get_anomaly(self, anomaly_id: str) -> AnomalyOut | None:
+        anomaly = self.db.scalar(select(AnomalyPrediction).where(AnomalyPrediction.id == anomaly_id))
+        if anomaly is None:
+            return None
+        return self._to_anomaly_out(anomaly)
+
+    def get_latest_anomaly_for_consumer(self, consumer_id: str) -> AnomalyOut | None:
+        anomaly = self.db.scalar(
+            select(AnomalyPrediction)
+            .where(AnomalyPrediction.consumer_id == consumer_id)
+            .order_by(AnomalyPrediction.created_at.desc())
+            .limit(1)
+        )
+        if anomaly is None:
+            return None
+        return self._to_anomaly_out(anomaly)
+
+    def list_investigation_cases(self, limit: int = 100) -> list[InvestigationCaseOut]:
+        rows = self.db.scalars(
+            select(InvestigationCase).order_by(InvestigationCase.risk_score.desc()).limit(limit)
+        ).all()
+        return [self._to_case_out(row) for row in rows]
+
+    def get_case_for_consumer(self, consumer_id: str) -> InvestigationCaseOut | None:
+        case = self.db.scalar(
+            select(InvestigationCase)
+            .where(InvestigationCase.consumer_id == consumer_id)
+            .order_by(InvestigationCase.created_at.desc())
+            .limit(1)
+        )
+        if case is None:
+            return None
+        return self._to_case_out(case)
+
+    def consumer_analysis(self, consumer_id: str) -> ConsumerAnalysisOut:
+        anomaly = self.get_latest_anomaly_for_consumer(consumer_id)
+        case = self.get_case_for_consumer(consumer_id)
+        if anomaly is None:
+            return ConsumerAnalysisOut(
+                consumer_id=consumer_id,
+                data_available=False,
+                recommended_action="No ML anomaly prediction is available for this consumer.",
+            )
+        return ConsumerAnalysisOut(
+            consumer_id=consumer_id,
+            data_available=True,
+            latest_anomaly=anomaly,
+            investigation_case=case,
+            recommended_action=self._recommended_action(anomaly.risk_level),
+        )
+
     def reset(self) -> None:
+        self.db.execute(delete(InvestigationCase))
+        self.db.execute(delete(AnomalyPrediction))
         self.db.execute(delete(TelemetryReading))
         self.db.execute(delete(Consumer))
         self.db.execute(delete(Transformer))
@@ -169,6 +271,39 @@ class TelemetryRepository:
         self.db.add(consumer)
         self.db.flush()
         return consumer
+
+    def _create_case_for_prediction(self, prediction: AnomalyPrediction) -> InvestigationCase:
+        existing = self.db.scalar(
+            select(InvestigationCase)
+            .where(InvestigationCase.anomaly_id == prediction.id)
+            .limit(1)
+        )
+        if existing is not None:
+            return existing
+        case = InvestigationCase(
+            id=str(uuid4()),
+            case_id=f"CASE-{prediction.consumer_id}-{prediction.id[:8]}",
+            consumer_id=prediction.consumer_id,
+            anomaly_id=prediction.id,
+            risk_score=prediction.risk_score,
+            predicted_cause=prediction.predicted_cause,
+            priority=prediction.risk_level,
+            status="AI_FLAGGED",
+        )
+        self.db.add(case)
+        self.db.flush()
+        return case
+
+    def _recommended_action(self, risk_level: str) -> str:
+        if risk_level == "CRITICAL":
+            return "Immediate field inspection recommended."
+        if risk_level == "HIGH":
+            return "Prioritize for field inspection."
+        if risk_level == "MEDIUM":
+            return "Review evidence and monitor before dispatch."
+        if risk_level == "LOW":
+            return "No immediate field action."
+        return "Evidence is insufficient; keep case under review."
 
     def _transformer_summary(self, transformer: Transformer) -> TransformerSummary:
         consumers = self.db.scalars(
@@ -217,4 +352,32 @@ class TelemetryRepository:
             meter_status=MeterStatus(reading.meter_status),
             communication_status=CommunicationStatus(reading.communication_status),
             source=TelemetrySource(reading.source),
+        )
+
+    def _to_anomaly_out(self, anomaly: AnomalyPrediction) -> AnomalyOut:
+        return AnomalyOut(
+            id=anomaly.id,
+            consumer_id=anomaly.consumer_id,
+            anomaly_score=anomaly.anomaly_score,
+            risk_score=anomaly.risk_score,
+            risk_level=anomaly.risk_level,
+            predicted_cause=anomaly.predicted_cause,
+            confidence=anomaly.confidence,
+            evidence=anomaly.evidence or [],
+            model_version=anomaly.model_version,
+            created_at=anomaly.created_at,
+        )
+
+    def _to_case_out(self, case: InvestigationCase) -> InvestigationCaseOut:
+        return InvestigationCaseOut(
+            id=case.id,
+            case_id=case.case_id,
+            consumer_id=case.consumer_id,
+            anomaly_id=case.anomaly_id,
+            risk_score=case.risk_score,
+            predicted_cause=case.predicted_cause,
+            priority=case.priority,
+            status=case.status,
+            created_at=case.created_at,
+            updated_at=case.updated_at,
         )

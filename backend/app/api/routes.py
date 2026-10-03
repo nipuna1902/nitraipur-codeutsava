@@ -1,8 +1,17 @@
+import json
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import uuid4
 
 from backend.app.database import get_db
+from backend.app.schemas.anomaly import (
+    AnomalyOut,
+    ConsumerAnalysisOut,
+    InvestigationCaseOut,
+    MlPredictionBatchIn,
+    MlPredictionIngestResponse,
+)
 from backend.app.schemas.grid import ConsumerSummary, TransformerSummary
 from backend.app.schemas.telemetry import TelemetryBatchIn, TelemetryIngestResponse, TelemetryReadingOut
 from backend.app.schemas.voice import (
@@ -17,6 +26,9 @@ from backend.app.schemas.voice import (
 from backend.app.services.repository import TelemetryRepository
 
 router = APIRouter()
+
+BASE_DIR = Path(__file__).resolve().parents[3]
+PREDICTIONS_SAMPLE_PATH = BASE_DIR / "ml" / "evaluation" / "predictions_sample.json"
 
 
 @router.get("/health")
@@ -53,9 +65,9 @@ def dashboard_summary(repository: TelemetryRepository = Depends(get_repository))
     return {
         "total_consumers": status["consumers"],
         "telemetry_readings": status["telemetry_readings"],
-        "active_anomalies": 0,
-        "high_risk_cases": 0,
-        "active_investigations": 0,
+        "active_anomalies": status["active_anomalies"],
+        "high_risk_cases": status["high_risk_cases"],
+        "active_investigations": status["active_investigations"],
         "latest_timestamp": status["latest_timestamp"],
     }
 
@@ -86,6 +98,72 @@ def get_consumer_history(
     if not history:
         raise HTTPException(status_code=404, detail="Consumer not found")
     return history
+
+
+@router.get("/consumers/{consumer_id}/analysis", response_model=ConsumerAnalysisOut)
+def get_consumer_analysis(
+    consumer_id: str,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> ConsumerAnalysisOut:
+    return repository.consumer_analysis(consumer_id)
+
+
+@router.post("/ml/predictions", response_model=MlPredictionIngestResponse)
+def ingest_ml_predictions(
+    payload: MlPredictionBatchIn,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> MlPredictionIngestResponse:
+    predictions, cases = repository.ingest_predictions(payload.predictions)
+    return MlPredictionIngestResponse(
+        accepted=len(predictions),
+        cases_created=len(cases),
+        production_model=payload.production_model,
+        model_version=payload.model_version,
+    )
+
+
+@router.post("/ml/predictions/load-sample", response_model=MlPredictionIngestResponse)
+def load_ml_prediction_sample(
+    repository: TelemetryRepository = Depends(get_repository),
+) -> MlPredictionIngestResponse:
+    if not PREDICTIONS_SAMPLE_PATH.exists():
+        raise HTTPException(status_code=404, detail="ML predictions sample file not found")
+    with PREDICTIONS_SAMPLE_PATH.open("r", encoding="utf-8") as f:
+        payload = MlPredictionBatchIn.model_validate(json.load(f))
+    predictions, cases = repository.ingest_predictions(payload.predictions)
+    return MlPredictionIngestResponse(
+        accepted=len(predictions),
+        cases_created=len(cases),
+        production_model=payload.production_model,
+        model_version=payload.model_version,
+    )
+
+
+@router.get("/anomalies", response_model=list[AnomalyOut])
+def list_anomalies(
+    limit: int = 100,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> list[AnomalyOut]:
+    return repository.list_anomalies(limit=max(1, min(limit, 1000)))
+
+
+@router.get("/anomalies/{anomaly_id}", response_model=AnomalyOut)
+def get_anomaly(
+    anomaly_id: str,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> AnomalyOut:
+    anomaly = repository.get_anomaly(anomaly_id)
+    if anomaly is None:
+        raise HTTPException(status_code=404, detail="Anomaly not found")
+    return anomaly
+
+
+@router.get("/investigations", response_model=list[InvestigationCaseOut])
+def list_investigations(
+    limit: int = 100,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> list[InvestigationCaseOut]:
+    return repository.list_investigation_cases(limit=max(1, min(limit, 1000)))
 
 
 @router.get("/transformers", response_model=list[TransformerSummary])
@@ -144,15 +222,25 @@ def voice_consumer_summary(
 
 
 @router.post("/voice/tools/anomaly-evidence", response_model=VoiceToolResponse)
-def voice_anomaly_evidence(payload: ConsumerToolRequest) -> VoiceToolResponse:
+def voice_anomaly_evidence(
+    payload: ConsumerToolRequest,
+    repository: TelemetryRepository = Depends(get_repository),
+) -> VoiceToolResponse:
+    analysis = repository.consumer_analysis(payload.consumer_id)
+    if not analysis.data_available or analysis.latest_anomaly is None:
+        return VoiceToolResponse(
+            data_available=False,
+            message="Anomaly evidence is unavailable because no ML prediction exists for this consumer.",
+            payload={
+                "consumer_id": payload.consumer_id,
+                "predicted_cause": "UNCERTAIN",
+                "evidence": [],
+            },
+        )
     return VoiceToolResponse(
-        data_available=False,
-        message="Anomaly evidence is unavailable because the ML anomaly layer is not integrated yet.",
-        payload={
-            "consumer_id": payload.consumer_id,
-            "predicted_cause": "UNCERTAIN",
-            "evidence": [],
-        },
+        data_available=True,
+        message="Anomaly evidence retrieved from ML prediction records.",
+        payload=analysis.model_dump(),
     )
 
 
