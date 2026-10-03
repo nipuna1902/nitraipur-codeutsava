@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://electron.local/contracts/simulation.schema.json",
+  "title": "SimulationEvent",
+  "type": "object",
+  "required": ["scenario", "target_consumers", "started_at", "ground_truth"],
+  "properties": {
+    "id": { "type": "string" },
+    "scenario": { "enum": ["NORMAL", "THEFT_TAMPERING", "METER_MALFUNCTION", "COMMUNICATION_FAILURE", "SEASONAL_VARIATION", "LEGITIMATE_ABNORMAL_CONSUMPTION", "COORDINATED_THEFT"] },
+    "target_consumers": { "type": "array", "items": { "type": "string" } },
+    "transformer_id": { "type": "string" },
+    "severity": { "type": "number", "minimum": 0, "maximum": 1 },
+    "started_at": { "type": "string", "format": "date-time" },
+    "ended_at": { "type": "string", "format": "date-time" },
+    "ground_truth": {
+      "type": "object",
+      "description": "Known simulator truth used for evaluation, not model output."
+    }
+  },
+  "additionalProperties": false
+}

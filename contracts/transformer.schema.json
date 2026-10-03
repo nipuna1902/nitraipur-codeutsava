@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://electron.local/contracts/transformer.schema.json",
+  "title": "Transformer",
+  "type": "object",
+  "required": ["transformer_id", "feeder_id", "rated_capacity"],
+  "properties": {
+    "id": { "type": "string" },
+    "transformer_id": { "type": "string" },
+    "feeder_id": { "type": "string" },
+    "rated_capacity": { "type": "number", "minimum": 0 },
+    "expected_technical_loss_config": {
+      "type": "object",
+      "description": "Configurable policy for technical loss assumptions; no hard-coded percentage."
+    },
+    "energy_snapshot": {
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "input_energy": { "type": "number" },
+        "consumer_energy": { "type": "number" },
+        "expected_technical_loss": { "type": "number" },
+        "unexplained_loss": { "type": "number" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

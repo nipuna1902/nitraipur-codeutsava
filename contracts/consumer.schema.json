@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://electron.local/contracts/consumer.schema.json",
+  "title": "Consumer",
+  "type": "object",
+  "required": ["consumer_id", "category", "sanctioned_load", "transformer_id", "feeder_id"],
+  "properties": {
+    "id": { "type": "string" },
+    "consumer_id": { "type": "string" },
+    "category": { "type": "string" },
+    "sanctioned_load": { "type": "number", "minimum": 0 },
+    "tariff": { "type": "string" },
+    "transformer_id": { "type": "string" },
+    "feeder_id": { "type": "string" },
+    "area": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

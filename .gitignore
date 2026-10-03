@@ -1,0 +1,17 @@
+.env
+.env.local
+__pycache__/
+*.pyc
+node_modules/
+.next/
+dist/
+build/
+.venv/
+venv/
+*.log
+data/raw/*
+data/processed/*
+data/synthetic/*
+ml/artifacts/*
+!**/.gitkeep
+pictures/

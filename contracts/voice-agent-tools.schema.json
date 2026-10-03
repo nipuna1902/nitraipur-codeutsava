@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://electron.local/contracts/voice-agent-tools.schema.json",
+  "title": "VoiceAgentToolContracts",
+  "type": "object",
+  "properties": {
+    "get_consumer_summary": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["consumer_id"], "properties": { "consumer_id": { "type": "string" } } },
+        "response": { "type": "object", "properties": { "consumer_id": { "type": "string" }, "category": { "type": "string" }, "transformer_id": { "type": "string" }, "risk_score": { "type": "number" }, "data_available": { "type": "boolean" } } }
+      }
+    },
+    "get_consumer_baseline": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["consumer_id"], "properties": { "consumer_id": { "type": "string" } } },
+        "response": { "type": "object", "properties": { "expected_baseline": { "type": "number" }, "historical_mean": { "type": "number" }, "profile_updated_at": { "type": "string", "format": "date-time" }, "data_available": { "type": "boolean" } } }
+      }
+    },
+    "get_peer_comparison": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["consumer_id"], "properties": { "consumer_id": { "type": "string" } } },
+        "response": { "type": "object", "properties": { "peer_group_id": { "type": "string" }, "peer_median": { "type": "number" }, "consumer_deviation": { "type": "number" }, "data_available": { "type": "boolean" } } }
+      }
+    },
+    "get_anomaly_evidence": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["consumer_id"], "properties": { "consumer_id": { "type": "string" } } },
+        "response": { "type": "object", "properties": { "predicted_cause": { "type": "string" }, "risk_score": { "type": "number" }, "evidence": { "type": "array", "items": { "type": "string" } }, "confidence": { "type": "number" }, "data_available": { "type": "boolean" } } }
+      }
+    },
+    "get_transformer_summary": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["transformer_id"], "properties": { "transformer_id": { "type": "string" } } },
+        "response": { "type": "object", "properties": { "transformer_id": { "type": "string" }, "unexplained_loss": { "type": "number" }, "suspicious_consumers": { "type": "array", "items": { "type": "string" } }, "data_available": { "type": "boolean" } } }
+      }
+    },
+    "get_investigation_case": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["case_id"], "properties": { "case_id": { "type": "string" } } },
+        "response": { "$ref": "investigation.schema.json" }
+      }
+    },
+    "get_inspection_checklist": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["case_id"], "properties": { "case_id": { "type": "string" } } },
+        "response": { "type": "object", "properties": { "items": { "type": "array", "items": { "type": "object" } } } }
+      }
+    },
+    "add_field_observation": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["case_id", "observation"], "properties": { "case_id": { "type": "string" }, "observation": { "type": "object" } } },
+        "response": { "type": "object", "properties": { "accepted": { "type": "boolean" }, "observation_id": { "type": "string" }, "requires_confirmation": { "type": "boolean" } } }
+      }
+    },
+    "update_checklist_item": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["case_id", "item_id", "status"], "properties": { "case_id": { "type": "string" }, "item_id": { "type": "string" }, "status": { "type": "string" } } },
+        "response": { "type": "object", "properties": { "updated": { "type": "boolean" }, "requires_confirmation": { "type": "boolean" } } }
+      }
+    },
+    "request_case_resolution": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["case_id", "resolution"], "properties": { "case_id": { "type": "string" }, "resolution": { "type": "object" } } },
+        "response": { "type": "object", "properties": { "accepted": { "type": "boolean" }, "requires_confirmation": { "type": "boolean" } } }
+      }
+    },
+    "generate_case_summary": {
+      "type": "object",
+      "properties": {
+        "arguments": { "type": "object", "required": ["case_id", "language"], "properties": { "case_id": { "type": "string" }, "language": { "enum": ["EN", "HI", "OR", "OTHER"] } } },
+        "response": { "type": "object", "properties": { "summary": { "type": "string" }, "language": { "type": "string" }, "grounding_status": { "type": "string" } } }
+      }
+    }
+  }
+}

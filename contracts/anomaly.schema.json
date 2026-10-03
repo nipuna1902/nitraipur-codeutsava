@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://electron.local/contracts/anomaly.schema.json",
+  "title": "Anomaly",
+  "type": "object",
+  "required": ["consumer_id", "timestamp", "anomaly_score", "risk_score", "predicted_cause"],
+  "properties": {
+    "id": { "type": "string" },
+    "consumer_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "anomaly_score": { "type": "number" },
+    "risk_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "predicted_cause": { "enum": ["NORMAL", "THEFT_TAMPERING", "METER_MALFUNCTION", "COMMUNICATION_FAILURE", "LEGITIMATE_ABNORMAL_CONSUMPTION", "UNCERTAIN"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "personal_deviation": { "type": "number" },
+    "peer_deviation": { "type": "number" },
+    "persistence_score": { "type": "number" },
+    "meter_health_score": { "type": "number" },
+    "communication_health_score": { "type": "number" },
+    "transformer_loss_score": { "type": "number" },
+    "cluster_score": { "type": "number" },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "model_version": { "type": "string" }
+  },
+  "additionalProperties": false
+}
