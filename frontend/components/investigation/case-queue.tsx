@@ -3,7 +3,7 @@ import type { Anomaly, InvestigationCase } from "@/types/dashboard";
 
 type CaseQueueProps = {
   cases: InvestigationCase[];
-  anomalies: Anomaly[];
+  anomalies?: unknown[];
 };
 
 const priorityClass: Record<string, string> = {

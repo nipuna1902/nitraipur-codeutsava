@@ -17,6 +17,15 @@ async function getJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+const emptySummary: DashboardSummary = {
+  total_consumers: 0,
+  telemetry_readings: 0,
+  active_anomalies: 0,
+  high_risk_cases: 0,
+  active_investigations: 0,
+  latest_timestamp: null
+};
+
 export async function getDashboardData(): Promise<DashboardData> {
   try {
     const [summary, anomalies, consumers, investigations, transformers] = await Promise.all([
@@ -27,22 +36,23 @@ export async function getDashboardData(): Promise<DashboardData> {
       getJson<Transformer[]>("/transformers")
     ]);
 
-    const hasDisplayData = anomalies.length > 0 || consumers.length > 0 || investigations.length > 0 || transformers.length > 0;
-
-    if (!hasDisplayData) {
-      return demoData;
-    }
-
     return {
       source: "LIVE API",
       summary,
-      anomalies: anomalies.length ? anomalies : demoData.anomalies,
-      consumers: consumers.length ? consumers : demoData.consumers,
-      investigations: investigations.length ? investigations : demoData.investigations,
-      transformers: transformers.length ? transformers : demoData.transformers
+      anomalies,
+      consumers,
+      investigations,
+      transformers
     };
   } catch {
-    return demoData;
+    return {
+      source: "BACKEND OFFLINE",
+      summary: emptySummary,
+      anomalies: [],
+      consumers: [],
+      investigations: [],
+      transformers: []
+    };
   }
 }
 
