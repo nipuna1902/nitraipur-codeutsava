@@ -1,6 +1,6 @@
 export type Health = "normal" | "warning" | "critical" | "unknown";
 export type GridNode = { id: string; name: string; kind: "Substation" | "Feeder" | "Residential"; position: [number, number, number]; consumers: string[] };
-export type Reading = { consumer_id: string; timestamp: string; voltage: number | null; current: number | null; power: number | null; energy: number; meter_status: string; communication_status: string; source: string };
+export type Reading = { consumer_id: string; timestamp: string; voltage: number | null; current: number | null; power: number | null; energy: number; meter_status?: string; communication_status?: string; source: string };
 export type Telemetry = { voltage: number | null; current: number | null; power: number | null; health: Health; timestamp: string | null };
 export const COLORS: Record<Health, string> = { normal: "#34d399", warning: "#facc15", critical: "#ff4564", unknown: "#64748b" };
 // Dedicated simulator IDs map to the backend's T01, T02 and T03 transformer ranges.
@@ -42,6 +42,6 @@ export function demoReadings(step: number, faults: Set<string>, timestamp = new 
     const faulted = NODES.some(parent => faults.has(parent.id) && parent.consumers.includes(n.consumers[0]));
     const voltage = faulted ? 184 : 230 + Math.sin(step / 3 + index) * 3;
     const current = faulted ? 2.4 : 18 + index * 7 + Math.sin(step / 4 + index) * 4;
-    return { consumer_id: n.consumers[0], timestamp, voltage, current, power: voltage * current * .95 / 1000, energy: 0, meter_status: faulted ? "FAULT" : "NORMAL", communication_status: "CONNECTED", source: "SIMULATOR" };
+    return { consumer_id: n.consumers[0], timestamp, voltage, current, power: voltage * current * .95 / 1000, energy: 0, source: "SIMULATOR" };
   });
 }

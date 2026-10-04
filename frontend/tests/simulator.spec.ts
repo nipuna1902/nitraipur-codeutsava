@@ -5,6 +5,7 @@ test("interactive topology, faults, pause, and snapshot publishing", async ({ pa
     const payload = route.request().postDataJSON();
     expect(payload.readings).toHaveLength(3);
     expect(payload.readings.every((r: { source: string }) => r.source === "SIMULATOR")).toBeTruthy();
+    expect(payload.readings.every((r: { meter_status?: string }) => r.meter_status === undefined)).toBeTruthy();
     await route.fulfill({ json: { accepted: 3 } });
   });
   await page.goto("/simulator");
@@ -97,8 +98,8 @@ test("known injection comparison renders backend conclusion", async ({ page }) =
           duration_ticks: 24
         },
         conclusion: matched
-          ? `Simulated detection matches the injected ground truth: ${profile.cause.replaceAll("_", " ")}.`
-          : `Simulated detection differs from ground truth. Expected ${expected}, predicted ${profile.cause}.`,
+          ? `Backend comparison matches the injected ground truth class: ${profile.cause === "THEFT_TAMPERING" ? "theft/tampering risk" : profile.cause.replaceAll("_", " ").toLowerCase()}.`
+          : `Backend comparison differs from ground truth. Expected ${expected}, predicted ${profile.cause}.`,
         recommended_next_step: "Use this as a judge-safe simulated comparison."
       }
     });
@@ -109,9 +110,9 @@ test("known injection comparison renders backend conclusion", async ({ page }) =
   await expect(page.getByText("Actual Backend Model Output", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Run Detection/ }).click();
   await expect(page.getByText("SIM-TEST")).toBeVisible();
-  await expect(page.getByText("Simulated detection matches the injected ground truth").first()).toBeVisible();
+  await expect(page.getByText("Backend comparison matches the injected ground truth class").first()).toBeVisible();
   await expect(page.getByText("Matched expected")).toBeVisible();
-  await expect(page.getByText("THEFT TAMPERING").last()).toBeVisible();
+  await expect(page.getByText("Theft/tampering risk").last()).toBeVisible();
   await page.getByRole("button", { name: /Missing Packets/ }).click();
   await expect(page.getByText("No backend run")).toBeVisible();
   await page.getByRole("button", { name: /Run Detection/ }).click();

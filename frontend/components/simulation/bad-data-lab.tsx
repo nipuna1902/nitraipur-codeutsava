@@ -204,6 +204,15 @@ type CompareResult = {
   recommended_next_step: string;
 };
 
+function displayCause(cause: string | undefined) {
+  if (!cause) return "Unknown";
+  if (cause === "THEFT_TAMPERING") return "Theft/tampering risk";
+  if (cause === "METER_MALFUNCTION") return "Meter malfunction";
+  if (cause === "COMMUNICATION_FAILURE") return "Communication failure";
+  if (cause === "LEGITIMATE_ABNORMAL_CONSUMPTION") return "Legitimate abnormal usage";
+  return cause.replaceAll("_", " ").toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase());
+}
+
 export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
   const [selected, setSelected] = useState(injections[1]);
   const [consumerId, setConsumerId] = useState(consumers[0]?.consumer_id ?? "");
@@ -376,7 +385,7 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-        <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
         {injections.map((injection) => {
           const Icon = injection.icon;
           const active = selected.id === injection.id;
@@ -386,14 +395,14 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
               type="button"
               onClick={() => setSelected(injection)}
               aria-pressed={active}
-              className={`min-h-28 cursor-pointer rounded-lg border p-4 text-left transition ${
+              className={`min-h-36 cursor-pointer rounded-lg border p-4 text-left transition ${
                 active
                   ? "border-teal-500 bg-teal-50 text-slate-950 ring-2 ring-teal-100"
                   : "border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
               }`}
             >
               <Icon size={20} />
-              <p className="mt-3 font-semibold">{injection.label}</p>
+              <p className="mt-3 text-sm font-semibold leading-5 sm:text-base">{injection.label}</p>
               <p className="mt-1 text-sm leading-5 text-slate-500">{injection.explanation}</p>
             </button>
           );
@@ -440,7 +449,7 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
               <p className="font-semibold text-slate-900">Live selection</p>
               <p>Transformer: {transformerId || "None selected"}{selectedTransformer ? ` / ${selectedTransformer.feeder_id}` : ""}</p>
               <p>Available consumers on this transformer: {filteredConsumers.length}</p>
-              <p>Selected consumer: {consumerId || "None selected"}</p>
+              <p className="break-all">Selected consumer: {consumerId || "None selected"}</p>
             </div>
             <label className="grid gap-2 text-sm">
               <span className="text-slate-600">Severity: {severity}%</span>
@@ -494,7 +503,7 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
           <p className="mt-2 text-sm leading-6 text-slate-700">{profile.detectorFocus}</p>
           <div className="mt-4 rounded-lg border border-teal-200 bg-white p-3 text-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">Expected detector class</p>
-            <p className="mt-1 font-semibold text-slate-950">{profile.expectedCause.replaceAll("_", " ")}</p>
+            <p className="mt-1 font-semibold text-slate-950">{displayCause(profile.expectedCause)}</p>
           </div>
         </div>
 
@@ -536,7 +545,7 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
           </p>
           <dl className="mt-4 grid gap-2 text-sm">
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Injection type</dt><dd className="font-medium text-slate-900">{selected.id}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected cause</dt><dd className="text-right font-medium text-slate-900">{profile.expectedCause.replaceAll("_", " ")}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected class</dt><dd className="text-right font-medium text-slate-900">{displayCause(profile.expectedCause)}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Target consumer</dt><dd className="font-medium text-slate-900">{consumerId}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Transformer</dt><dd className="font-medium text-slate-900">{transformerId}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Severity</dt><dd className="font-medium text-slate-900">{severity}%</dd></div>
@@ -552,7 +561,7 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
             This is the answer key for the selected known injection, not a backend response. Use it to explain what the comparator will check after `Run Detection`.
           </p>
           <dl className="mt-4 grid gap-2 text-sm">
-            <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected cause</dt><dd className="text-right font-semibold text-slate-950">{expectedOutput.predicted_cause.replaceAll("_", " ")}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected class</dt><dd className="text-right font-semibold text-slate-950">{displayCause(expectedOutput.predicted_cause)}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk score</dt><dd className="font-semibold text-slate-950">{expectedOutput.risk_score}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Confidence</dt><dd className="font-semibold text-slate-950">{Math.round(expectedOutput.confidence * 100)}%</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Priority</dt><dd className="font-semibold text-slate-950">{expectedOutput.adjusted_priority}</dd></div>
@@ -582,8 +591,8 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Run ID</dt><dd className="font-mono font-medium text-slate-900">{compareResult.run_id}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Model version</dt><dd className="text-right font-medium text-slate-900">{compareResult.model_version}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk engine</dt><dd className="text-right font-semibold text-slate-950">{(compareResult.model_output.risk_engine ?? "UNKNOWN").replaceAll("_", " ")}</dd></div>
-              <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected cause</dt><dd className="text-right font-semibold text-slate-950">{String(compareResult.comparison.expected_cause ?? "UNKNOWN").replaceAll("_", " ")}</dd></div>
-              <div className="flex justify-between gap-4"><dt className="text-slate-500">Predicted cause</dt><dd className="text-right font-semibold text-slate-950">{compareResult.model_output.predicted_cause.replaceAll("_", " ")}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected class</dt><dd className="text-right font-semibold text-slate-950">{displayCause(compareResult.comparison.expected_cause)}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Backend class</dt><dd className="text-right font-semibold text-slate-950">{displayCause(compareResult.model_output.predicted_cause)}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Ground-truth check</dt><dd className="font-semibold text-slate-950">{compareResult.comparison.matches_ground_truth ? "Matched" : "Needs review"}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk score</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.risk_score}</dd></div>
               {compareResult.model_output.raw_trained_risk_score !== undefined && compareResult.model_output.raw_trained_risk_score !== null ? (

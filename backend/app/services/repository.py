@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -102,10 +103,16 @@ class TelemetryRepository:
                 except IntegrityError:
                     self.db.rollback()
 
-    def ingest(self, readings: list[TelemetryReadingIn]) -> list[TelemetryReadingOut]:
+    def ingest(self, readings: list[TelemetryReadingIn]) -> tuple[list[TelemetryReadingOut], int, dict[str, int]]:
         saved: list[TelemetryReadingOut] = []
+        created_reports = 0
+        meter_status_counts: Counter[str] = Counter()
         for reading in readings:
             self._ensure_consumer(reading.consumer_id)
+            recent = self._recent_telemetry_models(reading.consumer_id, limit=8)
+            communication_status = self._derive_communication_status(reading)
+            meter_status = self._derive_meter_status(reading, recent, communication_status)
+            meter_status_counts[meter_status.value] += 1
             record = TelemetryReading(
                 id=str(uuid4()),
                 consumer_id=reading.consumer_id,
@@ -114,14 +121,18 @@ class TelemetryRepository:
                 current=reading.current,
                 power=reading.power,
                 energy=reading.energy,
-                meter_status=reading.meter_status.value,
-                communication_status=reading.communication_status.value,
+                meter_status=meter_status.value,
+                communication_status=communication_status.value,
                 source=reading.source.value,
             )
             self.db.add(record)
+            self.db.flush()
+            if self._should_create_telemetry_anomaly(meter_status, communication_status):
+                self._create_prediction_for_telemetry_status(record, meter_status, communication_status, recent)
+                created_reports += 1
             saved.append(self._to_telemetry_out(record))
         self.db.commit()
-        return saved
+        return saved, created_reports, dict(meter_status_counts)
 
     def list_telemetry(self, limit: int = 100) -> list[TelemetryReadingOut]:
         rows = self.db.scalars(
@@ -195,6 +206,106 @@ class TelemetryRepository:
             .limit(limit)
         ).all()
         return [self._to_telemetry_out(row) for row in reversed(rows)]
+
+    def _recent_telemetry_models(self, consumer_id: str, limit: int = 8) -> list[TelemetryReading]:
+        return list(
+            self.db.scalars(
+                select(TelemetryReading)
+                .where(TelemetryReading.consumer_id == consumer_id)
+                .order_by(TelemetryReading.timestamp.desc())
+                .limit(limit)
+            ).all()
+        )
+
+    def _derive_communication_status(self, reading: TelemetryReadingIn) -> CommunicationStatus:
+        numeric_values = [reading.voltage, reading.current, reading.power]
+        missing_count = sum(value is None for value in numeric_values)
+        if missing_count == len(numeric_values):
+            return CommunicationStatus.DISCONNECTED
+        if missing_count:
+            return CommunicationStatus.DEGRADED
+        return reading.communication_status or CommunicationStatus.CONNECTED
+
+    def _derive_meter_status(
+        self,
+        reading: TelemetryReadingIn,
+        recent: list[TelemetryReading],
+        communication_status: CommunicationStatus,
+    ) -> MeterStatus:
+        if communication_status == CommunicationStatus.DISCONNECTED:
+            return MeterStatus.UNKNOWN
+
+        recent_power = [row.power for row in recent if row.power is not None]
+        recent_energy = [row.energy for row in recent if row.energy is not None]
+        active_recent_power = bool(recent_power and max(recent_power) > 0.25)
+        active_recent_energy = bool(recent_energy and max(recent_energy) > 0.1)
+        zero_power = reading.power is not None and reading.power <= 0.001
+        zero_current = reading.current is not None and reading.current <= 0.001
+        normal_voltage = reading.voltage is not None and 216 <= reading.voltage <= 244
+
+        if normal_voltage and (zero_power or zero_current) and (active_recent_power or active_recent_energy):
+            return MeterStatus.SUSPECTED_FAULT
+
+        if len(recent) >= 4 and reading.power is not None:
+            power_window = [reading.power, *[row.power for row in recent[:4] if row.power is not None]]
+            if len(power_window) >= 5 and max(power_window) - min(power_window) <= 0.0001 and abs(reading.power) > 0:
+                return MeterStatus.SUSPECTED_FAULT
+
+        if reading.energy == 0 and zero_power and (active_recent_power or active_recent_energy):
+            return MeterStatus.SUSPECTED_FAULT
+
+        return MeterStatus.NORMAL
+
+    def _should_create_telemetry_anomaly(
+        self,
+        meter_status: MeterStatus,
+        communication_status: CommunicationStatus,
+    ) -> bool:
+        return meter_status in {MeterStatus.SUSPECTED_FAULT, MeterStatus.FAULT} or communication_status == CommunicationStatus.DISCONNECTED
+
+    def _create_prediction_for_telemetry_status(
+        self,
+        reading: TelemetryReading,
+        meter_status: MeterStatus,
+        communication_status: CommunicationStatus,
+        recent: list[TelemetryReading],
+    ) -> None:
+        if communication_status == CommunicationStatus.DISCONNECTED:
+            predicted_cause = "COMMUNICATION_FAILURE"
+            risk_score = 74.0
+            risk_level = "HIGH"
+            confidence = 0.82
+            evidence = [
+                {"feature": "missing_reading_ratio", "value": 1.0, "direction": "supports_anomaly"},
+                {"feature": "derived_communication_status", "value": communication_status.value, "direction": "supports_anomaly"},
+            ]
+        else:
+            predicted_cause = "METER_MALFUNCTION"
+            risk_score = 76.0 if meter_status == MeterStatus.SUSPECTED_FAULT else 88.0
+            risk_level = "HIGH" if risk_score < 85 else "CRITICAL"
+            confidence = 0.78 if meter_status == MeterStatus.SUSPECTED_FAULT else 0.9
+            recent_positive_power = max((row.power or 0.0 for row in recent), default=0.0)
+            evidence = [
+                {"feature": "derived_meter_status", "value": meter_status.value, "direction": "supports_anomaly"},
+                {"feature": "current_power", "value": reading.power, "direction": "supports_anomaly"},
+                {"feature": "recent_positive_power", "value": round(recent_positive_power, 4), "direction": "supports_anomaly"},
+            ]
+
+        anomaly = AnomalyPrediction(
+            id=str(uuid4()),
+            consumer_id=reading.consumer_id,
+            anomaly_score=round(risk_score / 100.0, 4),
+            risk_score=risk_score,
+            risk_level=risk_level,
+            predicted_cause=predicted_cause,
+            confidence=confidence,
+            evidence=evidence,
+            model_version="telemetry_status_inference_v1",
+        )
+        self.db.add(anomaly)
+        self.db.flush()
+        if risk_level in CASE_CREATING_RISK_LEVELS:
+            self._create_case_for_prediction(anomaly)
 
     def list_transformers(self) -> list[TransformerSummary]:
         transformers = self.db.scalars(select(Transformer).order_by(Transformer.transformer_id)).all()

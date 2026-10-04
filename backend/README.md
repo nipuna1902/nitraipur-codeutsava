@@ -46,6 +46,30 @@ http://127.0.0.1:8000/docs
 - `POST /voice/tools/field-observation`
 - `POST /voice/tools/checklist-update`
 
+## Telemetry Ingestion Contract
+
+`POST /telemetry/readings` accepts raw electrical readings. Clients should not send `meter_status`; the backend derives meter and communication status from telemetry values and recent history.
+
+Minimal payload:
+
+```json
+{
+  "readings": [
+    {
+      "consumer_id": "C001",
+      "timestamp": "2026-10-03T00:00:00Z",
+      "voltage": 230,
+      "current": 4.5,
+      "power": 1.1,
+      "energy": 0.275,
+      "source": "SIMULATOR"
+    }
+  ]
+}
+```
+
+Readback endpoints still include derived `meter_status` and `communication_status` so the UI can show health. If derived status indicates meter malfunction or communication failure, the backend creates a telemetry-derived anomaly report.
+
 ## ElevenLabs / Voice Testing Endpoints
 
 These endpoints are controlled backend tool contracts for future ElevenLabs integration. They do not call ElevenLabs yet.
