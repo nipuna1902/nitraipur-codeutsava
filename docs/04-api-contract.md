@@ -89,10 +89,11 @@ Voice tools are narrow backend APIs for the ElevenLabs agent. Their schemas are 
 
 - `POST /simulation/scenario`: define scenario.
 - `POST /simulation/run`: start run.
+- `POST /simulation/compare`: compare injected ground truth with deterministic simulated detection output.
 - `GET /simulation/status`: current run status.
 - `GET /simulation/results/{run_id}`: predictions compared with ground truth.
 
-No fake metrics are returned; metrics exist only after a completed simulation run.
+`/simulation/compare` is a demo-safe deterministic comparator for known injections. Full simulation-run metrics exist only after a completed simulation run.
 
 ## Real Time
 

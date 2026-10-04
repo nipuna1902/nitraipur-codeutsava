@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bot, DatabaseZap, RefreshCw, Server, ShieldAlert } from "lucide-react";
 import type { Anomaly, InvestigationCase, Transformer } from "@/types/dashboard";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8000";
+  "http://127.0.0.1:8000";
 
 type ActionState = {
   label: string;
@@ -64,6 +65,7 @@ function questionIsQueueSummary(value: string) {
 }
 
 export function BackendActions({ initialAnomalies, initialCases, initialTransformers }: BackendActionsProps) {
+  const router = useRouter();
   const [state, setState] = useState<ActionState>(defaultState);
   const [queue, setQueue] = useState<QueueState>(
     initialAnomalies.length
@@ -157,6 +159,7 @@ export function BackendActions({ initialAnomalies, initialCases, initialTransfor
 
       if (label === "Load ML") {
         await syncBackendContext(false);
+        router.refresh();
       }
 
       setState({
@@ -177,6 +180,7 @@ export function BackendActions({ initialAnomalies, initialCases, initialTransfor
     setState({ label: "Sync Queue", status: "loading", message: "Calling backend context routes..." });
     try {
       await syncBackendContext(false, limit);
+      router.refresh();
       const response = await fetch(`${API_BASE_URL}/anomalies/queue?limit=${limit}`);
       const body = await response.json();
       setState({ label: "Sync Queue", status: "success", message: JSON.stringify(body, null, 2) });

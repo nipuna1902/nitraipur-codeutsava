@@ -4,3 +4,5 @@ pydantic
 sqlalchemy
 psycopg[binary]
 paho-mqtt
+numpy
+xgboost

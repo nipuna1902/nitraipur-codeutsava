@@ -17,6 +17,8 @@ from .anomaly import (
     InvestigationCaseUpdateIn,
     MlPredictionBatchIn,
     MlPredictionIn,
+    SimulationCompareIn,
+    SimulationCompareOut,
 )
 
 __all__ = [
@@ -38,6 +40,8 @@ __all__ = [
     "MeterStatus",
     "MlPredictionBatchIn",
     "MlPredictionIn",
+    "SimulationCompareIn",
+    "SimulationCompareOut",
     "TelemetrySource",
     "TelemetryBatchIn",
     "TelemetryReadingIn",

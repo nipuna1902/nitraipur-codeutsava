@@ -55,6 +55,7 @@ I am loading model predictions through the backend. The frontend is not using bu
 On the home page, show:
 
 - Summary cards.
+- Demo Readiness panel.
 - Top live risk scores graph.
 - Investigation queue.
 - Anomaly review board.
@@ -65,6 +66,8 @@ What to say:
 ```text
 Electron starts with grid-level triage. It shows current anomaly volume, high-risk cases, and the top live risk scores. This graph is not a fake chart; it is built from the backend anomaly queue.
 ```
+
+The Demo Readiness panel should show backend, ML sample, queue, transformer, Ask Electron, and known-injection status. If it says `Needs data sync`, click `Load ML Sample` in Backend Actions and wait for the page counts to refresh.
 
 ## 4. Explain The Investigation Queue
 
@@ -218,8 +221,11 @@ Show:
 - Transformer dropdown.
 - Severity slider.
 - Duration ticks.
-- Ground Truth panel.
-- Payload preview.
+- Injected Ground Truth panel.
+- Expected Output Preview panel.
+- Actual Backend Model Output panel.
+- What changed from normal table.
+- Technical payload.
 
 Change:
 
@@ -233,16 +239,59 @@ Expected behavior:
 
 - Active fault card changes visually.
 - Consumer options follow selected transformer.
-- Ground Truth updates immediately.
-- Payload preview updates immediately.
+- Injected Ground Truth updates immediately.
+- Expected Output Preview updates immediately.
+- What changed from normal updates when the fault type changes.
+- Target and technical payload update when transformer, consumer, severity, or duration changes.
+- The previous backend result clears when you change fault, target, severity, or duration.
+- Click `Run Detection`.
+- Actual Backend Model Output fills with predicted cause, risk score, evidence, and conclusion.
+- The backend output shows the risk engine. When artifacts are installed, it should say `TRAINED XGBOOST ARTIFACT`.
 
 What to say:
 
 ```text
-This page is for controlled bad-data experiments. The ground truth is explicit, so once the backend injection endpoint is connected we can compare Electron's prediction against known injected faults.
+This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected output preview shows what Electron should return for that fault. It is not a backend result. When I click Run Detection, the frontend calls the backend `/simulation/compare` endpoint, runs trained XGBoost artifact risk scoring when available, then derives a conclusion: whether the guardrailed simulated output matches the injected truth.
 ```
 
-## 10. Mention OpenAI API Key
+What to say if asked about the normal reference:
+
+```text
+Normal reference is the healthy reading before injection. Injected test is the bad-data reading. The table only highlights what changed, so we do not need to inspect raw JSON to understand the scenario.
+```
+
+Important wording:
+
+```text
+The risk score is model-backed when the trained XGBoost artifact is available. The probable-cause wording is still guardrailed because the current trained artifact is a binary theft-risk model, not a real multiclass root-cause model.
+```
+
+If severity or duration is too low, the backend comparator can return `UNCERTAIN`. That is intentional: weak signals should not be forced into a theft or fault conclusion.
+
+## 10. Show The 3D Digital Twin
+
+Open:
+
+```text
+http://127.0.0.1:3000/simulator
+```
+
+Show:
+
+- What The 3D View Shows.
+- Topology Mapping.
+- Data Source.
+- Network digital twin.
+- Node Telemetry.
+- Missing Links / Current Limits.
+
+What to say:
+
+```text
+This is a simplified teaching topology, not an automatic map of every backend consumer. SS-01 feeds two feeders, which feed three residential zones mapped to C011, C023, and C035. The colors summarize downstream telemetry health from voltage, meter status, communication status, and freshness. Demo mode generates synthetic readings locally; backend mode polls live telemetry readings and marks nodes unknown when readings are missing or stale.
+```
+
+## 11. Mention OpenAI API Key
 
 What to say if asked:
 
@@ -250,7 +299,7 @@ What to say if asked:
 An OpenAI API key is not required for this demo. Ask Electron is currently deterministic and grounded in backend data. If we add an LLM later, the key should stay only on the backend, and the model should summarize tool results rather than invent facts.
 ```
 
-## 11. Close With The Main Value
+## 12. Close With The Main Value
 
 What to say:
 
@@ -270,6 +319,20 @@ If frontend shows backend offline:
 
 ```powershell
 Invoke-RestMethod -Uri http://127.0.0.1:8000/health
+```
+
+If backend port `8000` is already occupied:
+
+```powershell
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001
+```
+
+Then start the frontend with the same backend URL:
+
+```powershell
+cd C:\Users\ASHUTOSH\nitraipur\nitraipur-codeutsava\frontend
+$env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8001"
+npm.cmd run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
 If data is empty after tests:

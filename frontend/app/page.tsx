@@ -3,6 +3,7 @@ import { Activity, BrainCircuit, RadioTower, Route, ShieldAlert, Zap } from "luc
 import { AppNavigation } from "@/components/dashboard/app-navigation";
 import { AnomalyChart } from "@/components/dashboard/anomaly-chart";
 import { BackendActions } from "@/components/dashboard/backend-actions";
+import { DemoReadiness } from "@/components/dashboard/demo-readiness";
 import { AnomalyReviewBoard } from "@/components/investigation/anomaly-review-board";
 import { CaseQueue } from "@/components/investigation/case-queue";
 import { ConsumerPanel } from "@/components/consumers/consumer-panel";
@@ -54,6 +55,8 @@ export default async function DashboardPage() {
           <StatCard icon={RadioTower} label="Consumers covered" value={data.summary.total_consumers} tone="amber" />
           <StatCard icon={Route} label="Active investigations" value={data.summary.active_investigations} tone="emerald" />
         </section>
+
+        <DemoReadiness data={data} />
 
         <BackendActions
           initialAnomalies={data.anomalies}

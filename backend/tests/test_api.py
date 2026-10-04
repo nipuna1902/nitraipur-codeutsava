@@ -337,6 +337,92 @@ class BackendApiTest(unittest.TestCase):
         self.assertFalse(response.json()["data_available"])
         self.assertEqual(response.json()["intent"], "consumer_analysis")
 
+    def test_simulation_compare_returns_detection_conclusion(self):
+        response = self.client.post(
+            "/simulation/compare",
+            json={
+                "injection_type": "MISSING_PACKETS",
+                "consumer_id": "C011",
+                "transformer_id": "T01",
+                "severity": 0.75,
+                "duration_ticks": 24,
+                "ground_truth": {
+                    "expected_cause": "COMMUNICATION_FAILURE",
+                    "known_injection": True,
+                },
+                "changed_fields": [
+                    {"field": "communication_status", "before": "CONNECTED", "after": "DISCONNECTED"}
+                ],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["status"], "COMPLETED")
+        self.assertEqual(body["model_version"], "xgboost_ranker_v1")
+        self.assertEqual(body["model_output"]["risk_engine"], "TRAINED_XGBOOST_ARTIFACT")
+        self.assertIsNotNone(body["model_output"]["raw_trained_risk_score"])
+        self.assertEqual(body["model_output"]["predicted_cause"], "COMMUNICATION_FAILURE")
+        self.assertTrue(body["comparison"]["matches_ground_truth"])
+        self.assertIn("matches", body["conclusion"])
+
+    def test_simulation_compare_low_signal_returns_uncertain(self):
+        response = self.client.post(
+            "/simulation/compare",
+            json={
+                "injection_type": "SUDDEN_DROP",
+                "consumer_id": "C011",
+                "transformer_id": "T01",
+                "severity": 0.2,
+                "duration_ticks": 2,
+                "ground_truth": {
+                    "expected_cause": "THEFT_TAMPERING",
+                    "known_injection": True,
+                },
+                "changed_fields": [
+                    {"field": "power", "before": 734, "after": 620}
+                ],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["model_output"]["predicted_cause"], "UNCERTAIN")
+        self.assertEqual(body["model_output"]["adjusted_priority"], "REVIEW")
+        self.assertEqual(body["model_output"]["risk_engine"], "TRAINED_XGBOOST_ARTIFACT")
+        self.assertFalse(body["comparison"]["matches_ground_truth"])
+        self.assertIn("inconclusive", body["conclusion"])
+
+    def test_simulation_compare_profiles_do_not_all_return_theft(self):
+        scenarios = {
+            "ZERO_READING": "METER_MALFUNCTION",
+            "FLATLINE": "METER_MALFUNCTION",
+            "MISSING_PACKETS": "COMMUNICATION_FAILURE",
+            "SPIKE_THEN_DROP": "UNCERTAIN",
+            "TRANSFORMER_MISMATCH": "THEFT_TAMPERING",
+        }
+        for injection_type, expected in scenarios.items():
+            with self.subTest(injection_type=injection_type):
+                response = self.client.post(
+                    "/simulation/compare",
+                    json={
+                        "injection_type": injection_type,
+                        "consumer_id": "C011",
+                        "transformer_id": "T01",
+                        "severity": 0.75,
+                        "duration_ticks": 24,
+                        "ground_truth": {
+                            "expected_cause": expected,
+                            "known_injection": True,
+                        },
+                    },
+                )
+
+                self.assertEqual(response.status_code, 200)
+                body = response.json()
+                self.assertEqual(body["model_output"]["predicted_cause"], expected)
+                self.assertTrue(body["comparison"]["matches_ground_truth"])
+
     def test_investigation_lifecycle_persists_updates(self):
         self._create_prediction("C077", risk_level="CRITICAL", risk_score=93.0)
         cases = self.client.get("/investigations").json()

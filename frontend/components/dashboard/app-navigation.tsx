@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { Activity, GaugeCircle, GitCompareArrows, Network, RadioTower, ShieldAlert } from "lucide-react";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://127.0.0.1:8000";
+
 const navItems = [
   { href: "/", label: "Overview", icon: Activity, step: "1" },
   { href: "/simulator", label: "3D Simulator", icon: RadioTower, step: "2" },
   { href: "/dual-injection", label: "Known Injection", icon: GitCompareArrows, step: "3" },
-  { href: "http://127.0.0.1:8000/docs", label: "Swagger", icon: Network, external: true },
-  { href: "http://127.0.0.1:8000/anomalies/queue?limit=100", label: "ML Queue", icon: ShieldAlert, external: true },
-  { href: "http://127.0.0.1:8000/dashboard/summary", label: "API Summary", icon: GaugeCircle, external: true }
+  { href: `${API_BASE_URL}/docs`, label: "Swagger", icon: Network, external: true },
+  { href: `${API_BASE_URL}/anomalies/queue?limit=100`, label: "ML Queue", icon: ShieldAlert, external: true },
+  { href: `${API_BASE_URL}/dashboard/summary`, label: "API Summary", icon: GaugeCircle, external: true }
 ];
 
 export function AppNavigation() {
