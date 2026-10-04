@@ -23,24 +23,7 @@ function priorityFromScore(score: number) {
 export function CaseQueue({ cases, anomalies = [] }: CaseQueueProps) {
   const anomalyById = new Map(anomalies.map((anomaly) => [anomaly.id, anomaly]));
   const anomalyByConsumer = new Map(anomalies.map((anomaly) => [anomaly.consumer_id, anomaly]));
-  const fallbackCases = cases.length
-    ? cases
-    : anomalies.slice(0, 4).map((anomaly, index) => ({
-        case_id: `CASE-${index + 1}`,
-        anomaly_id: anomaly.id,
-        consumer_id: anomaly.consumer_id,
-        priority: priorityFromScore(anomaly.adjusted_risk_score ?? anomaly.risk_score),
-        status: "EVIDENCE_REVIEW",
-        assigned_to: index === 0 ? "Team Alpha" : null,
-        case_type: anomaly.case_type,
-        raw_risk_score: anomaly.raw_risk_score ?? anomaly.risk_score,
-        adjusted_risk_score: anomaly.adjusted_risk_score ?? anomaly.risk_score,
-        allocation_confidence: anomaly.allocation_confidence,
-        attribution_status: anomaly.attribution_status,
-        outlier_flags: anomaly.outlier_flags,
-        recommendation: anomaly.recommendation,
-        risk_adjustment_reason: anomaly.risk_adjustment_reason
-      }));
+  const visibleCases = cases.slice(0, 3);
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -51,10 +34,11 @@ export function CaseQueue({ cases, anomalies = [] }: CaseQueueProps) {
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">Field Action</p>
           <h2 className="text-xl font-semibold text-slate-950">Investigation queue</h2>
+          <p className="mt-1 text-sm text-slate-500">Showing {visibleCases.length} of {cases.length} live cases</p>
         </div>
       </div>
       <div className="mt-6 space-y-3">
-        {fallbackCases.map((item) => {
+        {visibleCases.length ? visibleCases.map((item) => {
           const anomaly = anomalyById.get(item.anomaly_id) ?? anomalyByConsumer.get(item.consumer_id);
           const rawRisk = item.raw_risk_score ?? anomaly?.raw_risk_score ?? anomaly?.risk_score ?? 0;
           const adjustedRisk = item.adjusted_risk_score ?? anomaly?.adjusted_risk_score ?? rawRisk;
@@ -140,7 +124,17 @@ export function CaseQueue({ cases, anomalies = [] }: CaseQueueProps) {
               </div>
             </article>
           );
-        })}
+        }) : (
+          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+            <p className="font-medium text-slate-800">No investigation cases loaded</p>
+            <p className="mt-1 text-sm text-slate-500">Create high-risk backend predictions to populate the queue.</p>
+          </div>
+        )}
+        {cases.length > visibleCases.length ? (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+            Remaining cases are available through Backend Actions and the Anomaly Review sections below.
+          </div>
+        ) : null}
       </div>
     </section>
   );

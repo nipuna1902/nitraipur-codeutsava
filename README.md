@@ -39,6 +39,10 @@ ElevenLabs is planned as the user-facing voice interface for field investigators
 
 See `docs/02-system-architecture.md` for the overall architecture and Mermaid diagrams. Detailed plans live under `docs/`.
 
+## End-To-End Testing
+
+Use `docs/18-end-to-end-testing-guide.md` to verify the backend, frontend, live ML prediction loading, aggregate guardrails, and the no-demo-data frontend behavior.
+
 ## Planned Tech Stack
 
 - Frontend: Next.js, TypeScript, Tailwind CSS, Recharts, React Flow or SVG, WebSocket client

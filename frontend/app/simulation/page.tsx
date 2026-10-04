@@ -2,8 +2,11 @@ import Link from "next/link";
 import { ArrowLeft, ClipboardList, RadioTower, Route } from "lucide-react";
 import { AppNavigation } from "@/components/dashboard/app-navigation";
 import { ScenarioControlPanel } from "@/components/simulation/scenario-control-panel";
+import { getDashboardData } from "@/lib/api";
 
-export default function SimulationPage() {
+export default async function SimulationPage() {
+  const data = await getDashboardData();
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-5 py-6 sm:px-8 lg:px-10">
@@ -28,7 +31,7 @@ export default function SimulationPage() {
           </div>
         </header>
 
-        <ScenarioControlPanel />
+        <ScenarioControlPanel consumers={data.consumers} transformers={data.transformers} />
 
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
