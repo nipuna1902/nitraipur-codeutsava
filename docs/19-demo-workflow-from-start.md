@@ -246,11 +246,12 @@ Expected behavior:
 - The previous backend result clears when you change fault, target, severity, or duration.
 - Click `Run Detection`.
 - Actual Backend Model Output fills with predicted cause, risk score, evidence, and conclusion.
+- The backend output shows the risk engine. When artifacts are installed, it should say `TRAINED XGBOOST ARTIFACT`.
 
 What to say:
 
 ```text
-This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected output preview shows what Electron should return for that fault. It is not a backend result. When I click Run Detection, the frontend calls the backend `/simulation/compare` endpoint and derives a conclusion: whether the simulated model output matches the injected truth.
+This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected output preview shows what Electron should return for that fault. It is not a backend result. When I click Run Detection, the frontend calls the backend `/simulation/compare` endpoint, runs trained XGBoost artifact risk scoring when available, then derives a conclusion: whether the guardrailed simulated output matches the injected truth.
 ```
 
 What to say if asked about the normal reference:
@@ -262,7 +263,7 @@ Normal reference is the healthy reading before injection. Injected test is the b
 Important wording:
 
 ```text
-This is a deterministic simulator comparator for the demo. It proves the compare workflow and conclusion UI. It does not claim the trained XGBoost pipeline has been rerun on synthetic telemetry yet.
+The risk score is model-backed when the trained XGBoost artifact is available. The probable-cause wording is still guardrailed because the current trained artifact is a binary theft-risk model, not a real multiclass root-cause model.
 ```
 
 If severity or duration is too low, the backend comparator can return `UNCERTAIN`. That is intentional: weak signals should not be forced into a theft or fault conclusion.

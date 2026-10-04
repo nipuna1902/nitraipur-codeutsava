@@ -359,6 +359,9 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertEqual(body["status"], "COMPLETED")
+        self.assertEqual(body["model_version"], "xgboost_ranker_v1")
+        self.assertEqual(body["model_output"]["risk_engine"], "TRAINED_XGBOOST_ARTIFACT")
+        self.assertIsNotNone(body["model_output"]["raw_trained_risk_score"])
         self.assertEqual(body["model_output"]["predicted_cause"], "COMMUNICATION_FAILURE")
         self.assertTrue(body["comparison"]["matches_ground_truth"])
         self.assertIn("matches", body["conclusion"])
@@ -386,6 +389,7 @@ class BackendApiTest(unittest.TestCase):
         body = response.json()
         self.assertEqual(body["model_output"]["predicted_cause"], "UNCERTAIN")
         self.assertEqual(body["model_output"]["adjusted_priority"], "REVIEW")
+        self.assertEqual(body["model_output"]["risk_engine"], "TRAINED_XGBOOST_ARTIFACT")
         self.assertFalse(body["comparison"]["matches_ground_truth"])
         self.assertIn("inconclusive", body["conclusion"])
 

@@ -301,10 +301,13 @@ Expected:
 - The page clearly treats injected fault as known truth, not model prediction.
 - Before `Run Detection`, the actual backend panel says `No backend run`.
 - Actual Backend Model Output is populated from `POST /simulation/compare`.
+- Actual Backend Model Output shows `Risk engine`; with local artifacts installed it should say `TRAINED XGBOOST ARTIFACT`.
+- Raw trained risk and model probability are visible when trained inference succeeds.
 - The conclusion says whether backend simulated detection matches the injected ground truth.
 - The response includes predicted cause, risk score, confidence, evidence, and recommended next step.
 - Low severity or very short duration can intentionally return `UNCERTAIN` rather than forcing a theft/fault match.
 - Non-theft scenarios should return non-theft outputs: `Missing Packets` returns communication failure, `Flatline Meter` and `Zero Reading` return meter malfunction, and `Spike Then Drop` remains uncertain/review.
+- The trained artifact is a binary theft-risk model, so probable-cause labels are still protected by guardrail rules.
 
 Fail conditions:
 
@@ -312,6 +315,7 @@ Fail conditions:
 - Transformer changes do not update consumer choices.
 - Injected Ground Truth, Expected Output Preview, target fields, technical payload, or backend result state remains stale after controls change.
 - Every scenario returns `THEFT TAMPERING`.
+- Risk engine says `DETERMINISTIC FALLBACK` when `ml/artifacts/best_production_model.pkl` exists and backend dependencies are installed.
 - `Run Detection` does not populate Actual Backend Model Output while the backend is running.
 
 ## 10. Test 3D Digital Twin Page

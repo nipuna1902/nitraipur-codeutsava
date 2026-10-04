@@ -7,7 +7,7 @@ import type { Consumer, Transformer } from "@/types/dashboard";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://127.0.0.1:8001";
+  "http://127.0.0.1:8000";
 
 const injections = [
   {
@@ -186,6 +186,11 @@ type CompareResult = {
     adjusted_priority: string;
     evidence: string[];
     guardrail_notes: string[];
+    risk_engine?: string;
+    raw_trained_risk_score?: number | null;
+    trained_model_probability?: number | null;
+    trained_model_cause?: string | null;
+    simulation_model_note?: string;
   };
   comparison: {
     expected_cause?: string;
@@ -459,14 +464,10 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
                 {compareStatus === "loading" ? "Running..." : "Run Detection"}
                 <span className="block text-[10px] font-normal">POST /simulation/compare</span>
               </button>
-              <button
-                type="button"
-                disabled
-                className="min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-400"
-              >
+              <div className="min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
                 Compare Result
                 <span className="block text-[10px] font-normal">Appears below after run</span>
-              </button>
+              </div>
             </div>
             {compareMessage ? (
               <p className={`rounded-lg border p-3 text-xs leading-5 ${
@@ -551,7 +552,7 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
             This is the answer key for the selected known injection, not a backend response. Use it to explain what the comparator will check after `Run Detection`.
           </p>
           <dl className="mt-4 grid gap-2 text-sm">
-            <div className="flex justify-between gap-4"><dt className="text-slate-500">Predicted cause</dt><dd className="text-right font-semibold text-slate-950">{expectedOutput.predicted_cause.replaceAll("_", " ")}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected cause</dt><dd className="text-right font-semibold text-slate-950">{expectedOutput.predicted_cause.replaceAll("_", " ")}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk score</dt><dd className="font-semibold text-slate-950">{expectedOutput.risk_score}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Confidence</dt><dd className="font-semibold text-slate-950">{Math.round(expectedOutput.confidence * 100)}%</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Priority</dt><dd className="font-semibold text-slate-950">{expectedOutput.adjusted_priority}</dd></div>
@@ -580,10 +581,17 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
             <dl className="grid gap-2 text-sm">
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Run ID</dt><dd className="font-mono font-medium text-slate-900">{compareResult.run_id}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Model version</dt><dd className="text-right font-medium text-slate-900">{compareResult.model_version}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk engine</dt><dd className="text-right font-semibold text-slate-950">{(compareResult.model_output.risk_engine ?? "UNKNOWN").replaceAll("_", " ")}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected cause</dt><dd className="text-right font-semibold text-slate-950">{String(compareResult.comparison.expected_cause ?? "UNKNOWN").replaceAll("_", " ")}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Predicted cause</dt><dd className="text-right font-semibold text-slate-950">{compareResult.model_output.predicted_cause.replaceAll("_", " ")}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Ground-truth check</dt><dd className="font-semibold text-slate-950">{compareResult.comparison.matches_ground_truth ? "Matched" : "Needs review"}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk score</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.risk_score}</dd></div>
+              {compareResult.model_output.raw_trained_risk_score !== undefined && compareResult.model_output.raw_trained_risk_score !== null ? (
+                <div className="flex justify-between gap-4"><dt className="text-slate-500">Raw trained risk</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.raw_trained_risk_score}</dd></div>
+              ) : null}
+              {compareResult.model_output.trained_model_probability !== undefined && compareResult.model_output.trained_model_probability !== null ? (
+                <div className="flex justify-between gap-4"><dt className="text-slate-500">Model probability</dt><dd className="font-semibold text-slate-950">{Math.round(compareResult.model_output.trained_model_probability * 100)}%</dd></div>
+              ) : null}
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Confidence</dt><dd className="font-semibold text-slate-950">{Math.round(compareResult.model_output.confidence * 100)}%</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Priority</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.adjusted_priority}</dd></div>
             </dl>
@@ -604,8 +612,19 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Next step</p>
                 <p className="mt-2 text-sm leading-6 text-slate-700">{compareResult.recommended_next_step}</p>
               </div>
+              {compareResult.model_output.simulation_model_note ? (
+                <div className="rounded-lg border border-teal-100 bg-teal-50 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">Model note</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{compareResult.model_output.simulation_model_note}</p>
+                </div>
+              ) : null}
             </div>
           </div>
+        ) : compareStatus === "loading" ? (
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Backend comparator is running for the current fault, target, severity, and duration. The result will appear here
+            when `/simulation/compare` returns.
+          </p>
         ) : (
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Click `Run Detection` to call the backend comparator. Changing the fault type, target, severity, or duration clears

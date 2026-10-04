@@ -40,6 +40,7 @@ from backend.app.schemas.voice import (
     VoiceSessionResponse,
     VoiceToolResponse,
 )
+from backend.app.services.simulation_ml import SimulationModelUnavailable, infer_known_injection
 from backend.app.services.repository import TelemetryRepository
 from backend.app.websocket.manager import ws_manager
 
@@ -288,9 +289,28 @@ def simulation_status(repository: TelemetryRepository = Depends(get_repository))
 def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
     profile = _simulation_profile(payload.injection_type)
     low_signal = payload.severity < 0.35 or payload.duration_ticks < 3
-    risk_score = min(99, round(profile["base_risk"] * (0.7 + payload.severity / 3)))
+    model_result = None
+    model_error = None
+    try:
+        model_result = infer_known_injection(payload)
+    except (SimulationModelUnavailable, ImportError, ValueError, OSError) as error:
+        model_error = str(error)
+
+    risk_score = (
+        model_result["risk_score"]
+        if model_result is not None
+        else min(99, round(profile["base_risk"] * (0.7 + payload.severity / 3)))
+    )
     expected_cause = payload.ground_truth.get("expected_cause") or payload.expected_model_output_preview.get("predicted_cause")
-    predicted_cause = "UNCERTAIN" if low_signal else profile["predicted_cause"]
+    model_predicted_cause = model_result["predicted_cause"] if model_result is not None else profile["predicted_cause"]
+    if not low_signal:
+        if profile["predicted_cause"] == "UNCERTAIN":
+            model_predicted_cause = "UNCERTAIN"
+        elif profile["predicted_cause"] in {"METER_MALFUNCTION", "COMMUNICATION_FAILURE"}:
+            model_predicted_cause = profile["predicted_cause"]
+        elif model_predicted_cause in {"NORMAL", "LEGITIMATE_ABNORMAL_CONSUMPTION"}:
+            model_predicted_cause = profile["predicted_cause"]
+    predicted_cause = "UNCERTAIN" if low_signal else model_predicted_cause
     matches_ground_truth = expected_cause == predicted_cause
     priority = (
         "REVIEW"
@@ -307,10 +327,23 @@ def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
     model_output = {
         "predicted_cause": predicted_cause,
         "risk_score": risk_score,
-        "confidence": min(profile["confidence"], 0.58) if low_signal else profile["confidence"],
+        "confidence": min(model_result["confidence"] if model_result is not None else profile["confidence"], 0.58) if low_signal else model_result["confidence"] if model_result is not None else profile["confidence"],
         "adjusted_priority": priority,
-        "evidence": ["signal is too weak for a confident class", *profile["evidence"][:2]] if low_signal else profile["evidence"],
+        "evidence": (
+            ["signal is too weak for a confident class", *profile["evidence"][:2]]
+            if low_signal
+            else _format_model_evidence(model_result["evidence"]) if model_result is not None else profile["evidence"]
+        ),
         "guardrail_notes": ["low severity or short duration; keep as review/monitor"] if low_signal else profile["guardrail_notes"],
+        "risk_engine": "TRAINED_XGBOOST_ARTIFACT" if model_result is not None else "DETERMINISTIC_FALLBACK",
+        "raw_trained_risk_score": model_result["risk_score"] if model_result is not None else None,
+        "trained_model_probability": round(model_result["probability"], 4) if model_result is not None else None,
+        "trained_model_cause": model_result["predicted_cause"] if model_result is not None else None,
+        "simulation_model_note": (
+            "Risk score comes from the persisted trained model artifact; probable cause is still guardrailed with scenario evidence."
+            if model_result is not None
+            else f"Fell back to deterministic comparator because trained model inference was unavailable: {model_error}"
+        ),
     }
     comparison = {
         "expected_cause": expected_cause,
@@ -330,19 +363,31 @@ def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
     if low_signal:
         next_step = "Increase severity or duration before using this scenario as a quality demonstration."
     elif matches_ground_truth:
-        next_step = "Use this as a judge-safe simulated comparison. A future production endpoint can replace this deterministic comparator with the trained model pipeline."
+        next_step = (
+            "Use this as a judge-safe simulated comparison. The risk score is backed by the trained model artifact when available; field verification is still required."
+            if model_result is not None
+            else "Use this as a judge-safe simulated comparison. Connect the trained model artifact before claiming model-backed risk."
+        )
     else:
         next_step = "Review evidence mapping before using this scenario as a model-quality claim."
 
     return SimulationCompareOut(
         run_id=f"SIM-{uuid4().hex[:8].upper()}",
         status="COMPLETED",
-        model_version="deterministic_injection_comparator_v1",
+        model_version=model_result["model_version"] if model_result is not None else "deterministic_injection_comparator_v1",
         model_output=model_output,
         comparison=comparison,
         conclusion=conclusion,
         recommended_next_step=next_step,
     )
+
+
+def _format_model_evidence(evidence: list[dict]) -> list[str]:
+    return [
+        f"{item['feature']}={item['value']}"
+        for item in evidence
+        if item.get("feature") is not None
+    ]
 
 
 def _simulation_profile(injection_type: str) -> dict:
