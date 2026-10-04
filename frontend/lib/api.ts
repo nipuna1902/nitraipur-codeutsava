@@ -7,7 +7,7 @@ const API_BASE_URL =
 
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    next: { revalidate: 10 }
+    cache: "no-store"
   });
 
   if (!response.ok) {

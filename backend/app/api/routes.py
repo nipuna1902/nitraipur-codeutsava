@@ -3,8 +3,6 @@ from __future__ import annotations
 import asyncio
 import json
 from pathlib import Path
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect

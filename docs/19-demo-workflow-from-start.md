@@ -55,6 +55,7 @@ I am loading model predictions through the backend. The frontend is not using bu
 On the home page, show:
 
 - Summary cards.
+- Demo Readiness panel.
 - Top live risk scores graph.
 - Investigation queue.
 - Anomaly review board.
@@ -65,6 +66,8 @@ What to say:
 ```text
 Electron starts with grid-level triage. It shows current anomaly volume, high-risk cases, and the top live risk scores. This graph is not a fake chart; it is built from the backend anomaly queue.
 ```
+
+The Demo Readiness panel should show backend, ML sample, queue, transformer, Ask Electron, and known-injection status. If it says `Needs data sync`, click `Load ML Sample` in Backend Actions and wait for the page counts to refresh.
 
 ## 4. Explain The Investigation Queue
 
@@ -270,6 +273,20 @@ If frontend shows backend offline:
 
 ```powershell
 Invoke-RestMethod -Uri http://127.0.0.1:8000/health
+```
+
+If backend port `8000` is already occupied:
+
+```powershell
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001
+```
+
+Then start the frontend with the same backend URL:
+
+```powershell
+cd C:\Users\ASHUTOSH\nitraipur\nitraipur-codeutsava\frontend
+$env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8001"
+npm.cmd run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
 If data is empty after tests:
