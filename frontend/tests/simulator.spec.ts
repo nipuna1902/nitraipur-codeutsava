@@ -5,6 +5,7 @@ test("interactive topology, faults, pause, and snapshot publishing", async ({ pa
     const payload = route.request().postDataJSON();
     expect(payload.readings).toHaveLength(3);
     expect(payload.readings.every((r: { source: string }) => r.source === "SIMULATOR")).toBeTruthy();
+    expect(payload.readings.every((r: { meter_status?: string }) => r.meter_status === undefined)).toBeTruthy();
     await route.fulfill({ json: { accepted: 3 } });
   });
   await page.goto("/simulator");

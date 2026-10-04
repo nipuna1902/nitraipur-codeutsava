@@ -64,9 +64,14 @@ def ingest_telemetry(
     payload: TelemetryBatchIn,
     repository: TelemetryRepository = Depends(get_repository),
 ) -> TelemetryIngestResponse:
-    saved = repository.ingest(payload.readings)
+    saved, anomaly_reports_created, derived_meter_status_counts = repository.ingest(payload.readings)
     latest = max((reading.timestamp for reading in saved), default=None)
-    return TelemetryIngestResponse(accepted=len(saved), latest_timestamp=latest)
+    return TelemetryIngestResponse(
+        accepted=len(saved),
+        latest_timestamp=latest,
+        anomaly_reports_created=anomaly_reports_created,
+        derived_meter_status_counts=derived_meter_status_counts,
+    )
 
 
 @router.get("/telemetry/readings", response_model=list[TelemetryReadingOut])

@@ -12,8 +12,8 @@ class TelemetryReadingIn(BaseModel):
     current: float | None = None
     power: float | None = None
     energy: float = Field(ge=0)
-    meter_status: MeterStatus
-    communication_status: CommunicationStatus
+    meter_status: MeterStatus | None = None
+    communication_status: CommunicationStatus | None = None
     source: TelemetrySource = TelemetrySource.SIMULATOR
 
 
@@ -28,3 +28,5 @@ class TelemetryReadingOut(TelemetryReadingIn):
 class TelemetryIngestResponse(BaseModel):
     accepted: int
     latest_timestamp: datetime | None
+    anomaly_reports_created: int = 0
+    derived_meter_status_counts: dict[str, int] = Field(default_factory=dict)

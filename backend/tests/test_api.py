@@ -27,8 +27,6 @@ class BackendApiTest(unittest.TestCase):
                     "current": 4.5,
                     "power": 1.1,
                     "energy": 0.275,
-                    "meter_status": "NORMAL",
-                    "communication_status": "CONNECTED",
                     "source": "SIMULATOR",
                 }
             ]
@@ -46,6 +44,8 @@ class BackendApiTest(unittest.TestCase):
         history = self.client.get("/consumers/C001/history")
         self.assertEqual(history.status_code, 200)
         self.assertEqual(len(history.json()), 1)
+        self.assertEqual(history.json()[0]["meter_status"], "NORMAL")
+        self.assertEqual(history.json()[0]["communication_status"], "CONNECTED")
 
     def test_missing_consumer_returns_404(self):
         response = self.client.get("/consumers/C999")
@@ -78,8 +78,6 @@ class BackendApiTest(unittest.TestCase):
                     "current": 4.5,
                     "power": 1.1,
                     "energy": 0.275,
-                    "meter_status": "NORMAL",
-                    "communication_status": "CONNECTED",
                     "source": "SIMULATOR",
                 }
             ]
@@ -90,6 +88,53 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["data_available"])
         self.assertEqual(response.json()["payload"]["consumer_id"], "C001")
+
+    def test_telemetry_ingest_derives_meter_status_and_creates_anomaly_report(self):
+        first = self.client.post(
+            "/telemetry/readings",
+            json={
+                "readings": [
+                    {
+                        "consumer_id": "C002",
+                        "timestamp": datetime(2026, 10, 3, 8, tzinfo=timezone.utc).isoformat(),
+                        "voltage": 230.0,
+                        "current": 4.5,
+                        "power": 1.2,
+                        "energy": 3.4,
+                        "source": "SIMULATOR",
+                    }
+                ]
+            },
+        )
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(first.json()["derived_meter_status_counts"], {"NORMAL": 1})
+        self.assertEqual(first.json()["anomaly_reports_created"], 0)
+
+        second = self.client.post(
+            "/telemetry/readings",
+            json={
+                "readings": [
+                    {
+                        "consumer_id": "C002",
+                        "timestamp": datetime(2026, 10, 3, 9, tzinfo=timezone.utc).isoformat(),
+                        "voltage": 230.0,
+                        "current": 0.0,
+                        "power": 0.0,
+                        "energy": 0.0,
+                        "source": "SIMULATOR",
+                    }
+                ]
+            },
+        )
+
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(second.json()["derived_meter_status_counts"], {"SUSPECTED_FAULT": 1})
+        self.assertEqual(second.json()["anomaly_reports_created"], 1)
+        history = self.client.get("/consumers/C002/history").json()
+        self.assertEqual(history[-1]["meter_status"], "SUSPECTED_FAULT")
+        anomalies = self.client.get("/anomalies").json()
+        self.assertEqual(anomalies[0]["predicted_cause"], "METER_MALFUNCTION")
+        self.assertEqual(anomalies[0]["model_version"], "telemetry_status_inference_v1")
 
     def test_voice_anomaly_evidence_preserves_uncertainty_before_ml_integration(self):
         response = self.client.post("/voice/tools/anomaly-evidence", json={"consumer_id": "C001"})
