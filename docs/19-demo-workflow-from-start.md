@@ -221,7 +221,9 @@ Show:
 - Transformer dropdown.
 - Severity slider.
 - Duration ticks.
-- Ground Truth panel.
+- Injected Ground Truth panel.
+- Expected Electron Output preview.
+- Actual Backend Model Output pending state.
 - Payload preview.
 
 Change:
@@ -236,13 +238,14 @@ Expected behavior:
 
 - Active fault card changes visually.
 - Consumer options follow selected transformer.
-- Ground Truth updates immediately.
+- Injected Ground Truth updates immediately.
+- Expected Electron Output preview updates immediately.
 - Payload preview updates immediately.
 
 What to say:
 
 ```text
-This page is for controlled bad-data experiments. The ground truth is explicit, so once the backend injection endpoint is connected we can compare Electron's prediction against known injected faults.
+This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected Electron output preview shows what the model should return for that fault. The actual backend model output is intentionally marked pending until the injection run endpoint is connected.
 ```
 
 ## 10. Mention OpenAI API Key

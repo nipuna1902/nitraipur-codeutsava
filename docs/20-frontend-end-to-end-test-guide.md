@@ -272,7 +272,9 @@ Check initial render:
 - Consumer dropdown is populated.
 - Severity control is visible.
 - Duration control is visible.
-- Ground Truth panel is visible.
+- Injected Ground Truth panel is visible.
+- Expected Electron Output preview is visible.
+- Actual Backend Model Output pending state is visible.
 - Payload preview is visible.
 
 Interaction test:
@@ -283,20 +285,22 @@ Interaction test:
 4. Change consumer.
 5. Change severity.
 6. Change duration.
-7. Watch Ground Truth and payload preview.
+7. Watch Injected Ground Truth, Expected Electron Output, and payload preview.
 
 Expected:
 
 - Active fault card changes visually.
-- Ground Truth changes when fault type changes.
+- Injected Ground Truth changes when fault type changes.
+- Expected Electron Output changes when fault type or severity changes.
 - Payload changes when transformer, consumer, severity, or duration changes.
 - The page clearly treats injected fault as known truth, not model prediction.
+- Actual Backend Model Output stays marked as endpoint-pending until backend injection is implemented.
 
 Fail conditions:
 
 - Fault cards cannot be switched.
 - Transformer changes do not update consumer choices.
-- Ground Truth or payload remains unchanged after controls change.
+- Injected Ground Truth, Expected Electron Output, or payload remains unchanged after controls change.
 
 ## 10. Test Offline Behavior
 
