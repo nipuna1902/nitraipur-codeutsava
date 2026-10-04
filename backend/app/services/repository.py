@@ -114,7 +114,9 @@ class TelemetryRepository:
                 current=reading.current,
                 power=reading.power,
                 energy=reading.energy,
-                meter_status=reading.meter_status.value,
+                # Meter condition is an ML-derived output. Raw clients cannot
+                # declare their own diagnostic status.
+                meter_status=MeterStatus.UNKNOWN.value,
                 communication_status=reading.communication_status.value,
                 source=reading.source.value,
             )
@@ -122,6 +124,17 @@ class TelemetryRepository:
             saved.append(self._to_telemetry_out(record))
         self.db.commit()
         return saved
+
+    def set_latest_meter_status(self, consumer_id: str, status: MeterStatus) -> None:
+        latest = self.db.scalar(
+            select(TelemetryReading)
+            .where(TelemetryReading.consumer_id == consumer_id)
+            .order_by(TelemetryReading.timestamp.desc())
+            .limit(1)
+        )
+        if latest is not None:
+            latest.meter_status = status.value
+            self.db.commit()
 
     def list_telemetry(self, limit: int = 100) -> list[TelemetryReadingOut]:
         rows = self.db.scalars(

@@ -21,7 +21,7 @@ import {
   Unplug,
   Zap
 } from "lucide-react";
-import { aggregate, COLORS, demoReadings, NODES, type Reading, type Telemetry } from "@/lib/grid";
+import { aggregate, COLORS, demoHistoryReadings, demoReadings, NODES, type Reading, type Telemetry } from "@/lib/grid";
 
 const GridScene = dynamic(() => import("@/components/grid/GridScene"), {
   ssr: false,
@@ -125,13 +125,16 @@ export default function Simulator() {
       const response = await fetch("/api/telemetry/readings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ readings: demoReadings(step, faults) }),
-        signal: AbortSignal.timeout(10000)
+        body: JSON.stringify({ readings: demoHistoryReadings(step, faults) }),
+        signal: AbortSignal.timeout(60000)
       });
       if (!response.ok) throw new Error(`Backend returned ${response.status}`);
       const result = await response.json();
-      setNotice(`${result.accepted} simulated readings saved to the backend.`);
-      log("Snapshot published to Electron telemetry pipeline.");
+      const analyzed = result.analyses?.filter((item: { status: string }) => item.status === "ANALYZED").length ?? 0;
+      setNotice(
+        `${result.accepted} raw readings saved. ML analyzed ${analyzed} meters and created ${result.anomaly_reports_created ?? 0} anomaly report(s).`
+      );
+      log("Telemetry history published and analyzed by the Electron ML pipeline.");
     } catch (error) {
       setNotice(`Publish failed. ${error instanceof Error ? error.message : "Check the backend connection."}`);
     } finally {
@@ -319,7 +322,7 @@ export default function Simulator() {
               <div className="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
                 <p>This view does not automatically render every backend consumer. It uses a fixed teaching topology for C011, C023, and C035.</p>
                 <p>Transformer IDs from the live ML dashboard are not yet drawn as separate 3D transformer assets here.</p>
-                <p>Publishing a snapshot saves simulator readings; it does not run theft detection by itself.</p>
+                <p>Publishing sends raw telemetry history; the backend ML layer infers meter condition and creates anomaly reports.</p>
               </div>
             </section>
           </div>
@@ -413,7 +416,7 @@ export default function Simulator() {
                     {publishing ? <Gauge size={14} /> : <Send size={14} />}
                     {publishing ? "Publishing..." : "Publish snapshot to backend"}
                   </button>
-                  <p className="mt-2 text-[10px] leading-relaxed text-slate-500">Saves 3 SIMULATOR readings for C011, C023 and C035. Injections remain local until published.</p>
+                  <p className="mt-2 text-[10px] leading-relaxed text-slate-500">Sends a 45-reading history for each demo meter. Meter status is inferred by the backend and is never submitted by this page.</p>
                 </>
               )}
               {notice ? <p role="status" className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">{notice}</p> : null}

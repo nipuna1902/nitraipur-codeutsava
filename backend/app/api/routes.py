@@ -24,13 +24,14 @@ from backend.app.schemas.anomaly import (
     InvestigationCaseDetailOut,
     InvestigationCaseOut,
     InvestigationCaseUpdateIn,
+    MlPredictionIn,
     MlPredictionBatchIn,
     MlPredictionIngestResponse,
     SimulationCompareIn,
     SimulationCompareOut,
 )
 from backend.app.schemas.grid import ConsumerSummary, TransformerSummary
-from backend.app.schemas.telemetry import TelemetryBatchIn, TelemetryIngestResponse, TelemetryReadingOut
+from backend.app.schemas.telemetry import TelemetryAnalysisOut, TelemetryBatchIn, TelemetryIngestResponse, TelemetryReadingOut
 from backend.app.schemas.voice import (
     ChecklistUpdateRequest,
     ConsumerToolRequest,
@@ -41,6 +42,7 @@ from backend.app.schemas.voice import (
     VoiceToolResponse,
 )
 from backend.app.services.simulation_ml import SimulationModelUnavailable, infer_known_injection
+from backend.app.services.telemetry_ml import analyze_telemetry_history
 from backend.app.services.repository import TelemetryRepository
 from backend.app.websocket.manager import ws_manager
 
@@ -66,7 +68,69 @@ def ingest_telemetry(
 ) -> TelemetryIngestResponse:
     saved = repository.ingest(payload.readings)
     latest = max((reading.timestamp for reading in saved), default=None)
-    return TelemetryIngestResponse(accepted=len(saved), latest_timestamp=latest)
+    analyses: list[TelemetryAnalysisOut] = []
+    anomaly_reports_created = 0
+    cases_created = 0
+    for consumer_id in sorted({reading.consumer_id for reading in saved}):
+        try:
+            result = analyze_telemetry_history(repository.consumer_history(consumer_id, limit=60))
+        except SimulationModelUnavailable as exc:
+            analyses.append(
+                TelemetryAnalysisOut(
+                    consumer_id=consumer_id,
+                    status="MODEL_UNAVAILABLE",
+                    readings_used=0,
+                    minimum_readings=30,
+                    inferred_meter_status="UNKNOWN",
+                    message=str(exc),
+                )
+            )
+            continue
+
+        repository.set_latest_meter_status(consumer_id, result["meter_status"])
+        anomaly_id = None
+        case_id = None
+        if result["status"] == "ANALYZED" and result["predicted_cause"] != "NORMAL":
+            prediction = MlPredictionIn(
+                consumer_id=consumer_id,
+                risk_score=result["risk_score"],
+                risk_level=result["risk_level"],
+                predicted_cause=result["predicted_cause"],
+                confidence=result["confidence"],
+                anomaly_score=result["anomaly_score"],
+                model_version=result["model_version"],
+                evidence=result["evidence"],
+            )
+            anomalies, cases = repository.ingest_predictions([prediction])
+            anomaly_id = anomalies[0].id
+            case_id = cases[0].case_id if cases else None
+            anomaly_reports_created += len(anomalies)
+            cases_created += len(cases)
+
+        analyses.append(
+            TelemetryAnalysisOut(
+                consumer_id=consumer_id,
+                status=result["status"],
+                readings_used=result["readings_used"],
+                minimum_readings=result["minimum_readings"],
+                inferred_meter_status=result["meter_status"],
+                risk_score=result.get("risk_score"),
+                risk_level=result.get("risk_level"),
+                predicted_cause=result.get("predicted_cause"),
+                confidence=result.get("confidence"),
+                anomaly_id=anomaly_id,
+                case_id=case_id,
+                model_version=result.get("model_version"),
+                message=result["message"],
+            )
+        )
+    return TelemetryIngestResponse(
+        accepted=len(saved),
+        latest_timestamp=latest,
+        analyses=analyses,
+        anomaly_reports_created=anomaly_reports_created,
+        cases_created=cases_created,
+    )
 
 
 @router.get("/telemetry/readings", response_model=list[TelemetryReadingOut])

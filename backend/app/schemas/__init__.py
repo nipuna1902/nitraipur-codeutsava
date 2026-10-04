@@ -1,5 +1,5 @@
 from .common import CommunicationStatus, MeterStatus, TelemetrySource
-from .telemetry import TelemetryBatchIn, TelemetryReadingIn, TelemetryReadingOut
+from .telemetry import TelemetryAnalysisOut, TelemetryBatchIn, TelemetryReadingIn, TelemetryReadingOut
 from .anomaly import (
     AnomalyOut,
     AnomalyQueueOut,
@@ -46,4 +46,5 @@ __all__ = [
     "TelemetryBatchIn",
     "TelemetryReadingIn",
     "TelemetryReadingOut",
+    "TelemetryAnalysisOut",
 ]

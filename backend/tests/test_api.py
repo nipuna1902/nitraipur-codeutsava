@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
@@ -27,7 +27,6 @@ class BackendApiTest(unittest.TestCase):
                     "current": 4.5,
                     "power": 1.1,
                     "energy": 0.275,
-                    "meter_status": "NORMAL",
                     "communication_status": "CONNECTED",
                     "source": "SIMULATOR",
                 }
@@ -37,6 +36,8 @@ class BackendApiTest(unittest.TestCase):
         ingest = self.client.post("/telemetry/readings", json=payload)
         self.assertEqual(ingest.status_code, 200)
         self.assertEqual(ingest.json()["accepted"], 1)
+        self.assertEqual(ingest.json()["analyses"][0]["status"], "INSUFFICIENT_HISTORY")
+        self.assertEqual(ingest.json()["analyses"][0]["inferred_meter_status"], "UNKNOWN")
 
         consumer = self.client.get("/consumers/C001")
         self.assertEqual(consumer.status_code, 200)
@@ -46,6 +47,56 @@ class BackendApiTest(unittest.TestCase):
         history = self.client.get("/consumers/C001/history")
         self.assertEqual(history.status_code, 200)
         self.assertEqual(len(history.json()), 1)
+        self.assertEqual(history.json()[0]["meter_status"], "UNKNOWN")
+
+    def test_ingest_rejects_client_supplied_meter_status(self):
+        response = self.client.post(
+            "/telemetry/readings",
+            json={
+                "readings": [
+                    {
+                        "consumer_id": "C001",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "energy": 12.5,
+                        "meter_status": "NORMAL",
+                        "communication_status": "CONNECTED",
+                    }
+                ]
+            },
+        )
+        self.assertEqual(response.status_code, 422)
+
+    def test_telemetry_history_is_analyzed_and_returns_anomaly_report(self):
+        start = datetime(2026, 8, 1, tzinfo=timezone.utc)
+        readings = []
+        for day in range(45):
+            fault_window = day >= 15
+            readings.append(
+                {
+                    "consumer_id": "C011",
+                    "timestamp": (start + timedelta(days=day)).isoformat(),
+                    "voltage": 184.0 if fault_window else 230.0,
+                    "current": 0.0 if fault_window else 4.5,
+                    "power": 0.0 if fault_window else 1.1,
+                    "energy": 0.0 if fault_window else 12.0 + (day % 3) * 0.2,
+                    "communication_status": "CONNECTED",
+                    "source": "SIMULATOR",
+                }
+            )
+
+        response = self.client.post("/telemetry/readings", json={"readings": readings})
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["accepted"], 45)
+        self.assertEqual(body["analyses"][0]["status"], "ANALYZED")
+        self.assertEqual(body["analyses"][0]["predicted_cause"], "METER_MALFUNCTION")
+        self.assertEqual(body["analyses"][0]["inferred_meter_status"], "FAULT")
+        self.assertEqual(body["anomaly_reports_created"], 1)
+
+        latest = self.client.get("/consumers/C011").json()
+        self.assertEqual(latest["meter_status"], "FAULT")
+        anomalies = self.client.get("/anomalies").json()
+        self.assertEqual(anomalies[0]["consumer_id"], "C011")
 
     def test_missing_consumer_returns_404(self):
         response = self.client.get("/consumers/C999")
@@ -78,7 +129,6 @@ class BackendApiTest(unittest.TestCase):
                     "current": 4.5,
                     "power": 1.1,
                     "energy": 0.275,
-                    "meter_status": "NORMAL",
                     "communication_status": "CONNECTED",
                     "source": "SIMULATOR",
                 }

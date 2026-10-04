@@ -15,6 +15,7 @@ from ml.contracts import FEATURE_COLUMNS, MODEL_VERSION, classify_probable_cause
 BASE_DIR = Path(__file__).resolve().parents[3]
 ARTIFACTS_DIR = BASE_DIR / "ml" / "artifacts"
 MODEL_PATH = ARTIFACTS_DIR / "best_production_model.pkl"
+LEGACY_MODEL_PATH = ARTIFACTS_DIR / "best_xgboost_model.pkl"
 FEATURE_COLUMNS_PATH = ARTIFACTS_DIR / "feature_columns.json"
 THRESHOLDS_PATH = ARTIFACTS_DIR / "thresholds.json"
 
@@ -23,17 +24,26 @@ class SimulationModelUnavailable(RuntimeError):
     pass
 
 
+def warm_model() -> None:
+    """Load and validate the artifact during API startup, before requests arrive."""
+    _load_model_bundle()
+
+
 @lru_cache(maxsize=1)
 def _load_model_bundle() -> dict[str, Any]:
-    if not MODEL_PATH.exists():
+    model_path = MODEL_PATH if MODEL_PATH.exists() else LEGACY_MODEL_PATH
+    if not model_path.exists():
         raise SimulationModelUnavailable(f"Missing model artifact: {MODEL_PATH}")
-    if not FEATURE_COLUMNS_PATH.exists():
-        raise SimulationModelUnavailable(f"Missing feature columns artifact: {FEATURE_COLUMNS_PATH}")
 
-    with MODEL_PATH.open("rb") as f:
+    with model_path.open("rb") as f:
         model = pickle.load(f)
-    with FEATURE_COLUMNS_PATH.open("r", encoding="utf-8") as f:
-        feature_columns = json.load(f)
+    if FEATURE_COLUMNS_PATH.exists():
+        with FEATURE_COLUMNS_PATH.open("r", encoding="utf-8") as f:
+            feature_columns = json.load(f)
+    else:
+        # Older committed artifacts predate the sidecar file but were trained
+        # with the canonical contract order.
+        feature_columns = FEATURE_COLUMNS.copy()
     thresholds = {}
     if THRESHOLDS_PATH.exists():
         with THRESHOLDS_PATH.open("r", encoding="utf-8") as f:
@@ -53,7 +63,6 @@ def _load_model_bundle() -> dict[str, Any]:
 
 
 def infer_known_injection(payload) -> dict[str, Any]:
-    bundle = _load_model_bundle()
     feature_map = build_simulation_feature_map(
         payload.injection_type,
         payload.normal_reference_snapshot or payload.baseline_snapshot,
@@ -61,6 +70,12 @@ def infer_known_injection(payload) -> dict[str, Any]:
         payload.severity,
         payload.duration_ticks,
     )
+    return infer_feature_map(feature_map)
+
+
+def infer_feature_map(feature_map: dict[str, float]) -> dict[str, Any]:
+    """Run the trained theft-risk artifact and evidence-based cause classifier."""
+    bundle = _load_model_bundle()
     row = np.array([[float(feature_map.get(column, 0.0)) for column in bundle["feature_columns"]]], dtype=float)
     probability = float(bundle["model"].predict_proba(row)[0][1])
     risk_score = round(probability * 100.0, 1)

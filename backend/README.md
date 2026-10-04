@@ -46,6 +46,10 @@ http://127.0.0.1:8000/docs
 - `POST /voice/tools/field-observation`
 - `POST /voice/tools/checklist-update`
 
+`POST /telemetry/readings` accepts raw measurements (`voltage`, `current`, `power`, `energy`) plus observed communication state and source. It rejects client-supplied `meter_status`. After storing the batch, the backend builds a per-consumer history window, runs the trained XGBoost artifact from `ml/artifacts`, infers meter condition, and returns analysis status in `analyses`. At least 30 readings are required; smaller histories return `INSUFFICIENT_HISTORY` and an inferred status of `UNKNOWN`.
+
+Non-normal ML results are persisted as anomaly reports. `HIGH` and `CRITICAL` reports continue into the existing investigation-case workflow. Cause classification remains evidence-based because the current training datasets provide binary theft labels rather than verified multiclass fault labels.
+
 ## ElevenLabs / Voice Testing Endpoints
 
 These endpoints are controlled backend tool contracts for future ElevenLabs integration. They do not call ElevenLabs yet.
@@ -248,6 +252,5 @@ Tables are created on startup for the prototype. A migration tool should be adde
 ## Not Implemented Yet
 
 - authentication
-- live ML model inference from telemetry
 - WebSockets
 - ElevenLabs, OpenAI, MQTT, or ThingsBoard integrations

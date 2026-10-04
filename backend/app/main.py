@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.app.api.routes import router
 from backend.app.database import init_db
 from backend.app.integrations.mqtt.client import mqtt_manager
+from backend.app.services.simulation_ml import SimulationModelUnavailable, warm_model
 from backend.app.websocket.manager import ws_manager
 
 logger = logging.getLogger("electron.main")
@@ -41,6 +42,11 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     async def on_startup() -> None:
         init_db()
+        try:
+            warm_model()
+            logger.info("ML model artifact loaded and ready.")
+        except SimulationModelUnavailable as exc:
+            logger.warning("ML model is unavailable: %s", exc)
         mqtt_manager.set_broadcast_callback(handle_mqtt_telemetry)
         mqtt_manager.start()
         logger.info("MQTT client started.")

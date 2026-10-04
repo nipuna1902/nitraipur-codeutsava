@@ -3,9 +3,10 @@ test("interactive topology, faults, pause, and snapshot publishing", async ({ pa
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   await page.route("**/api/telemetry/readings", async route => {
     const payload = route.request().postDataJSON();
-    expect(payload.readings).toHaveLength(3);
+    expect(payload.readings).toHaveLength(135);
     expect(payload.readings.every((r: { source: string }) => r.source === "SIMULATOR")).toBeTruthy();
-    await route.fulfill({ json: { accepted: 3 } });
+    expect(payload.readings.every((r: Record<string, unknown>) => !("meter_status" in r))).toBeTruthy();
+    await route.fulfill({ json: { accepted: 135, analyses: [{ status: "ANALYZED" }, { status: "ANALYZED" }, { status: "ANALYZED" }], anomaly_reports_created: 2 } });
   });
   await page.goto("/simulator");
   await expect(page.getByRole("heading", { name: "Grid simulator" })).toBeVisible();
@@ -20,7 +21,7 @@ test("interactive topology, faults, pause, and snapshot publishing", async ({ pa
   await expect(page.getByText("PAUSED", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await page.getByRole("button", { name: "Publish snapshot to backend" }).click();
-  await expect(page.getByRole("status")).toContainText("3 simulated readings saved");
+  await expect(page.getByRole("status")).toContainText("135 raw readings saved", { timeout: 60000 });
   await page.screenshot({ path: "test-results/simulator-desktop.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole("heading", { name: "Node Telemetry" })).toBeVisible();
@@ -44,7 +45,7 @@ test("real backend snapshot round trip", async ({ page }) => {
   await expect(page.locator("canvas")).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Inject fault on F01", exact: true }).click();
   await page.getByRole("button", { name: "Publish snapshot to backend" }).click();
-  await expect(page.getByRole("status")).toContainText("3 simulated readings saved");
+  await expect(page.getByRole("status")).toContainText("135 raw readings saved", { timeout: 60000 });
   await page.getByLabel("Telemetry source").selectOption("live");
   await expect(page.getByText("CONNECTED", { exact: true })).toBeVisible();
   await expect(page.getByText("critical / Fault detected", { exact: true })).toBeVisible();

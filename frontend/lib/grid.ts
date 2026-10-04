@@ -1,6 +1,7 @@
 export type Health = "normal" | "warning" | "critical" | "unknown";
 export type GridNode = { id: string; name: string; kind: "Substation" | "Feeder" | "Residential"; position: [number, number, number]; consumers: string[] };
 export type Reading = { consumer_id: string; timestamp: string; voltage: number | null; current: number | null; power: number | null; energy: number; meter_status: string; communication_status: string; source: string };
+export type RawReading = Omit<Reading, "meter_status">;
 export type Telemetry = { voltage: number | null; current: number | null; power: number | null; health: Health; timestamp: string | null };
 export const COLORS: Record<Health, string> = { normal: "#34d399", warning: "#facc15", critical: "#ff4564", unknown: "#64748b" };
 // Dedicated simulator IDs map to the backend's T01, T02 and T03 transformer ranges.
@@ -44,4 +45,30 @@ export function demoReadings(step: number, faults: Set<string>, timestamp = new 
     const current = faulted ? 2.4 : 18 + index * 7 + Math.sin(step / 4 + index) * 4;
     return { consumer_id: n.consumers[0], timestamp, voltage, current, power: voltage * current * .95 / 1000, energy: 0, meter_status: faulted ? "FAULT" : "NORMAL", communication_status: "CONNECTED", source: "SIMULATOR" };
   });
+}
+
+export function demoHistoryReadings(step: number, faults: Set<string>, now = new Date()): RawReading[] {
+  const readings: RawReading[] = [];
+  for (let day = 0; day < 45; day += 1) {
+    const timestamp = new Date(now.getTime() - (44 - day) * 86_400_000).toISOString();
+    for (const [index, node] of NODES.filter(item => item.kind === "Residential").entries()) {
+      const faulted = NODES.some(parent => faults.has(parent.id) && parent.consumers.includes(node.consumers[0]));
+      const faultWindow = faulted && day >= 15;
+      const voltage = faultWindow ? 184 : 230 + Math.sin((step + day) / 3 + index) * 3;
+      const current = faultWindow ? 0 : 18 + index * 7 + Math.sin((step + day) / 4 + index) * 4;
+      const power = voltage * current * .95 / 1000;
+      const baselineEnergy = 12 + index * 3 + Math.sin(day / 3 + index) * .45;
+      readings.push({
+        consumer_id: node.consumers[0],
+        timestamp,
+        voltage,
+        current,
+        power,
+        energy: faultWindow ? 0 : Math.max(0, baselineEnergy),
+        communication_status: "CONNECTED",
+        source: "SIMULATOR"
+      });
+    }
+  }
+  return readings;
 }

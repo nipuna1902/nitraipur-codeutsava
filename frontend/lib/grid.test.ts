@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { aggregate, demoReadings, healthOf, NODES, utcTimestamp } from "./grid";
+import { aggregate, demoHistoryReadings, demoReadings, healthOf, NODES, utcTimestamp } from "./grid";
 test("SQLite timestamps preserve UTC when the backend omits the timezone", () => {
   const timestamp = new Date().toISOString();
   const rows = demoReadings(0, new Set(["F01"]), timestamp.replace("Z", ""));
@@ -37,4 +37,10 @@ test("warning thresholds and snapshot contract", () => {
   assert.equal(healthOf({ ...rows[0], voltage: 210 }), "warning");
   assert.equal(healthOf({ ...rows[0], communication_status: "DISCONNECTED" }), "critical");
   assert.ok(rows.every(r => r.source === "SIMULATOR" && r.energy >= 0 && Number.isFinite(Date.parse(r.timestamp))));
+});
+test("published simulator history contains raw telemetry without meter diagnosis", () => {
+  const rows = demoHistoryReadings(0, new Set(["F01"]));
+  assert.equal(rows.length, 135);
+  assert.ok(rows.every(row => !("meter_status" in row)));
+  assert.equal(rows.filter(row => row.consumer_id === "C011" && row.energy === 0).length, 30);
 });

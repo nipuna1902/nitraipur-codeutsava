@@ -1,19 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://electron.local/contracts/telemetry.schema.json",
-  "title": "TelemetryReading",
+  "title": "TelemetryReadingInput",
   "type": "object",
-  "required": ["consumer_id", "timestamp", "energy", "meter_status", "communication_status"],
+  "required": ["consumer_id", "timestamp", "energy", "communication_status"],
   "properties": {
-    "id": { "type": "string" },
     "consumer_id": { "type": "string" },
     "timestamp": { "type": "string", "format": "date-time" },
     "voltage": { "type": "number" },
     "current": { "type": "number" },
     "power": { "type": "number" },
     "energy": { "type": "number" },
-    "meter_status": { "enum": ["NORMAL", "SUSPECTED_FAULT", "FAULT", "UNKNOWN"] },
-    "communication_status": { "enum": ["CONNECTED", "DEGRADED", "DISCONNECTED", "UNKNOWN"] }
+    "communication_status": { "enum": ["CONNECTED", "DEGRADED", "DISCONNECTED", "UNKNOWN"] },
+    "source": { "enum": ["SIMULATOR", "CSV_UPLOAD", "MQTT_DEVICE_FUTURE"] }
   },
   "additionalProperties": false
 }
