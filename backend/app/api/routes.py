@@ -359,11 +359,11 @@ def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
         "duration_ticks": payload.duration_ticks,
     }
     conclusion = (
-        f"Simulated detection is inconclusive. Expected {expected_cause}, but the changed signal is too weak or too short, so the comparator returns UNCERTAIN."
+        f"Backend comparison is inconclusive. Expected {_display_simulation_cause(expected_cause)}, but the changed signal is too weak or too short, so the comparator returns uncertain."
         if low_signal
-        else f"Simulated detection matches the injected ground truth: {predicted_cause.replace('_', ' ')}."
+        else f"Backend comparison matches the injected ground truth class: {_display_simulation_cause(predicted_cause)}."
         if matches_ground_truth
-        else f"Simulated detection differs from ground truth. Expected {expected_cause}, predicted {predicted_cause}."
+        else f"Backend comparison differs from ground truth. Expected {_display_simulation_cause(expected_cause)}, predicted {_display_simulation_cause(predicted_cause)}."
     )
     if low_signal:
         next_step = "Increase severity or duration before using this scenario as a quality demonstration."
@@ -393,6 +393,18 @@ def _format_model_evidence(evidence: list[dict]) -> list[str]:
         for item in evidence
         if item.get("feature") is not None
     ]
+
+
+def _display_simulation_cause(cause: str | None) -> str:
+    labels = {
+        "THEFT_TAMPERING": "theft/tampering risk",
+        "METER_MALFUNCTION": "meter malfunction",
+        "COMMUNICATION_FAILURE": "communication failure",
+        "LEGITIMATE_ABNORMAL_CONSUMPTION": "legitimate abnormal usage",
+        "UNCERTAIN": "uncertain",
+        "NORMAL": "normal",
+    }
+    return labels.get(cause or "", (cause or "unknown").replace("_", " ").lower())
 
 
 def _simulation_profile(injection_type: str) -> dict:
