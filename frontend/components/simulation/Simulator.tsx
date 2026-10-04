@@ -166,7 +166,10 @@ export default function Simulator() {
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
               Grid simulator<span className="ml-3 align-middle text-xs font-normal text-teal-700">/ LAB</span>
             </h1>
-            <p className="mt-2 text-sm text-slate-600">Explore the network, inject a fault, and see the impact.</p>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              A simplified distribution digital twin: one substation feeds two feeders and three residential zones.
+              Each zone maps to a demo meter ID, and colors summarize the latest downstream telemetry health.
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <label className="control">
@@ -209,6 +212,31 @@ export default function Simulator() {
             </div>
           ))}
         </div>
+
+        <section className="mb-5 grid gap-3 lg:grid-cols-3">
+          <div className="panel p-4">
+            <p className="eyebrow">What The 3D View Shows</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              The 3D scene is a topology view, not a load-flow solver. Boxes are grid assets, lines are parent-child
+              feeder relationships, and node color comes from voltage, meter status, communication status, and freshness.
+            </p>
+          </div>
+          <div className="panel p-4">
+            <p className="eyebrow">Topology Mapping</p>
+            <div className="mt-2 grid gap-1 text-sm text-slate-600">
+              <p>SS-01 feeds F01 and F02.</p>
+              <p>F01 feeds R-01/C011 and R-02/C023.</p>
+              <p>F02 feeds R-03/C035.</p>
+            </div>
+          </div>
+          <div className="panel p-4">
+            <p className="eyebrow">Data Source</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Demo mode generates synthetic readings locally. Backend mode polls `/api/telemetry/readings`; if readings are
+              missing or stale, affected nodes turn unknown instead of inventing live data.
+            </p>
+          </div>
+        </section>
 
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="min-w-0 space-y-4">
@@ -284,6 +312,15 @@ export default function Simulator() {
                   </li>
                 ))}
               </ul>
+            </section>
+
+            <section className="panel p-5">
+              <p className="eyebrow">Missing Links / Current Limits</p>
+              <div className="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+                <p>This view does not automatically render every backend consumer. It uses a fixed teaching topology for C011, C023, and C035.</p>
+                <p>Transformer IDs from the live ML dashboard are not yet drawn as separate 3D transformer assets here.</p>
+                <p>Publishing a snapshot saves simulator readings; it does not run theft detection by itself.</p>
+              </div>
             </section>
           </div>
 

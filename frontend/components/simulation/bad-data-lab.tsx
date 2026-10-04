@@ -4,6 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Activity, Copy, Gauge, GitCompareArrows, RadioTower, ShieldAlert, WifiOff, ZapOff } from "lucide-react";
 import type { Consumer, Transformer } from "@/types/dashboard";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://127.0.0.1:8001";
+
 const injections = [
   {
     id: "ZERO_READING",
@@ -170,6 +175,30 @@ type BadDataLabProps = {
   transformers: Transformer[];
 };
 
+type CompareResult = {
+  run_id: string;
+  status: string;
+  model_version: string;
+  model_output: {
+    predicted_cause: string;
+    risk_score: number;
+    confidence: number;
+    adjusted_priority: string;
+    evidence: string[];
+    guardrail_notes: string[];
+  };
+  comparison: {
+    expected_cause?: string;
+    predicted_cause: string;
+    matches_ground_truth: boolean;
+    changed_fields_reviewed: string[];
+    severity: number;
+    duration_ticks: number;
+  };
+  conclusion: string;
+  recommended_next_step: string;
+};
+
 export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
   const [selected, setSelected] = useState(injections[1]);
   const [consumerId, setConsumerId] = useState(consumers[0]?.consumer_id ?? "");
@@ -177,6 +206,9 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
   const [severity, setSeverity] = useState(75);
   const [durationTicks, setDurationTicks] = useState(24);
   const [copied, setCopied] = useState(false);
+  const [compareResult, setCompareResult] = useState<CompareResult | null>(null);
+  const [compareStatus, setCompareStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [compareMessage, setCompareMessage] = useState("");
   const profile = injectionProfiles[selected.id as keyof typeof injectionProfiles];
   const changedFields = useMemo(
     () =>
@@ -257,6 +289,31 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
     await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1500);
+  }
+
+  async function runComparison() {
+    setCompareStatus("loading");
+    setCompareMessage("Calling backend simulation comparator...");
+    setCompareResult(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/simulation/compare`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        setCompareStatus("error");
+        setCompareMessage(body?.detail ?? `Backend returned ${response.status}`);
+        return;
+      }
+      setCompareResult(body);
+      setCompareStatus("success");
+      setCompareMessage(body.conclusion ?? "Comparison completed.");
+    } catch (error) {
+      setCompareStatus("error");
+      setCompareMessage(error instanceof Error ? error.message : "Comparison request failed.");
+    }
   }
 
   return (
@@ -363,13 +420,40 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
               <input type="number" min="1" max="240" value={durationTicks} onChange={(event) => setDurationTicks(Number(event.target.value))} className="min-h-10 rounded-lg border border-slate-200 bg-white px-3" />
             </label>
             <div className="grid gap-2 sm:grid-cols-3">
-              {["Inject Known Data", "Run Detection", "Compare Result"].map((label) => (
-                <button key={label} type="button" disabled className="min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-400">
-                  {label}
-                  <span className="block text-[10px] font-normal">Backend endpoint pending</span>
-                </button>
-              ))}
+              <button type="button" disabled className="min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-400">
+                Inject Known Data
+                <span className="block text-[10px] font-normal">Preview only</span>
+              </button>
+              <button
+                type="button"
+                onClick={runComparison}
+                disabled={compareStatus === "loading"}
+                className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:text-slate-400"
+              >
+                {compareStatus === "loading" ? "Running..." : "Run Detection"}
+                <span className="block text-[10px] font-normal">POST /simulation/compare</span>
+              </button>
+              <button
+                type="button"
+                onClick={runComparison}
+                disabled={compareStatus === "loading"}
+                className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:text-slate-400"
+              >
+                Compare Result
+                <span className="block text-[10px] font-normal">Truth vs backend</span>
+              </button>
             </div>
+            {compareMessage ? (
+              <p className={`rounded-lg border p-3 text-xs leading-5 ${
+                compareStatus === "error"
+                  ? "border-red-200 bg-red-50 text-red-700"
+                  : compareStatus === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-amber-200 bg-amber-50 text-amber-700"
+              }`}>
+                {compareMessage}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
@@ -459,12 +543,51 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
       <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-slate-950">Actual Backend Model Output</p>
-          <span className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-500">Endpoint pending</span>
+          <span className={`rounded-md border px-2 py-1 text-xs font-medium ${
+            compareResult
+              ? compareResult.comparison.matches_ground_truth
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-red-200 bg-red-50 text-red-700"
+              : "border-slate-200 bg-white text-slate-500"
+          }`}>
+            {compareResult ? (compareResult.comparison.matches_ground_truth ? "Matched" : "Mismatch") : "Not run"}
+          </span>
         </div>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          This section is intentionally not populated yet. When the backend injection/run endpoint is added, `Run Detection`
-          should write the real model response here and compare it against the injected ground truth above.
-        </p>
+        {compareResult ? (
+          <div className="mt-4 grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+            <dl className="grid gap-2 text-sm">
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Run ID</dt><dd className="font-mono font-medium text-slate-900">{compareResult.run_id}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Model version</dt><dd className="text-right font-medium text-slate-900">{compareResult.model_version}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Predicted cause</dt><dd className="text-right font-semibold text-slate-950">{compareResult.model_output.predicted_cause.replaceAll("_", " ")}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk score</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.risk_score}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Confidence</dt><dd className="font-semibold text-slate-950">{Math.round(compareResult.model_output.confidence * 100)}%</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Priority</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.adjusted_priority}</dd></div>
+            </dl>
+            <div className="grid gap-3">
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Conclusion</p>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{compareResult.conclusion}</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Backend evidence</p>
+                <ul className="mt-2 grid gap-1 text-sm text-slate-700">
+                  {compareResult.model_output.evidence.map((item) => (
+                    <li key={item}>- {item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Next step</p>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{compareResult.recommended_next_step}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Click `Run Detection` to call the backend comparator. It will return the simulated model output and compare it
+            against the injected ground truth above.
+          </p>
+        )}
       </div>
 
       <pre className="mt-6 max-h-80 overflow-auto rounded-lg border border-slate-200 bg-slate-950 p-5 text-xs leading-5 text-slate-100">

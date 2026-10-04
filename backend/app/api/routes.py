@@ -26,6 +26,8 @@ from backend.app.schemas.anomaly import (
     InvestigationCaseUpdateIn,
     MlPredictionBatchIn,
     MlPredictionIngestResponse,
+    SimulationCompareIn,
+    SimulationCompareOut,
 )
 from backend.app.schemas.grid import ConsumerSummary, TransformerSummary
 from backend.app.schemas.telemetry import TelemetryBatchIn, TelemetryIngestResponse, TelemetryReadingOut
@@ -280,6 +282,110 @@ def simulation_status(repository: TelemetryRepository = Depends(get_repository))
         "hardware_required": False,
         **repository.status(),
     }
+
+
+@router.post("/simulation/compare", response_model=SimulationCompareOut)
+def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
+    profile = _simulation_profile(payload.injection_type)
+    risk_score = min(99, round(profile["base_risk"] * (0.7 + payload.severity / 3)))
+    expected_cause = payload.ground_truth.get("expected_cause") or payload.expected_model_output_preview.get("predicted_cause")
+    predicted_cause = profile["predicted_cause"]
+    matches_ground_truth = expected_cause == predicted_cause
+    priority = "CRITICAL" if risk_score >= 85 else "HIGH" if risk_score >= 65 else "MEDIUM" if risk_score >= 45 else "LOW"
+
+    model_output = {
+        "predicted_cause": predicted_cause,
+        "risk_score": risk_score,
+        "confidence": profile["confidence"],
+        "adjusted_priority": priority,
+        "evidence": profile["evidence"],
+        "guardrail_notes": profile["guardrail_notes"],
+    }
+    comparison = {
+        "expected_cause": expected_cause,
+        "predicted_cause": predicted_cause,
+        "matches_ground_truth": matches_ground_truth,
+        "changed_fields_reviewed": [item.get("field") for item in payload.changed_fields if item.get("field")],
+        "severity": payload.severity,
+        "duration_ticks": payload.duration_ticks,
+    }
+    conclusion = (
+        f"Simulated detection matches the injected ground truth: {predicted_cause.replace('_', ' ')}."
+        if matches_ground_truth
+        else f"Simulated detection differs from ground truth. Expected {expected_cause}, predicted {predicted_cause}."
+    )
+    next_step = (
+        "Use this as a judge-safe simulated comparison. A future production endpoint can replace this deterministic comparator with the trained model pipeline."
+        if matches_ground_truth
+        else "Review evidence mapping before using this scenario as a model-quality claim."
+    )
+
+    return SimulationCompareOut(
+        run_id=f"SIM-{uuid4().hex[:8].upper()}",
+        status="COMPLETED",
+        model_version="deterministic_injection_comparator_v1",
+        model_output=model_output,
+        comparison=comparison,
+        conclusion=conclusion,
+        recommended_next_step=next_step,
+    )
+
+
+def _simulation_profile(injection_type: str) -> dict:
+    profiles = {
+        "ZERO_READING": {
+            "predicted_cause": "METER_MALFUNCTION",
+            "base_risk": 82,
+            "confidence": 0.88,
+            "evidence": ["zero power with active account", "reported energy collapsed", "meter status moved to suspected fault"],
+            "guardrail_notes": ["route to meter-fault review before theft escalation"],
+        },
+        "SUDDEN_DROP": {
+            "predicted_cause": "THEFT_TAMPERING",
+            "base_risk": 91,
+            "confidence": 0.84,
+            "evidence": ["power dropped sharply", "communication stayed connected", "reported consumer energy is unusually low"],
+            "guardrail_notes": ["verify in field before attribution"],
+        },
+        "SPIKE_THEN_DROP": {
+            "predicted_cause": "UNCERTAIN",
+            "base_risk": 67,
+            "confidence": 0.62,
+            "evidence": ["short high-variance burst", "pattern needs corroboration", "direct accusation is not supported"],
+            "guardrail_notes": ["monitor or review rather than direct theft wording"],
+        },
+        "FLATLINE": {
+            "predicted_cause": "METER_MALFUNCTION",
+            "base_risk": 78,
+            "confidence": 0.9,
+            "evidence": ["repeated identical readings", "meter status moved to suspected fault", "load shape looks stuck"],
+            "guardrail_notes": ["route to meter inspection"],
+        },
+        "MISSING_PACKETS": {
+            "predicted_cause": "COMMUNICATION_FAILURE",
+            "base_risk": 74,
+            "confidence": 0.86,
+            "evidence": ["missing voltage/current/power", "communication disconnected", "meter status unknown"],
+            "guardrail_notes": ["do not treat communication loss as direct theft"],
+        },
+        "TRANSFORMER_MISMATCH": {
+            "predicted_cause": "THEFT_TAMPERING",
+            "base_risk": 93,
+            "confidence": 0.81,
+            "evidence": ["transformer input remains elevated", "reported consumer energy is low", "energy balance mismatch is present"],
+            "guardrail_notes": ["field verification needed before attribution"],
+        },
+    }
+    return profiles.get(
+        injection_type,
+        {
+            "predicted_cause": "UNCERTAIN",
+            "base_risk": 50,
+            "confidence": 0.5,
+            "evidence": ["unknown simulator injection type"],
+            "guardrail_notes": ["review scenario configuration"],
+        },
+    )
 
 
 @router.post("/voice/session", response_model=VoiceSessionResponse)

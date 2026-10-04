@@ -274,7 +274,7 @@ Check initial render:
 - Duration control is visible.
 - Injected Ground Truth panel is visible.
 - Expected Electron Output preview is visible.
-- Actual Backend Model Output pending state is visible.
+- Actual Backend Model Output panel is visible.
 - Payload preview is visible.
 
 Interaction test:
@@ -286,6 +286,8 @@ Interaction test:
 5. Change severity.
 6. Change duration.
 7. Watch Injected Ground Truth, Expected Electron Output, and payload preview.
+8. Click `Run Detection`.
+9. Watch Actual Backend Model Output.
 
 Expected:
 
@@ -294,15 +296,59 @@ Expected:
 - Expected Electron Output changes when fault type or severity changes.
 - Payload changes when transformer, consumer, severity, or duration changes.
 - The page clearly treats injected fault as known truth, not model prediction.
-- Actual Backend Model Output stays marked as endpoint-pending until backend injection is implemented.
+- Actual Backend Model Output is populated from `POST /simulation/compare`.
+- The conclusion says whether backend simulated detection matches the injected ground truth.
+- The response includes predicted cause, risk score, confidence, evidence, and recommended next step.
 
 Fail conditions:
 
 - Fault cards cannot be switched.
 - Transformer changes do not update consumer choices.
 - Injected Ground Truth, Expected Electron Output, or payload remains unchanged after controls change.
+- `Run Detection` does not populate Actual Backend Model Output while the backend is running.
 
-## 10. Test Offline Behavior
+## 10. Test 3D Digital Twin Page
+
+URL:
+
+```text
+http://127.0.0.1:3000/simulator
+```
+
+Check initial render:
+
+- Page loads without a client-side application error.
+- Canvas is visible.
+- `What The 3D View Shows` is visible.
+- `Topology Mapping` is visible.
+- `Data Source` is visible.
+- `Missing Links / Current Limits` is visible.
+- `Node Telemetry` is visible.
+
+Expected:
+
+- The page explains that the 3D view is a simplified topology, not a full load-flow solver.
+- It identifies SS-01, F01, F02, R-01/C011, R-02/C023, and R-03/C035.
+- It explains that colors come from downstream telemetry health.
+- It explains Demo mode versus Backend telemetry mode.
+
+Interaction test:
+
+1. Select a node in the 3D scene or Network inventory.
+2. Confirm Node Telemetry changes.
+3. Inject a fault on a feeder.
+4. Confirm affected downstream nodes become critical.
+5. Clear all injections.
+6. Switch to Backend telemetry.
+
+Expected:
+
+- Demo mode uses synthetic local readings.
+- Backend mode polls `/api/telemetry/readings`.
+- Missing/stale readings show unknown rather than fake data.
+- The page explains current limits: not every backend consumer is rendered and transformer assets are not yet separate 3D objects.
+
+## 11. Test Offline Behavior
 
 Stop the backend server and refresh:
 
@@ -320,7 +366,7 @@ Expected:
 
 Restart backend, reload ML data, and refresh to return to live mode.
 
-## 11. Browser Console Checks
+## 12. Browser Console Checks
 
 Open DevTools Console while testing each page.
 
@@ -338,7 +384,7 @@ If requests go to the wrong port:
 
 The frontend reads `NEXT_PUBLIC_API_URL` at startup.
 
-## 12. Command-Line Smoke Checks
+## 13. Command-Line Smoke Checks
 
 With backend and frontend running:
 

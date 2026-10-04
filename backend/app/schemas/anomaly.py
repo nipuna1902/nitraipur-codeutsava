@@ -165,3 +165,27 @@ class ConsumerAnalysisOut(BaseModel):
     latest_anomaly: AnomalyOut | None = None
     investigation_case: InvestigationCaseOut | None = None
     recommended_action: str
+
+
+class SimulationCompareIn(BaseModel):
+    injection_type: str = Field(min_length=1)
+    consumer_id: str | None = None
+    transformer_id: str | None = None
+    severity: float = Field(default=0.75, ge=0, le=1)
+    duration_ticks: int = Field(default=24, ge=1, le=1000)
+    timestamp: str | None = None
+    ground_truth: dict = Field(default_factory=dict)
+    expected_model_output_preview: dict = Field(default_factory=dict)
+    baseline_snapshot: dict = Field(default_factory=dict)
+    injected_snapshot: dict = Field(default_factory=dict)
+    changed_fields: list[dict] = Field(default_factory=list)
+
+
+class SimulationCompareOut(BaseModel):
+    run_id: str
+    status: str
+    model_version: str
+    model_output: dict
+    comparison: dict
+    conclusion: str
+    recommended_next_step: str

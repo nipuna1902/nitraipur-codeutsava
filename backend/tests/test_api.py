@@ -337,6 +337,32 @@ class BackendApiTest(unittest.TestCase):
         self.assertFalse(response.json()["data_available"])
         self.assertEqual(response.json()["intent"], "consumer_analysis")
 
+    def test_simulation_compare_returns_detection_conclusion(self):
+        response = self.client.post(
+            "/simulation/compare",
+            json={
+                "injection_type": "MISSING_PACKETS",
+                "consumer_id": "C011",
+                "transformer_id": "T01",
+                "severity": 0.75,
+                "duration_ticks": 24,
+                "ground_truth": {
+                    "expected_cause": "COMMUNICATION_FAILURE",
+                    "known_injection": True,
+                },
+                "changed_fields": [
+                    {"field": "communication_status", "before": "CONNECTED", "after": "DISCONNECTED"}
+                ],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["status"], "COMPLETED")
+        self.assertEqual(body["model_output"]["predicted_cause"], "COMMUNICATION_FAILURE")
+        self.assertTrue(body["comparison"]["matches_ground_truth"])
+        self.assertIn("matches", body["conclusion"])
+
     def test_investigation_lifecycle_persists_updates(self):
         self._create_prediction("C077", risk_level="CRITICAL", risk_score=93.0)
         cases = self.client.get("/investigations").json()

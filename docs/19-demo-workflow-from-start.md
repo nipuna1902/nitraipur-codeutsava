@@ -223,7 +223,7 @@ Show:
 - Duration ticks.
 - Injected Ground Truth panel.
 - Expected Electron Output preview.
-- Actual Backend Model Output pending state.
+- Actual Backend Model Output panel.
 - Payload preview.
 
 Change:
@@ -241,14 +241,45 @@ Expected behavior:
 - Injected Ground Truth updates immediately.
 - Expected Electron Output preview updates immediately.
 - Payload preview updates immediately.
+- Click `Run Detection`.
+- Actual Backend Model Output fills with predicted cause, risk score, evidence, and conclusion.
 
 What to say:
 
 ```text
-This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected Electron output preview shows what the model should return for that fault. The actual backend model output is intentionally marked pending until the injection run endpoint is connected.
+This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected Electron output preview shows what the model should return for that fault. When I click Run Detection, the frontend calls the backend `/simulation/compare` endpoint and derives a conclusion: whether the simulated model output matches the injected truth.
 ```
 
-## 10. Mention OpenAI API Key
+Important wording:
+
+```text
+This is a deterministic simulator comparator for the demo. It proves the compare workflow and conclusion UI. It does not claim the trained XGBoost pipeline has been rerun on synthetic telemetry yet.
+```
+
+## 10. Show The 3D Digital Twin
+
+Open:
+
+```text
+http://127.0.0.1:3000/simulator
+```
+
+Show:
+
+- What The 3D View Shows.
+- Topology Mapping.
+- Data Source.
+- Network digital twin.
+- Node Telemetry.
+- Missing Links / Current Limits.
+
+What to say:
+
+```text
+This is a simplified teaching topology, not an automatic map of every backend consumer. SS-01 feeds two feeders, which feed three residential zones mapped to C011, C023, and C035. The colors summarize downstream telemetry health from voltage, meter status, communication status, and freshness. Demo mode generates synthetic readings locally; backend mode polls live telemetry readings and marks nodes unknown when readings are missing or stale.
+```
+
+## 11. Mention OpenAI API Key
 
 What to say if asked:
 
@@ -256,7 +287,7 @@ What to say if asked:
 An OpenAI API key is not required for this demo. Ask Electron is currently deterministic and grounded in backend data. If we add an LLM later, the key should stay only on the backend, and the model should summarize tool results rather than invent facts.
 ```
 
-## 11. Close With The Main Value
+## 12. Close With The Main Value
 
 What to say:
 

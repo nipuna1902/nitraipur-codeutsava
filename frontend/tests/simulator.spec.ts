@@ -36,7 +36,7 @@ test("backend empty, stale and failure states do not substitute demo telemetry",
   await expect(page.getByText("No recent telemetry", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Inject fault on F01", exact: true })).toHaveCount(0);
   await page.route("**/api/telemetry/readings?*", route => route.fulfill({ status: 503, json: {} }));
-  await expect(page.getByText("BACKEND UNAVAILABLE · RETRYING", { exact: true })).toBeVisible({ timeout: 12000 });
+  await expect(page.getByText("BACKEND UNAVAILABLE - RETRYING", { exact: true })).toBeVisible({ timeout: 12000 });
 });
 test("real backend snapshot round trip", async ({ page }) => {
   test.skip(!process.env.TEST_REAL_BACKEND, "Set TEST_REAL_BACKEND=1 with an isolated backend and BACKEND_URL configured.");
@@ -48,4 +48,42 @@ test("real backend snapshot round trip", async ({ page }) => {
   await page.getByLabel("Telemetry source").selectOption("live");
   await expect(page.getByText("CONNECTED", { exact: true })).toBeVisible();
   await expect(page.getByText("critical / Fault detected", { exact: true })).toBeVisible();
+});
+
+test("known injection comparison renders backend conclusion", async ({ page }) => {
+  await page.route("**/simulation/compare", async route => {
+    await route.fulfill({
+      json: {
+        run_id: "SIM-TEST",
+        status: "COMPLETED",
+        model_version: "deterministic_injection_comparator_v1",
+        model_output: {
+          predicted_cause: "THEFT_TAMPERING",
+          risk_score: 91,
+          confidence: 0.84,
+          adjusted_priority: "CRITICAL",
+          evidence: ["power dropped sharply", "communication stayed connected"],
+          guardrail_notes: ["verify in field before attribution"]
+        },
+        comparison: {
+          expected_cause: "THEFT_TAMPERING",
+          predicted_cause: "THEFT_TAMPERING",
+          matches_ground_truth: true,
+          changed_fields_reviewed: ["power", "energy"],
+          severity: 0.75,
+          duration_ticks: 24
+        },
+        conclusion: "Simulated detection matches the injected ground truth: THEFT TAMPERING.",
+        recommended_next_step: "Use this as a judge-safe simulated comparison."
+      }
+    });
+  });
+
+  await page.goto("/dual-injection");
+  await expect(page.getByText("Injected Ground Truth", { exact: true })).toBeVisible();
+  await expect(page.getByText("Actual Backend Model Output", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: /Run Detection/ }).click();
+  await expect(page.getByText("SIM-TEST")).toBeVisible();
+  await expect(page.getByText("Simulated detection matches the injected ground truth").first()).toBeVisible();
+  await expect(page.getByText("Matched")).toBeVisible();
 });
