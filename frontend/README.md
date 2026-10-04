@@ -26,6 +26,7 @@ Requests to `/api/*` are proxied to `http://127.0.0.1:8000/*`. To change this, s
 - Six selectable nodes, five power lines, orbit/pan/zoom controls, camera reset and a keyboard-accessible node inventory.
 - Demo telemetry updates every two seconds. Faults apply to the selected node's downstream meters; upstream aggregate health reflects affected meters. Clear all injections restores the baseline.
 - Backend mode polls `GET /telemetry/readings?limit=1000` every three seconds. Missing or older-than-30-second readings show unknown health. Connection failures are shown and retried; demo values never replace backend values.
+- The Overview navigation shows MQTT status from `GET /mqtt/status`, including whether the backend MQTT client is connected and how many MQTT readings were ingested.
 - The simplified topology represents C011 (T01/F01), C023 (T02/F01), and C035 (T03/F02), matching existing repository transformer assignment. It is not an automatic visualization of every backend consumer. The backend's latest-1000 window can omit quiet consumers; those show no data.
 - Voltage is mean downstream residential voltage in volts, current is summed amperes, and power is summed kW. The substation/feeder values represent downstream meter aggregates, not high-voltage bus measurements or a load-flow solver.
 - Normal is green, warning yellow (outside 216–244 V), critical red (outside 200–260 V or meter/communication fault), and missing/stale telemetry slate. Faulted geometry pulses unless reduced motion is enabled.

@@ -21,6 +21,10 @@ All API routes require authentication except `GET /health`. Authorization is rol
 
 Purpose: service health check. Auth: none. Response: `{ "status": "ok" }`.
 
+`GET /mqtt/status`
+
+Purpose: report MQTT ingestion state, broker config, last message time, and persisted MQTT reading count.
+
 ## Dashboard
 
 `GET /dashboard/summary`

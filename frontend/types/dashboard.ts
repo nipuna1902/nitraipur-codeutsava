@@ -92,4 +92,19 @@ export type DashboardData = {
   consumers: Consumer[];
   investigations: InvestigationCase[];
   transformers: Transformer[];
+  mqtt?: MqttStatus;
+};
+
+export type MqttStatus = {
+  enabled: boolean;
+  started: boolean;
+  connected: boolean;
+  broker_host: string;
+  broker_port: number;
+  topic: string;
+  client_id: string;
+  last_message_at?: string | null;
+  last_error?: string | null;
+  messages_received: number;
+  readings_ingested: number;
 };
