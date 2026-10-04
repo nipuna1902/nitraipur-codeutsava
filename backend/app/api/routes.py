@@ -287,19 +287,30 @@ def simulation_status(repository: TelemetryRepository = Depends(get_repository))
 @router.post("/simulation/compare", response_model=SimulationCompareOut)
 def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
     profile = _simulation_profile(payload.injection_type)
+    low_signal = payload.severity < 0.35 or payload.duration_ticks < 3
     risk_score = min(99, round(profile["base_risk"] * (0.7 + payload.severity / 3)))
     expected_cause = payload.ground_truth.get("expected_cause") or payload.expected_model_output_preview.get("predicted_cause")
-    predicted_cause = profile["predicted_cause"]
+    predicted_cause = "UNCERTAIN" if low_signal else profile["predicted_cause"]
     matches_ground_truth = expected_cause == predicted_cause
-    priority = "CRITICAL" if risk_score >= 85 else "HIGH" if risk_score >= 65 else "MEDIUM" if risk_score >= 45 else "LOW"
+    priority = (
+        "REVIEW"
+        if low_signal
+        else "CRITICAL"
+        if risk_score >= 85
+        else "HIGH"
+        if risk_score >= 65
+        else "MEDIUM"
+        if risk_score >= 45
+        else "LOW"
+    )
 
     model_output = {
         "predicted_cause": predicted_cause,
         "risk_score": risk_score,
-        "confidence": profile["confidence"],
+        "confidence": min(profile["confidence"], 0.58) if low_signal else profile["confidence"],
         "adjusted_priority": priority,
-        "evidence": profile["evidence"],
-        "guardrail_notes": profile["guardrail_notes"],
+        "evidence": ["signal is too weak for a confident class", *profile["evidence"][:2]] if low_signal else profile["evidence"],
+        "guardrail_notes": ["low severity or short duration; keep as review/monitor"] if low_signal else profile["guardrail_notes"],
     }
     comparison = {
         "expected_cause": expected_cause,
@@ -310,15 +321,18 @@ def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
         "duration_ticks": payload.duration_ticks,
     }
     conclusion = (
-        f"Simulated detection matches the injected ground truth: {predicted_cause.replace('_', ' ')}."
+        f"Simulated detection is inconclusive. Expected {expected_cause}, but the changed signal is too weak or too short, so the comparator returns UNCERTAIN."
+        if low_signal
+        else f"Simulated detection matches the injected ground truth: {predicted_cause.replace('_', ' ')}."
         if matches_ground_truth
         else f"Simulated detection differs from ground truth. Expected {expected_cause}, predicted {predicted_cause}."
     )
-    next_step = (
-        "Use this as a judge-safe simulated comparison. A future production endpoint can replace this deterministic comparator with the trained model pipeline."
-        if matches_ground_truth
-        else "Review evidence mapping before using this scenario as a model-quality claim."
-    )
+    if low_signal:
+        next_step = "Increase severity or duration before using this scenario as a quality demonstration."
+    elif matches_ground_truth:
+        next_step = "Use this as a judge-safe simulated comparison. A future production endpoint can replace this deterministic comparator with the trained model pipeline."
+    else:
+        next_step = "Review evidence mapping before using this scenario as a model-quality claim."
 
     return SimulationCompareOut(
         run_id=f"SIM-{uuid4().hex[:8].upper()}",

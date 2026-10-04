@@ -9,7 +9,7 @@ test("interactive topology, faults, pause, and snapshot publishing", async ({ pa
   });
   await page.goto("/simulator");
   await expect(page.getByRole("heading", { name: "Grid simulator" })).toBeVisible();
-  await expect(page.locator("canvas")).toBeVisible();
+  await expect(page.locator("canvas")).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Select North residential", exact: true }).click();
   await expect(page.getByRole("heading", { name: "North residential", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Inject fault on F01", exact: true }).click();
@@ -41,7 +41,7 @@ test("backend empty, stale and failure states do not substitute demo telemetry",
 test("real backend snapshot round trip", async ({ page }) => {
   test.skip(!process.env.TEST_REAL_BACKEND, "Set TEST_REAL_BACKEND=1 with an isolated backend and BACKEND_URL configured.");
   await page.goto("/simulator");
-  await expect(page.locator("canvas")).toBeVisible();
+  await expect(page.locator("canvas")).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Inject fault on F01", exact: true }).click();
   await page.getByRole("button", { name: "Publish snapshot to backend" }).click();
   await expect(page.getByRole("status")).toContainText("3 simulated readings saved");
@@ -52,28 +52,53 @@ test("real backend snapshot round trip", async ({ page }) => {
 
 test("known injection comparison renders backend conclusion", async ({ page }) => {
   await page.route("**/simulation/compare", async route => {
+    const payload = route.request().postDataJSON();
+    const profiles: Record<string, { cause: string; risk: number; priority: string; evidence: string[] }> = {
+      SUDDEN_DROP: {
+        cause: "THEFT_TAMPERING",
+        risk: 91,
+        priority: "CRITICAL",
+        evidence: ["power dropped sharply", "communication stayed connected"]
+      },
+      MISSING_PACKETS: {
+        cause: "COMMUNICATION_FAILURE",
+        risk: 74,
+        priority: "HIGH",
+        evidence: ["missing voltage/current/power", "communication disconnected"]
+      }
+    };
+    const profile = profiles[payload.injection_type] ?? {
+      cause: "UNCERTAIN",
+      risk: 55,
+      priority: "REVIEW",
+      evidence: ["scenario requires review"]
+    };
+    const expected = payload.ground_truth?.expected_cause ?? profile.cause;
+    const matched = expected === profile.cause;
     await route.fulfill({
       json: {
         run_id: "SIM-TEST",
         status: "COMPLETED",
         model_version: "deterministic_injection_comparator_v1",
         model_output: {
-          predicted_cause: "THEFT_TAMPERING",
-          risk_score: 91,
+          predicted_cause: profile.cause,
+          risk_score: profile.risk,
           confidence: 0.84,
-          adjusted_priority: "CRITICAL",
-          evidence: ["power dropped sharply", "communication stayed connected"],
+          adjusted_priority: profile.priority,
+          evidence: profile.evidence,
           guardrail_notes: ["verify in field before attribution"]
         },
         comparison: {
-          expected_cause: "THEFT_TAMPERING",
-          predicted_cause: "THEFT_TAMPERING",
-          matches_ground_truth: true,
+          expected_cause: expected,
+          predicted_cause: profile.cause,
+          matches_ground_truth: matched,
           changed_fields_reviewed: ["power", "energy"],
           severity: 0.75,
           duration_ticks: 24
         },
-        conclusion: "Simulated detection matches the injected ground truth: THEFT TAMPERING.",
+        conclusion: matched
+          ? `Simulated detection matches the injected ground truth: ${profile.cause.replaceAll("_", " ")}.`
+          : `Simulated detection differs from ground truth. Expected ${expected}, predicted ${profile.cause}.`,
         recommended_next_step: "Use this as a judge-safe simulated comparison."
       }
     });
@@ -85,5 +110,11 @@ test("known injection comparison renders backend conclusion", async ({ page }) =
   await page.getByRole("button", { name: /Run Detection/ }).click();
   await expect(page.getByText("SIM-TEST")).toBeVisible();
   await expect(page.getByText("Simulated detection matches the injected ground truth").first()).toBeVisible();
-  await expect(page.getByText("Matched")).toBeVisible();
+  await expect(page.getByText("Matched expected")).toBeVisible();
+  await expect(page.getByText("THEFT TAMPERING").last()).toBeVisible();
+  await page.getByRole("button", { name: /Missing Packets/ }).click();
+  await expect(page.getByText("No backend run")).toBeVisible();
+  await page.getByRole("button", { name: /Run Detection/ }).click();
+  await expect(page.getByText("COMMUNICATION FAILURE").last()).toBeVisible();
+  await expect(page.getByText("Matched expected")).toBeVisible();
 });

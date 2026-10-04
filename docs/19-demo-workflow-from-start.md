@@ -222,9 +222,10 @@ Show:
 - Severity slider.
 - Duration ticks.
 - Injected Ground Truth panel.
-- Expected Electron Output preview.
+- Expected Output Preview panel.
 - Actual Backend Model Output panel.
-- Payload preview.
+- What changed from normal table.
+- Technical payload.
 
 Change:
 
@@ -239,15 +240,23 @@ Expected behavior:
 - Active fault card changes visually.
 - Consumer options follow selected transformer.
 - Injected Ground Truth updates immediately.
-- Expected Electron Output preview updates immediately.
-- Payload preview updates immediately.
+- Expected Output Preview updates immediately.
+- What changed from normal updates when the fault type changes.
+- Target and technical payload update when transformer, consumer, severity, or duration changes.
+- The previous backend result clears when you change fault, target, severity, or duration.
 - Click `Run Detection`.
 - Actual Backend Model Output fills with predicted cause, risk score, evidence, and conclusion.
 
 What to say:
 
 ```text
-This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected Electron output preview shows what the model should return for that fault. When I click Run Detection, the frontend calls the backend `/simulation/compare` endpoint and derives a conclusion: whether the simulated model output matches the injected truth.
+This page is for controlled bad-data experiments. The first output is the injected ground truth, which is the answer key. The expected output preview shows what Electron should return for that fault. It is not a backend result. When I click Run Detection, the frontend calls the backend `/simulation/compare` endpoint and derives a conclusion: whether the simulated model output matches the injected truth.
+```
+
+What to say if asked about the normal reference:
+
+```text
+Normal reference is the healthy reading before injection. Injected test is the bad-data reading. The table only highlights what changed, so we do not need to inspect raw JSON to understand the scenario.
 ```
 
 Important wording:
@@ -255,6 +264,8 @@ Important wording:
 ```text
 This is a deterministic simulator comparator for the demo. It proves the compare workflow and conclusion UI. It does not claim the trained XGBoost pipeline has been rerun on synthetic telemetry yet.
 ```
+
+If severity or duration is too low, the backend comparator can return `UNCERTAIN`. That is intentional: weak signals should not be forced into a theft or fault conclusion.
 
 ## 10. Show The 3D Digital Twin
 

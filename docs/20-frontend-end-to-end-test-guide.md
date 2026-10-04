@@ -273,9 +273,10 @@ Check initial render:
 - Severity control is visible.
 - Duration control is visible.
 - Injected Ground Truth panel is visible.
-- Expected Electron Output preview is visible.
+- Expected Output Preview panel is visible.
 - Actual Backend Model Output panel is visible.
-- Payload preview is visible.
+- `What changed from normal` table is visible.
+- Technical payload is available behind a details control.
 
 Interaction test:
 
@@ -285,7 +286,7 @@ Interaction test:
 4. Change consumer.
 5. Change severity.
 6. Change duration.
-7. Watch Injected Ground Truth, Expected Electron Output, and payload preview.
+7. Watch Injected Ground Truth, Expected Output Preview, target fields, and `What changed from normal`.
 8. Click `Run Detection`.
 9. Watch Actual Backend Model Output.
 
@@ -293,18 +294,24 @@ Expected:
 
 - Active fault card changes visually.
 - Injected Ground Truth changes when fault type changes.
-- Expected Electron Output changes when fault type or severity changes.
-- Payload changes when transformer, consumer, severity, or duration changes.
+- Expected Output Preview changes when fault type or severity changes.
+- The changed-fields table changes when fault type changes.
+- Target consumer, transformer, severity, duration, and technical payload change when their controls change.
+- Previous Actual Backend Model Output clears when scenario controls change.
 - The page clearly treats injected fault as known truth, not model prediction.
+- Before `Run Detection`, the actual backend panel says `No backend run`.
 - Actual Backend Model Output is populated from `POST /simulation/compare`.
 - The conclusion says whether backend simulated detection matches the injected ground truth.
 - The response includes predicted cause, risk score, confidence, evidence, and recommended next step.
+- Low severity or very short duration can intentionally return `UNCERTAIN` rather than forcing a theft/fault match.
+- Non-theft scenarios should return non-theft outputs: `Missing Packets` returns communication failure, `Flatline Meter` and `Zero Reading` return meter malfunction, and `Spike Then Drop` remains uncertain/review.
 
 Fail conditions:
 
 - Fault cards cannot be switched.
 - Transformer changes do not update consumer choices.
-- Injected Ground Truth, Expected Electron Output, or payload remains unchanged after controls change.
+- Injected Ground Truth, Expected Output Preview, target fields, technical payload, or backend result state remains stale after controls change.
+- Every scenario returns `THEFT TAMPERING`.
 - `Run Detection` does not populate Actual Backend Model Output while the backend is running.
 
 ## 10. Test 3D Digital Twin Page

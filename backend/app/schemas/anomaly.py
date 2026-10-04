@@ -176,6 +176,7 @@ class SimulationCompareIn(BaseModel):
     timestamp: str | None = None
     ground_truth: dict = Field(default_factory=dict)
     expected_model_output_preview: dict = Field(default_factory=dict)
+    normal_reference_snapshot: dict = Field(default_factory=dict)
     baseline_snapshot: dict = Field(default_factory=dict)
     injected_snapshot: dict = Field(default_factory=dict)
     changed_fields: list[dict] = Field(default_factory=list)

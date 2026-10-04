@@ -48,7 +48,7 @@ const injections = [
   }
 ];
 
-const baselineSnapshot = {
+const normalReferenceSnapshot = {
   voltage: 229.4,
   current: 3.2,
   power: 734,
@@ -213,10 +213,10 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
   const changedFields = useMemo(
     () =>
       Object.entries(profile.injected)
-        .filter(([key, value]) => baselineSnapshot[key as keyof typeof baselineSnapshot] !== value)
+        .filter(([key, value]) => normalReferenceSnapshot[key as keyof typeof normalReferenceSnapshot] !== value)
         .map(([field, value]) => ({
           field,
-          before: baselineSnapshot[field as keyof typeof baselineSnapshot],
+          before: normalReferenceSnapshot[field as keyof typeof normalReferenceSnapshot],
           after: value
         })),
     [profile]
@@ -227,7 +227,7 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
       risk_score: Math.min(99, Math.round(profile.baseRisk * (0.7 + severity / 300))),
       confidence: profile.confidence,
       adjusted_priority: profile.priority,
-      match_status: "Expected match with injected ground truth",
+      target: "Expected class before running backend comparator",
       evidence: profile.evidence
     }),
     [profile, severity]
@@ -277,13 +277,19 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
         known_injection: true
       },
       expected_model_output_preview: expectedOutput,
-      baseline_snapshot: baselineSnapshot,
+      normal_reference_snapshot: normalReferenceSnapshot,
       injected_snapshot: profile.injected,
       changed_fields: changedFields,
       note: "This is a prototype payload preview. The backend injection endpoint is planned next."
     }),
     [changedFields, consumerId, durationTicks, expectedOutput, profile, selected.id, severity, transformerId]
   );
+
+  useEffect(() => {
+    setCompareResult(null);
+    setCompareStatus("idle");
+    setCompareMessage("");
+  }, [consumerId, durationTicks, selected.id, severity, transformerId]);
 
   async function copyPayload() {
     await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
@@ -296,11 +302,14 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
     setCompareMessage("Calling backend simulation comparator...");
     setCompareResult(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/simulation/compare`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      const [response] = await Promise.all([
+        fetch(`${API_BASE_URL}/simulation/compare`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }),
+        new Promise((resolve) => window.setTimeout(resolve, 850))
+      ]);
       const body = await response.json();
       if (!response.ok) {
         setCompareStatus("error");
@@ -315,6 +324,23 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
       setCompareMessage(error instanceof Error ? error.message : "Comparison request failed.");
     }
   }
+
+  const backendBadgeLabel =
+    compareStatus === "loading"
+      ? "Running backend"
+      : compareResult
+        ? compareResult.comparison.matches_ground_truth
+          ? "Matched expected"
+          : "Different / uncertain"
+        : "No backend run";
+  const backendBadgeClass =
+    compareStatus === "loading"
+      ? "border-amber-200 bg-amber-50 text-amber-700"
+      : compareResult
+        ? compareResult.comparison.matches_ground_truth
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : "border-amber-200 bg-amber-50 text-amber-700"
+        : "border-slate-200 bg-white text-slate-500";
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -435,12 +461,11 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
               </button>
               <button
                 type="button"
-                onClick={runComparison}
-                disabled={compareStatus === "loading"}
-                className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:text-slate-400"
+                disabled
+                className="min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-400"
               >
                 Compare Result
-                <span className="block text-[10px] font-normal">Truth vs backend</span>
+                <span className="block text-[10px] font-normal">Appears below after run</span>
               </button>
             </div>
             {compareMessage ? (
@@ -474,16 +499,19 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
 
         <div className="rounded-lg border border-slate-200 bg-white p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-slate-950">Changed fields</p>
+            <p className="text-sm font-semibold text-slate-950">What changed from normal</p>
             <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600">
               {changedFields.length} fields changed
             </span>
           </div>
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Normal reference is the healthy reading before injection. Injected test is the bad-data reading sent to the comparator.
+          </p>
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 text-sm">
             <div className="grid grid-cols-[1fr_0.8fr_0.8fr] bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
               <span>Field</span>
-              <span>Baseline</span>
-              <span>Injected</span>
+              <span>Normal reference</span>
+              <span>Injected test</span>
             </div>
             {changedFields.map((item) => (
               <div key={item.field} className="grid grid-cols-[1fr_0.8fr_0.8fr] border-t border-slate-200 px-3 py-2">
@@ -516,18 +544,18 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-slate-950">Expected Electron Output</p>
+            <p className="text-sm font-semibold text-slate-950">Expected Output Preview</p>
             <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">Preview</span>
           </div>
           <p className="mt-2 text-xs leading-5 text-slate-500">
-            This is the expected model-style output for the selected fault, so you can explain what Electron should detect before the backend run endpoint exists.
+            This is the answer key for the selected known injection, not a backend response. Use it to explain what the comparator will check after `Run Detection`.
           </p>
           <dl className="mt-4 grid gap-2 text-sm">
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Predicted cause</dt><dd className="text-right font-semibold text-slate-950">{expectedOutput.predicted_cause.replaceAll("_", " ")}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk score</dt><dd className="font-semibold text-slate-950">{expectedOutput.risk_score}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Confidence</dt><dd className="font-semibold text-slate-950">{Math.round(expectedOutput.confidence * 100)}%</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-slate-500">Priority</dt><dd className="font-semibold text-slate-950">{expectedOutput.adjusted_priority}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-slate-500">Match status</dt><dd className="text-right font-medium text-emerald-700">{expectedOutput.match_status}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-slate-500">Preview role</dt><dd className="text-right font-medium text-amber-700">{expectedOutput.target}</dd></div>
           </dl>
           <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Evidence Electron should surface</p>
@@ -543,14 +571,8 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
       <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-slate-950">Actual Backend Model Output</p>
-          <span className={`rounded-md border px-2 py-1 text-xs font-medium ${
-            compareResult
-              ? compareResult.comparison.matches_ground_truth
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-red-200 bg-red-50 text-red-700"
-              : "border-slate-200 bg-white text-slate-500"
-          }`}>
-            {compareResult ? (compareResult.comparison.matches_ground_truth ? "Matched" : "Mismatch") : "Not run"}
+          <span className={`rounded-md border px-2 py-1 text-xs font-medium ${backendBadgeClass}`}>
+            {backendBadgeLabel}
           </span>
         </div>
         {compareResult ? (
@@ -558,7 +580,9 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
             <dl className="grid gap-2 text-sm">
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Run ID</dt><dd className="font-mono font-medium text-slate-900">{compareResult.run_id}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Model version</dt><dd className="text-right font-medium text-slate-900">{compareResult.model_version}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Expected cause</dt><dd className="text-right font-semibold text-slate-950">{String(compareResult.comparison.expected_cause ?? "UNKNOWN").replaceAll("_", " ")}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Predicted cause</dt><dd className="text-right font-semibold text-slate-950">{compareResult.model_output.predicted_cause.replaceAll("_", " ")}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Ground-truth check</dt><dd className="font-semibold text-slate-950">{compareResult.comparison.matches_ground_truth ? "Matched" : "Needs review"}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Risk score</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.risk_score}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Confidence</dt><dd className="font-semibold text-slate-950">{Math.round(compareResult.model_output.confidence * 100)}%</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Priority</dt><dd className="font-semibold text-slate-950">{compareResult.model_output.adjusted_priority}</dd></div>
@@ -584,15 +608,21 @@ export function BadDataLab({ consumers, transformers }: BadDataLabProps) {
           </div>
         ) : (
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Click `Run Detection` to call the backend comparator. It will return the simulated model output and compare it
-            against the injected ground truth above.
+            Click `Run Detection` to call the backend comparator. Changing the fault type, target, severity, or duration clears
+            this section so old results are not reused for a new scenario.
           </p>
         )}
       </div>
 
-      <pre className="mt-6 max-h-80 overflow-auto rounded-lg border border-slate-200 bg-slate-950 p-5 text-xs leading-5 text-slate-100">
-        {JSON.stringify(payload, null, 2)}
-      </pre>
+      <details className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
+        <summary className="cursor-pointer text-sm font-semibold text-slate-800">Technical payload</summary>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          This is the request body sent to `/simulation/compare`. It is shown for debugging, not as the primary demo output.
+        </p>
+        <pre className="mt-3 max-h-80 overflow-auto rounded-lg border border-slate-200 bg-slate-950 p-5 text-xs leading-5 text-slate-100">
+          {JSON.stringify(payload, null, 2)}
+        </pre>
+      </details>
     </section>
   );
 }
