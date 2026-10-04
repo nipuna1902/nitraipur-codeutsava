@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test lib/grid.test.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.0.0",
@@ -24,11 +24,14 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/three": "^0.180.0",
+    "postcss": "^8.5.0",
+    "tailwindcss": "^4.1.0",
     "tsx": "^4.20.0",
-    "typescript": "^6.0.3"
+    "typescript": "^5.8.0"
   }
 }

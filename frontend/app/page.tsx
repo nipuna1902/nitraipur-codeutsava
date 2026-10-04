@@ -83,8 +83,8 @@ export default async function DashboardPage() {
               ))}
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
-              <Link href="/simulation" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white">
-                Next: Simulator
+              <Link href="/simulator" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white">
+                Next: 3D Simulator
               </Link>
               <Link href="/dual-injection" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white">
                 Next: Known Injection
