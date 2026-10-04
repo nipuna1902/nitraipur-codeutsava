@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from fastapi.testclient import TestClient
 
+from backend.app.integrations.mqtt.client import mqtt_payload_to_readings
 from backend.app.main import app
 from backend.app.services import store
 
@@ -61,6 +62,33 @@ class BackendApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         transformer_ids = {item["transformer_id"] for item in response.json()}
         self.assertEqual(transformer_ids, {"T01", "T02", "T03", "T04"})
+
+    def test_mqtt_status_endpoint_reports_integration_state(self):
+        response = self.client.get("/mqtt/status")
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertIn("enabled", body)
+        self.assertIn("connected", body)
+        self.assertIn("topic", body)
+        self.assertIn("readings_ingested", body)
+
+    def test_mqtt_payload_normalizes_to_raw_telemetry_reading(self):
+        readings = mqtt_payload_to_readings(
+            {
+                "voltage": 231.2,
+                "current": 4.7,
+                "power": 1.08,
+                "energy_kwh": 3.4,
+                "ts": "2026-10-04T00:00:00Z",
+            },
+            "smartmeter/telemetry/C123",
+        )
+
+        self.assertEqual(len(readings), 1)
+        self.assertEqual(readings[0].consumer_id, "C123")
+        self.assertEqual(readings[0].source, "MQTT_DEVICE_FUTURE")
+        self.assertEqual(readings[0].energy, 3.4)
+        self.assertEqual(readings[0].meter_status, None)
 
     def test_voice_session_placeholder_does_not_call_external_provider(self):
         response = self.client.post("/voice/session", json={"consumer_id": "C001", "language": "HI"})

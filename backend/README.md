@@ -39,6 +39,7 @@ http://127.0.0.1:8000/docs
 - `GET /transformers`
 - `GET /transformers/{transformer_id}`
 - `GET /simulation/status`
+- `GET /mqtt/status`
 - `POST /voice/session`
 - `POST /voice/tools/consumer-summary`
 - `POST /voice/tools/anomaly-evidence`
@@ -69,6 +70,33 @@ Minimal payload:
 ```
 
 Readback endpoints still include derived `meter_status` and `communication_status` so the UI can show health. If derived status indicates meter malfunction or communication failure, the backend creates a telemetry-derived anomaly report.
+
+## MQTT Live Ingestion
+
+The backend can subscribe to MQTT smart-meter readings and persist them through the same telemetry repository as `POST /telemetry/readings`.
+
+Default configuration:
+
+```powershell
+$env:MQTT_ENABLED="true"
+$env:MQTT_BROKER_HOST="localhost"
+$env:MQTT_BROKER_PORT="1883"
+$env:MQTT_TOPIC="smartmeter/telemetry/#"
+```
+
+Status:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/mqtt/status
+```
+
+Publish one sample message:
+
+```powershell
+python scripts/publish_mqtt_sample.py --host 127.0.0.1 --topic smartmeter/telemetry/C011
+```
+
+MQTT payloads should contain raw readings only. The backend derives meter and communication status after ingestion.
 
 ## ElevenLabs / Voice Testing Endpoints
 

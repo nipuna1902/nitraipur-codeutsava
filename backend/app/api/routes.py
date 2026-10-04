@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisco
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
+from backend.app.integrations.mqtt.client import mqtt_manager
 from backend.app.schemas.anomaly import (
     AnomalyOut,
     AnomalyQueueOut,
@@ -288,6 +289,11 @@ def simulation_status(repository: TelemetryRepository = Depends(get_repository))
         "hardware_required": False,
         **repository.status(),
     }
+
+
+@router.get("/mqtt/status")
+def mqtt_status() -> dict:
+    return mqtt_manager.status()
 
 
 @router.post("/simulation/compare", response_model=SimulationCompareOut)
