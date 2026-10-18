@@ -13,6 +13,14 @@ npm run dev
 
 Open http://localhost:3000/simulator. `/` redirects there. On PowerShell systems that block scripts, use `npm.cmd`.
 
+The Voice Investigator is available at http://localhost:3000/voice. Configure the existing public ElevenLabs agent in `frontend/.env.local`:
+
+```text
+NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_agent_id
+```
+
+This value is an agent identifier, not an API key. Never put `ELEVENLABS_API_KEY` in a `NEXT_PUBLIC_` variable.
+
 Demo mode works without the backend. For backend telemetry and snapshot publishing, run the existing FastAPI service from the repository root:
 
 ```sh

@@ -10,6 +10,7 @@
     "test": "tsx --test lib/grid.test.ts"
   },
   "dependencies": {
+    "@elevenlabs/react": "^1.16.0",
     "@react-three/drei": "^10.0.0",
     "@react-three/fiber": "^9.0.0",
     "@tailwindcss/postcss": "^4.1.17",
