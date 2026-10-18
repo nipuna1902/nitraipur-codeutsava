@@ -1,4 +1,4 @@
-import type { Anomaly, Consumer, DashboardData, DashboardSummary, InvestigationCase, Transformer } from "@/types/dashboard";
+import type { Anomaly, Consumer, DashboardData, DashboardSummary, InvestigationCase, MqttStatus, Transformer } from "@/types/dashboard";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -17,6 +17,14 @@ async function getJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function getOptionalJson<T>(path: string): Promise<T | undefined> {
+  try {
+    return await getJson<T>(path);
+  } catch {
+    return undefined;
+  }
+}
+
 const emptySummary: DashboardSummary = {
   total_consumers: 0,
   telemetry_readings: 0,
@@ -28,12 +36,13 @@ const emptySummary: DashboardSummary = {
 
 export async function getDashboardData(): Promise<DashboardData> {
   try {
-    const [summary, anomalies, consumers, investigations, transformers] = await Promise.all([
+    const [summary, anomalies, consumers, investigations, transformers, mqtt] = await Promise.all([
       getJson<DashboardSummary>("/dashboard/summary"),
       getJson<Anomaly[]>("/anomalies?limit=100"),
       getJson<Consumer[]>("/consumers"),
       getJson<InvestigationCase[]>("/investigations?limit=12"),
-      getJson<Transformer[]>("/transformers")
+      getJson<Transformer[]>("/transformers"),
+      getOptionalJson<MqttStatus>("/mqtt/status")
     ]);
 
     return {
@@ -42,7 +51,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       anomalies,
       consumers,
       investigations,
-      transformers
+      transformers,
+      mqtt
     };
   } catch {
     return {

@@ -123,8 +123,8 @@ Important fields:
 - `current`
 - `power`
 - `energy`
-- `meter_status`
-- `communication_status`
+- `meter_status` derived by backend telemetry/ML guardrails
+- `communication_status` derived by backend telemetry/ML guardrails
 - `source`
 
 ## API Behavior Preserved
@@ -184,8 +184,6 @@ $body = @'
       "current": 4.5,
       "power": 1.1,
       "energy": 0.275,
-      "meter_status": "NORMAL",
-      "communication_status": "CONNECTED",
       "source": "SIMULATOR"
     }
   ]

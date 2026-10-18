@@ -28,6 +28,8 @@ Fields: `id`, `consumer_id`, `category`, `sanctioned_load`, `tariff`, `transform
 
 Fields: `id`, `consumer_id`, `timestamp`, `voltage`, `current`, `power`, `energy`, `meter_status`, `communication_status`
 
+`meter_status` and `communication_status` are stored for readback and UI health, but they are derived backend fields. Raw telemetry ingestion should send electrical readings, not trusted meter-status labels.
+
 ### consumer_profiles
 
 Fields: `consumer_id`, `historical_mean`, `historical_median`, `historical_std`, `historical_min`, `historical_max`, `expected_baseline`, `load_factor`, `night_ratio`, `peak_ratio`, `weekday_profile`, `weekend_profile`, `peer_group_id`, `profile_updated_at`

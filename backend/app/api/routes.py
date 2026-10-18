@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisco
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
+from backend.app.integrations.mqtt.client import mqtt_manager
 from backend.app.schemas.anomaly import (
     AnomalyOut,
     AnomalyQueueOut,
@@ -64,9 +65,14 @@ def ingest_telemetry(
     payload: TelemetryBatchIn,
     repository: TelemetryRepository = Depends(get_repository),
 ) -> TelemetryIngestResponse:
-    saved = repository.ingest(payload.readings)
+    saved, anomaly_reports_created, derived_meter_status_counts = repository.ingest(payload.readings)
     latest = max((reading.timestamp for reading in saved), default=None)
-    return TelemetryIngestResponse(accepted=len(saved), latest_timestamp=latest)
+    return TelemetryIngestResponse(
+        accepted=len(saved),
+        latest_timestamp=latest,
+        anomaly_reports_created=anomaly_reports_created,
+        derived_meter_status_counts=derived_meter_status_counts,
+    )
 
 
 @router.get("/telemetry/readings", response_model=list[TelemetryReadingOut])
@@ -285,6 +291,11 @@ def simulation_status(repository: TelemetryRepository = Depends(get_repository))
     }
 
 
+@router.get("/mqtt/status")
+def mqtt_status() -> dict:
+    return mqtt_manager.status()
+
+
 @router.post("/simulation/compare", response_model=SimulationCompareOut)
 def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
     profile = _simulation_profile(payload.injection_type)
@@ -354,11 +365,11 @@ def compare_simulation(payload: SimulationCompareIn) -> SimulationCompareOut:
         "duration_ticks": payload.duration_ticks,
     }
     conclusion = (
-        f"Simulated detection is inconclusive. Expected {expected_cause}, but the changed signal is too weak or too short, so the comparator returns UNCERTAIN."
+        f"Backend comparison is inconclusive. Expected {_display_simulation_cause(expected_cause)}, but the changed signal is too weak or too short, so the comparator returns uncertain."
         if low_signal
-        else f"Simulated detection matches the injected ground truth: {predicted_cause.replace('_', ' ')}."
+        else f"Backend comparison matches the injected ground truth class: {_display_simulation_cause(predicted_cause)}."
         if matches_ground_truth
-        else f"Simulated detection differs from ground truth. Expected {expected_cause}, predicted {predicted_cause}."
+        else f"Backend comparison differs from ground truth. Expected {_display_simulation_cause(expected_cause)}, predicted {_display_simulation_cause(predicted_cause)}."
     )
     if low_signal:
         next_step = "Increase severity or duration before using this scenario as a quality demonstration."
@@ -388,6 +399,18 @@ def _format_model_evidence(evidence: list[dict]) -> list[str]:
         for item in evidence
         if item.get("feature") is not None
     ]
+
+
+def _display_simulation_cause(cause: str | None) -> str:
+    labels = {
+        "THEFT_TAMPERING": "theft/tampering risk",
+        "METER_MALFUNCTION": "meter malfunction",
+        "COMMUNICATION_FAILURE": "communication failure",
+        "LEGITIMATE_ABNORMAL_CONSUMPTION": "legitimate abnormal usage",
+        "UNCERTAIN": "uncertain",
+        "NORMAL": "normal",
+    }
+    return labels.get(cause or "", (cause or "unknown").replace("_", " ").lower())
 
 
 def _simulation_profile(injection_type: str) -> dict:
