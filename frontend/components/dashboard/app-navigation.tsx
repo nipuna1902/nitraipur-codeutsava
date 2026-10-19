@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, GaugeCircle, GitCompareArrows, Network, RadioTower, SatelliteDish, ShieldAlert } from "lucide-react";
+import { Activity, GaugeCircle, GitCompareArrows, Network, RadioTower, Mic2, SatelliteDish, ShieldAlert } from "lucide-react";
 import type { MqttStatus } from "@/types/dashboard";
 
 const API_BASE_URL =
