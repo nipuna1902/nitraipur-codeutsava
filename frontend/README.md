@@ -4,7 +4,7 @@ Next.js / React frontend with a dedicated interactive digital twin at `/simulato
 
 ## Run locally
 
-Requires Node.js 20.9+ and npm. From this directory:
+Requires Node.js 22.22+ and npm (the voice dependency's LiveKit client requires it). From this directory:
 
 ```sh
 npm install
